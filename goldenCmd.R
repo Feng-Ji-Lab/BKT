@@ -1,0 +1,1 @@
+unloadNamespace("BKT");rm(list = ls());devtools::load_all("./");devtools::test()

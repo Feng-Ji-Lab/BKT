@@ -1,3 +1,0 @@
-rm(list = ls())
-devtools::load_all("./", TRUE)
-devtools::test()
