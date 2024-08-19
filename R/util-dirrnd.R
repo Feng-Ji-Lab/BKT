@@ -9,7 +9,8 @@ dirrnd <- function(alphavec, rand = rgamma) {
   if (length(dim(alphavec)) == 3 || length(dim(alphavec)) == 2) {
     dimsum <- length(dim(alphavec)) - 2
   }
-  a <- array(rand(alphavec, 1), dim = dim(alphavec))
+  rr = rand(n=length(alphavec), shape=alphavec, scale=1)
+  a <- array(rr, dim(alphavec))
   temp <- apply(a, dimsum, sum)
   a <- a / array(apply(a, dimsum, sum), dim = dim(a))
   return(a)
