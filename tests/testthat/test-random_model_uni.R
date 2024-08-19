@@ -24,9 +24,21 @@ test_that("test-random_model_uni.R", {
     pi_0_prior <- matrix(c(100, 1), nrow = 2, byrow = TRUE)
 
     # model parameter generate
-    # As <- dirrnd(trans_prior)
-    # given_notknow <- dirrnd(given_notknow_prior)
-    # given_know <- dirrnd(given_know_prior)
-    # pi_0 <- dirrnd(pi_0_prior)
-    # print_3_dim_matrix(As)
+    As <- dirrnd(trans_prior)
+    given_notknow <- dirrnd(given_notknow_prior)
+    given_know <- dirrnd(given_know_prior)
+    pi_0 <- dirrnd(pi_0_prior)
+    # print(pi_0)
+
+    # emission
+    given_notknow = reshape_python(c(1,2,3,4,5,6), dim = c(2,3))
+    given_know = reshape_python(c(7,8,9,10,11,12), dim = c(2,3))
+    
+    given_notknow_reshaped <- t(matrix(given_notknow, nrow = 2, ncol = num_subparts))
+    given_know_reshaped <- t(matrix(given_know, nrow = 2, ncol = num_subparts))
+    emissions <- array(c(given_notknow_reshaped, given_know_reshaped), 
+                   dim = c(num_subparts, 2, 2))
+    emissions = aperm(emissions, c(1,3,2))
+    target = reshape_python(c(1,4,7,10, 2,5,8,11, 3,6,9,12), dim=c(3,2,2))
+    expect_equal(emissions, target)
 })

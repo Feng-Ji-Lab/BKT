@@ -23,15 +23,18 @@ random_model_uni <- function(num_resources = 1, num_subparts = 1,
   pi_0 <- dirrnd(pi_0_prior)
 
   # 创建发射矩阵
-  emissions <- array(0, dim = c(num_subparts, 2, 2))
-  for (i in seq_len(num_subparts)) {
-    emissions[i, , ] <- rbind(given_notknow[, i], given_know[, i])
-  }
+  given_notknow_reshaped <- t(matrix(given_notknow, nrow = 2, ncol = num_subparts))
+  given_know_reshaped <- t(matrix(given_know, nrow = 2, ncol = num_subparts))
+  emissions <- array(c(given_notknow_reshaped, given_know_reshaped), 
+                  dim = c(num_subparts, 2, 2))
+  emissions = aperm(emissions, c(1,3,2))
 
   # 初始化模型结构
   modelstruct <- list()
   modelstruct$prior <- runif(1)
   
+  #TODO
+
   # 设置转移矩阵参数
   As[1, 2, ] <- rand(num_resources) * 0.40
   As[2, 2, ] <- 1 - As[1, 2, ]

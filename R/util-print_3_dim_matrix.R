@@ -1,8 +1,8 @@
 print_3_dim_matrix <- function(arr) {
   dims <- dim(arr)
-  
   if (length(dims) != 3) {
-    stop("This function only supports 3-dimensional arrays.")
+    print(arr)
+    return()
   }
   
   cat("[\n")
