@@ -1,6 +1,6 @@
-random_model_uni <- function(num_resources = 1, num_subparts = 1, 
+runifom_model_uni <- function(num_resources = 1, num_subparts = 1, 
                              trans_prior = NULL, given_notknow_prior = NULL, 
-                             given_know_prior = NULL, pi_0_prior = NULL, rand = runif) {
+                             given_know_prior = NULL, pi_0_prior = NULL) {
   # dismiss handle
   if (is.null(trans_prior)) {
     trans_prior <- t(array(c(20, 4, 1, 20), dim = c(2, 2)))
@@ -29,26 +29,19 @@ random_model_uni <- function(num_resources = 1, num_subparts = 1,
                   dim = c(num_subparts, 2, 2))
   emissions = aperm(emissions, c(1,3,2))
 
-  # 初始化模型结构
   modelstruct <- list()
   modelstruct$prior <- runif(1)
-  
-  #TODO
 
-  # 设置转移矩阵参数
-  As[1, 2, ] <- rand(num_resources) * 0.40
-  As[2, 2, ] <- 1 - As[1, 2, ]
-  As[2, 1, ] <- 0
-  As[1, 1, ] <- 1
+  As[, 2, 1] <- runif(num_resources) * 0.40      
+  As[, 2, 2] <- 1 - As[, 2, 1]                   
+  As[, 1, 2] <- 0                               
+  As[, 1, 1] <- 1
   
-  modelstruct$learns <- As[1, 2, ]
-  modelstruct$forgets <- As[2, 1, ]
-  
-  # 设置猜测和滑动参数
-  given_notknow[2, ] <- rand(num_subparts) * 0.40
+  modelstruct$learns <- As[, 2, 1]
+  modelstruct$forgets <- As[, 1, 2]
+  given_notknow[2, ] <- runif(num_subparts) * 0.40
   modelstruct$guesses <- given_notknow[2, ]
-  
-  given_know[1, ] <- rand(num_subparts) * 0.30
+  given_know[1, ] <- runif(num_subparts) * 0.30
   modelstruct$slips <- given_know[1, ]
   
   modelstruct$As <- As
