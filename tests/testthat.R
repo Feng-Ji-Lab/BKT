@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(bkt)
+library(BKT)
 
-test_check("bkt")
+test_check("BKT")
