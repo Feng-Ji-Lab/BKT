@@ -134,13 +134,17 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
             stop("not implemented")
         } else {
             resources <- rep(1, length(data))
+            resources <- as.integer(unlist(resources))
+            resources <- matrix(data, ncol = 1)
         }
         
         if(multigs) {
             stop("not implemented")
         } else {
             data <- list(data)
-            Data <- list("data" = as.integer(unlist(data)))
+            data <- as.integer(unlist(data))
+            data_matrix <- matrix(data, nrow = 1)
+            Data <- list("data" = data_matrix)
         }
 
         if (!multilearn && !multipair && !multiprior) {
@@ -165,7 +169,7 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
         datas[[skill_]] <- Data
     }
     return(datas)
-}
+} 
 
 # const require to sort string by ascii
 ascii_order <- function(x) {

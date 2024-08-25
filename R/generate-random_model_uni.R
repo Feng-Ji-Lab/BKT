@@ -1,4 +1,4 @@
-runifom_model_uni <- function(num_resources = 1, num_subparts = 1, 
+random_model_uni <- function(num_resources = 1, num_subparts = 1, 
                              trans_prior = NULL, given_notknow_prior = NULL, 
                              given_know_prior = NULL, pi_0_prior = NULL) {
   # dismiss handle

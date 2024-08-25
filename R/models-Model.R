@@ -137,12 +137,10 @@ setMethod("partial_fit", "Model", function(.Object, data_path = NULL, data = NUL
   # 更新技能参数
   .Object <- ._update_param(.Object, "skills", list(skills = names(all_data)))
   
-  # 对每个技能进行模型拟合
   for (skill in names(all_data)) {
     .Object@fit_model[[skill]] <- ._fit(.Object, all_data[[skill]], skill, .Object@forgets, preload = ifelse("preload" %in% names(args), args$preload, FALSE))
   }
   
-  # 标记为非手动参数初始化
   .Object@manual_param_init <- FALSE
   
   return(.Object)
@@ -198,10 +196,10 @@ setMethod("._update_param", "Model", function(.Object, params, args, keep = FALS
   if (is.list(args)) {
     for (param in params) {
       if (!param %in% names(args) && (!param %in% names(.Object@keep) || !.Object@keep[[param]])) {
-        # 从 DEFAULTS 中获取参数的默认值
-        arg <- .Object@DEFAULTS[[param]]
-        # 如果默认值是函数，则调用它，否则直接赋值
-        slot(.Object, param) <- if (is.function(arg)) arg() else arg
+        # # 从 DEFAULTS 中获取参数的默认值
+        # arg <- .Object@DEFAULTS[[param]]
+        # # 如果默认值是函数，则调用它，否则直接赋值
+        # slot(.Object, param) <- if (is.function(arg)) arg() else arg
       } else if (param %in% names(args)) {
         # 如果参数在 args 中，则使用传递的参数值
         slot(.Object, param) <- args[[param]]
@@ -277,4 +275,124 @@ setMethod("._data_helper", "Model", function(.Object, data_path = NULL, data = N
   }
   
   return(data_p)
+})
+
+# MARK: ._fit
+setGeneric("._fit", function(object, data, skill, forgets, preload = FALSE) {
+  standardGeneric("._fit")
+})
+
+setMethod(
+  "._fit",
+  signature(object = "Model"),
+  function(object, data, skill, forgets, preload = FALSE) {
+
+    num_learns <- length(data$resource_names)
+    num_gs <- length(data$gs_names)
+    check_manual_param_init(object, num_learns, num_gs, skill)
+    if (!is.null(object@fixed)) {
+      object@check_fixed(object)
+    }
+    
+    num_fit_initializations <- object@num_fits
+    best_likelihood <- -Inf
+    best_model <- NULL
+    
+    for (i in seq_len(num_fit_initializations)) {
+      fitmodel <- random_model_uni(num_learns, num_gs)
+      optional_args <- list(fixed = list())
+      fitmodel$prior <- 0.3
+      fitmodel$learns[1] <- 0.28
+      fitmodel$forgets[1] <- 0
+      fitmodel$guesses[1] <- 0.35
+      fitmodel$slips[1] <- 0.27
+      fitmodel$As[1, 2, 1] <- 0.28
+      fitmodel$As[1, 2, 2] <- 0.72
+      fitmodel$emissions[1, 1, 1] <- 0.78
+      fitmodel$emissions[1, 1, 2] <- 0.21
+      fitmodel$emissions[1, 2, 1] <- 0.16
+      fitmodel$emissions[1, 2, 2] <- 0.84
+      fitmodel$pi_0[1, 1] <- 0.95
+      fitmodel$pi_0[2, 1] <- 0.33
+      # print(fitmodel)
+      if (forgets) {
+        fitmodel$forgets <- runif(length(fitmodel$forgets))
+      }
+      
+      # if (object@model_type[which(Model$MODELS_BKT == 'multiprior')]) {
+      #   fitmodel$prior <- 0
+      # }
+      
+      if (object@manual_param_init && skill %in% names(object@fit_model)) {
+        for (var in names(object@fit_model[[skill]])) {
+          if (!is.null(object@fixed) && skill %in% names(object@fixed) &&
+              var %in% names(object@fixed[[skill]]) &&
+              is.logical(object@fixed[[skill]][[var]]) && object@fixed[[skill]][[var]]) {
+            optional_args$fixed[[var]] <- object@fit_model[[skill]][[var]]
+          } else if (var %in% names(fitmodel)) {
+            fitmodel[[var]] <- object@fit_model[[skill]][[var]]
+          }
+        }
+      }
+      
+      if (!is.null(object@fixed) && skill %in% names(object@fixed)) {
+        for (var in names(object@fixed[[skill]])) {
+          if (!is.logical(object@fixed[[skill]][[var]])) {
+            optional_args$fixed[[var]] <- object@fixed[[skill]][[var]]
+          }
+        }
+      }
+      
+      if (!preload) {
+        em_fit_result <- EM_fit(fitmodel, data, parallel = object@parallel, optional_args)
+        stop("222")
+        fitmodel <- em_fit_result$fitmodel
+        log_likelihoods <- em_fit_result$log_likelihoods
+        
+        if (log_likelihoods[length(log_likelihoods)] > best_likelihood) {
+          best_likelihood <- log_likelihoods[length(log_likelihoods)]
+          best_model <- fitmodel
+        }
+      } else {
+        best_model <- fitmodel
+      }
+    }
+    
+    fit_model <- best_model
+    fit_model$learns <- fit_model$As[, 2, 1]
+    fit_model$forgets <- fit_model$As[, 1, 2]
+    fit_model$prior <- fit_model$pi_0[[1]][2]
+    fit_model$resource_names <- data$resource_names
+    fit_model$gs_names <- data$gs_names
+    
+    return(fit_model)
+  }
+)
+
+# MARK: check_manual_param_init
+setGeneric("check_manual_param_init", function(object, num_learns, num_gs, skill) {
+  standardGeneric("check_manual_param_init")
+})
+
+setMethod("check_manual_param_init", signature(object = "Model"), function(object, num_learns, num_gs, skill) {
+  if (!is.null(object@fit_model) && skill %in% names(object@fit_model)) {
+    
+    # Check for 'learns'
+    if ("learns" %in% names(object@fit_model[[skill]]) &&
+        length(object@fit_model[[skill]]$learns) != num_learns) {
+      stop("invalid number of learns in initialization")
+    }
+    
+    # Check for 'guesses'
+    if ("guesses" %in% names(object@fit_model[[skill]]) &&
+        length(object@fit_model[[skill]]$guesses) != num_gs) {
+      stop("invalid number of guess classes in initialization")
+    }
+    
+    # Check for 'slips'
+    if ("slips" %in% names(object@fit_model[[skill]]) &&
+        length(object@fit_model[[skill]]$slips) != num_gs) {
+      stop("invalid number of slip classes in initialization")
+    }
+  }
 })
