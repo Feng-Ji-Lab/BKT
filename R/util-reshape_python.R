@@ -1,4 +1,4 @@
-reshape_python <- function(x, dims) {
+reshape_python <- function(x, dim) {
   if (is.null(dim(x))) {
     # vector
     flattened <- as.vector(x)
@@ -6,15 +6,15 @@ reshape_python <- function(x, dims) {
     rx = reverse_dimensions(x)
     flattened <- as.vector(rx)
   }
-  reshaped <- array(flattened, dim = rev(dims))
+  reshaped <- array(flattened, dim = rev(dim))
   return(reverse_dimensions(reshaped))
 }
 
 reverse_dimensions <- function(x) {
-  dims <- dim(x)
-  if (is.null(dims)) {
+  dim <- dim(x)
+  if (is.null(dim)) {
     stop("Input must be a matrix or an array.")
   }
-  reversed_array <- aperm(x, rev(seq_along(dims)))
+  reversed_array <- aperm(x, rev(seq_along(dim)))
   return(reversed_array)
 }

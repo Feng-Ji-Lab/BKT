@@ -135,7 +135,7 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
         } else {
             resources <- rep(1, length(data))
             resources <- as.integer(unlist(resources))
-            resources <- matrix(data, ncol = 1)
+            resources <- matrix(resources, ncol = 1)
         }
         
         if(multigs) {

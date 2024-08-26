@@ -1,19 +1,19 @@
 print_3_dim_matrix <- function(arr) {
-  dims <- dim(arr)
-  if (length(dims) != 3) {
+  dim <- dim(arr)
+  if (length(dim) != 3) {
     print(arr)
     return()
   }
   
   cat("[\n")
-  for (i in 1:dims[1]) {
+  for (i in 1:dim[1]) {
     cat(" [\n")
-    for (j in 1:dims[2]) {
+    for (j in 1:dim[2]) {
       cat("  [", paste(arr[i, j, ], collapse = " "), "]", sep = "")
-      if (j < dims[2]) cat(",\n")
+      if (j < dim[2]) cat(",\n")
     }
     cat("\n ]")
-    if (i < dims[1]) cat(",\n")
+    if (i < dim[1]) cat(",\n")
   }
   cat("\n]\n")
 }
