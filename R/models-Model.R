@@ -301,19 +301,19 @@ setMethod(
     for (i in seq_len(num_fit_initializations)) {
       fitmodel <- random_model_uni(num_learns, num_gs)
       optional_args <- list(fixed = list())
-      fitmodel$prior <- 0.3
-      fitmodel$learns[1] <- 0.28
-      fitmodel$forgets[1] <- 0
-      fitmodel$guesses[1] <- 0.35
-      fitmodel$slips[1] <- 0.27
-      fitmodel$As[1, 2, 1] <- 0.28
-      fitmodel$As[1, 2, 2] <- 0.72
-      fitmodel$emissions[1, 1, 1] <- 0.78
-      fitmodel$emissions[1, 1, 2] <- 0.21
-      fitmodel$emissions[1, 2, 1] <- 0.16
-      fitmodel$emissions[1, 2, 2] <- 0.84
-      fitmodel$pi_0[1, 1] <- 0.95
-      fitmodel$pi_0[2, 1] <- 0.33
+      # fitmodel$prior <- 0.3
+      # fitmodel$learns[1] <- 0.28
+      # fitmodel$forgets[1] <- 0
+      # fitmodel$guesses[1] <- 0.35
+      # fitmodel$slips[1] <- 0.27
+      # fitmodel$As[1, 2, 1] <- 0.28
+      # fitmodel$As[1, 2, 2] <- 0.72
+      # fitmodel$emissions[1, 1, 1] <- 0.78
+      # fitmodel$emissions[1, 1, 2] <- 0.21
+      # fitmodel$emissions[1, 2, 1] <- 0.16
+      # fitmodel$emissions[1, 2, 2] <- 0.84
+      # fitmodel$pi_0[1, 1] <- 0.95
+      # fitmodel$pi_0[2, 1] <- 0.33
       # print(fitmodel)
       if (forgets) {
         fitmodel$forgets <- runif(length(fitmodel$forgets))
@@ -344,11 +344,10 @@ setMethod(
       }
       
       if (!preload) {
-        em_fit_result <- EM_fit(fitmodel, data, parallel = object@parallel, optional_args)
-        stop("222")
-        fitmodel <- em_fit_result$fitmodel
+        em_fit_result <- EM_fit(fitmodel, data, parallel = object@parallel, optional_args = optional_args)
+        fitmodel <- em_fit_result$model
         log_likelihoods <- em_fit_result$log_likelihoods
-        
+        stop("222")
         if (log_likelihoods[length(log_likelihoods)] > best_likelihood) {
           best_likelihood <- log_likelihoods[length(log_likelihoods)]
           best_model <- fitmodel

@@ -1,16 +1,15 @@
 
 #' @import parallel
 
-EM_fit <- function(model, data, tol = 0.005, maxiter = 100, parallel = TRUE, fixed = list()) {
+EM_fit <- function(model, data, tol = 0.005, maxiter = 100, parallel = TRUE, fixed = list(), optional_args = optional_args) {
   
   check_data(data)
   num_subparts <- nrow(data$data)  # 第一维度对应于每个子部分
   num_resources <- length(model$learns)
-  
   trans_softcounts <- array(0, dim = c(num_resources, 2, 2))
   emission_softcounts <- array(0, dim = c(num_subparts, 2, 2))
   init_softcounts <- matrix(0, nrow = 2, ncol = 1)
-  log_likelihoods <- numeric(maxiter)
+  log_likelihoods <- array(0, dim = c(maxiter, 1))
   
   result <- list(
     all_trans_softcounts = trans_softcounts,
@@ -21,7 +20,6 @@ EM_fit <- function(model, data, tol = 0.005, maxiter = 100, parallel = TRUE, fix
   for (i in seq_len(maxiter)) {
     result <- run(data, model, result$all_trans_softcounts, result$all_emission_softcounts, result$all_initial_softcounts, 1, parallel, fixed = fixed)
     
-    stop("333")
     for (j in seq_len(num_resources)) {
       result$all_trans_softcounts[j,,] <- t(result$all_trans_softcounts[j,,])
     }
@@ -29,10 +27,9 @@ EM_fit <- function(model, data, tol = 0.005, maxiter = 100, parallel = TRUE, fix
     for (j in seq_len(num_subparts)) {
       result$all_emission_softcounts[j,,] <- t(result$all_emission_softcounts[j,,])
     }
+    log_likelihoods[i,1] <- result$total_loglike
     
-    log_likelihoods[i] <- result$total_loglike
-    
-    if (i > 1 && abs(log_likelihoods[i] - log_likelihoods[i - 1]) <= tol) {
+    if ((i > 1) && (abs(log_likelihoods[i,1] - log_likelihoods[i - 1,1]) <= tol)) {
       break
     }
     
@@ -109,7 +106,7 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
     normalizeLengths = normalizeLengths,
     alpha_out = alpha_out
   )
-
+# parallel = FALSE
   num_threads <- if (parallel) parallel::detectCores() else 1
   thread_counts <- vector("list", num_threads)
   
@@ -124,12 +121,13 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
   }
 
   x <- list()
-  parallel = TRUE
   if (parallel) {
-    cl <- makeCluster(num_threads)
+    # print(trans_softcounts)
+    # cl <- makeCluster(num_threads)
+    # print("begin")
     x <- parLapply(cl, thread_counts, inner) 
-    stopCluster(cl)
-    print(x)
+    # print("end")
+    # stopCluster(cl)
   } else {
     x <- lapply(thread_counts, inner)
   }
@@ -154,10 +152,6 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
   all_emission_softcounts = reshape_python(all_emission_softcounts, dim = c(num_subparts, 2, 2))
   all_initial_softcounts = all_initial_softcounts
   alpha_out = reshape_python(as.vector(alpha_out), dim = dim(alpha_out))
-
-  print_3_dim_matrix(all_trans_softcounts)
-  print_3_dim_matrix(all_emission_softcounts)
-  print_3_dim_matrix(all_initial_softcounts)
 
   result <- list(
     total_loglike = total_loglike,
@@ -290,6 +284,5 @@ inner <- function(x) {
         init_softcounts_temp <- init_softcounts_temp + matrix(gamma[, 1], nrow = 2, ncol = 1)
         alphas[[length(alphas) + 1]] <- list(sequence_start = sequence_start, T = T, alpha = alpha)
     }
-    print(alphas)
     return(list(trans_softcounts_temp = trans_softcounts_temp, emission_softcounts_temp = emission_softcounts_temp, init_softcounts_temp = init_softcounts_temp, loglike = loglike, alphas = alphas))
 }
