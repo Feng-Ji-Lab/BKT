@@ -123,11 +123,11 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
   x <- list()
   if (parallel) {
     # print(trans_softcounts)
-    # cl <- makeCluster(num_threads)
+    cl <- makeCluster(num_threads)
     # print("begin")
     x <- parLapply(cl, thread_counts, inner) 
     # print("end")
-    # stopCluster(cl)
+    stopCluster(cl)
   } else {
     x <- lapply(thread_counts, inner)
   }

@@ -146,16 +146,6 @@ setMethod("partial_fit", "Model", function(.Object, data_path = NULL, data = NUL
   return(.Object)
 })
 
-# MARK: _fit
-setGeneric("_fit", function(.Object, data, skill, forgets, preload = FALSE) {
-  standardGeneric("_fit")
-})
-
-setMethod("_fit", "Model", function(.Object, data, skill, forgets, preload = FALSE) {
-  # TODO: 实现你的模型拟合逻辑
-  return(list())  # 返回一个空列表作为占位符
-})
-
 # MARK: ._check_data
 # 检查数据的合法性
 setGeneric("._check_data", function(.Object, data_path, data) {
@@ -347,7 +337,6 @@ setMethod(
         em_fit_result <- EM_fit(fitmodel, data, parallel = object@parallel, optional_args = optional_args)
         fitmodel <- em_fit_result$model
         log_likelihoods <- em_fit_result$log_likelihoods
-        stop("222")
         if (log_likelihoods[length(log_likelihoods)] > best_likelihood) {
           best_likelihood <- log_likelihoods[length(log_likelihoods)]
           best_model <- fitmodel
@@ -356,13 +345,14 @@ setMethod(
         best_model <- fitmodel
       }
     }
-    
+
     fit_model <- best_model
     fit_model$learns <- fit_model$As[, 2, 1]
     fit_model$forgets <- fit_model$As[, 1, 2]
-    fit_model$prior <- fit_model$pi_0[[1]][2]
+    fit_model$prior <- fit_model$pi_0[2,1]
     fit_model$resource_names <- data$resource_names
     fit_model$gs_names <- data$gs_names
+    fit_model$likelihood <- best_likelihood
     
     return(fit_model)
   }
@@ -395,3 +385,90 @@ setMethod("check_manual_param_init", signature(object = "Model"), function(objec
     }
   }
 })
+
+# MARK: params
+# Placeholder for format_param function, which should be defined elsewhere
+setGeneric("params", function(object, skill, param, param_value) {
+  standardGeneric("params")
+})
+
+setMethod(
+  "params",
+  "Model",
+  function(object) {
+    coefs <- coef_(object)
+    formatted_coefs <- list()
+    
+    for (skill in names(coefs)) {
+      for (param in names(coefs[[skill]])) {
+        classes <- format_param(object, skill, param, coefs[[skill]][[param]])
+        
+        for (class_ in names(classes)) {
+          formatted_coefs <- append(formatted_coefs, list(c(skill, param, class_, classes[[class_]])))
+        }
+      }
+    }
+    
+    df <- as.data.frame(do.call(rbind, formatted_coefs), stringsAsFactors = FALSE)
+    colnames(df) <- c("skill", "param", "class", "value")
+    
+    df <-transform(df, value = sprintf("%.6f", as.numeric(value)))
+    
+    return(df)
+  }
+)
+
+# MARK: coef_
+setGeneric("coef_", function(object) {
+  standardGeneric("coef_")
+})
+
+setMethod(
+  "coef_",
+  "Model",
+  function(object) {
+    if (length(object@fit_model) == 0) {
+      stop("model has not been trained or initialized")
+    }
+    
+    initializable_params <- c("learns", "forgets", "guesses", "slips", "prior")  # Equivalent to Model.INITIALIZABLE_PARAMS
+    
+    coefs <- list()
+    
+    for (skill in names(object@fit_model)) {
+      params <- list()
+      for (param in initializable_params) {
+        if (!is.null(object@fit_model[[skill]][[param]])) {
+          params[[param]] <- object@fit_model[[skill]][[param]]
+        }
+      }
+      coefs[[skill]] <- params
+    }
+    
+    return(coefs)
+  }
+)
+
+# MARK: format_param
+setGeneric("format_param", function(object, skill, param, value) {
+  standardGeneric("format_param")
+})
+
+setMethod(
+  "format_param",
+  "Model",
+  function(object, skill, param, value) {
+    if (is.numeric(value) && length(value) > 1) {
+      ptype <- if (param %in% c("learns", "forgets")) "resource_names" else "gs_names"
+      
+      if (!is.null(object@fit_model[[skill]][[ptype]])) {
+        names <- as.character(object@fit_model[[skill]][[ptype]])
+        return(setNames(as.list(value), names))
+      } else {
+        stop(paste("Parameter type", ptype, "not found for skill", skill))
+      }
+    } else {
+      return(list("default" = value))
+    }
+  }
+)
