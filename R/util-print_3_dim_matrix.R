@@ -4,7 +4,7 @@ print_3_dim_matrix <- function(arr) {
     print(arr)
     return()
   }
-  
+
   cat("[\n")
   for (i in 1:dim[1]) {
     cat(" [\n")

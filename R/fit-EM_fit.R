@@ -1,47 +1,44 @@
-
 #' @import parallel
 
 EM_fit <- function(model, data, tol = 0.005, maxiter = 100, parallel = TRUE, fixed = list(), optional_args = optional_args) {
-  
   check_data(data)
-  num_subparts <- nrow(data$data) 
+  num_subparts <- nrow(data$data)
   num_resources <- length(model$learns)
   trans_softcounts <- array(0, dim = c(num_resources, 2, 2))
   emission_softcounts <- array(0, dim = c(num_subparts, 2, 2))
   init_softcounts <- matrix(0, nrow = 2, ncol = 1)
   log_likelihoods <- array(0, dim = c(maxiter, 1))
-  
+
   result <- list(
     all_trans_softcounts = trans_softcounts,
     all_emission_softcounts = emission_softcounts,
     all_initial_softcounts = init_softcounts
   )
-  
+
   for (i in seq_len(maxiter)) {
     result <- run(data, model, result$all_trans_softcounts, result$all_emission_softcounts, result$all_initial_softcounts, 1, parallel, fixed = fixed)
-    
+
     for (j in seq_len(num_resources)) {
-      result$all_trans_softcounts[j,,] <- t(result$all_trans_softcounts[j,,])
+      result$all_trans_softcounts[j, , ] <- t(result$all_trans_softcounts[j, , ])
     }
-    
+
     for (j in seq_len(num_subparts)) {
-      result$all_emission_softcounts[j,,] <- t(result$all_emission_softcounts[j,,])
+      result$all_emission_softcounts[j, , ] <- t(result$all_emission_softcounts[j, , ])
     }
-    log_likelihoods[i,1] <- result$total_loglike
-    
-    if ((i > 1) && (abs(log_likelihoods[i,1] - log_likelihoods[i - 1,1]) <= tol)) {
+    log_likelihoods[i, 1] <- result$total_loglike
+
+    if ((i > 1) && (abs(log_likelihoods[i, 1] - log_likelihoods[i - 1, 1]) <= tol)) {
       break
     }
-    
+
     model <- M_step_run(model, result$all_trans_softcounts, result$all_emission_softcounts, result$all_initial_softcounts, fixed = fixed)
   }
-  
+
   return(list(model = model, log_likelihoods = log_likelihoods[1:i]))
 }
 
 # MARK: run
 run <- function(data, model, trans_softcounts, emission_softcounts, init_softcounts, num_outputs, parallel = TRUE, fixed = list()) {
-
   # Processed Parameters
   alldata <- data$data
   bigT <- ncol(alldata)
@@ -71,8 +68,8 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
     forgets <- forgets * (fixed$forgets < 0) + fixed$forgets * (fixed$forgets >= 0)
   }
   As <- matrix(0, nrow = 2, ncol = 2 * num_resources)
-  As[1,] <- c(1 - learns, forgets)
-  As[2,] <- c(learns, 1 - forgets)
+  As[1, ] <- c(1 - learns, forgets)
+  As[2, ] <- c(learns, 1 - forgets)
 
   if (!is.null(fixed$guesses)) {
     guesses <- guesses * (fixed$guesses < 0) + fixed$guesses * (fixed$guesses >= 0)
@@ -81,8 +78,8 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
     slips <- slips * (fixed$slips < 0) + fixed$slips * (fixed$slips >= 0)
   }
   Bn <- matrix(0, nrow = 2, ncol = 2 * num_subparts)
-  Bn[1,] <- c(1 - guesses, guesses)
-  Bn[2,] <- c(slips, 1 - slips)
+  Bn[1, ] <- c(1 - guesses, guesses)
+  Bn[2, ] <- c(slips, 1 - slips)
 
   # Outputs
   all_trans_softcounts <- matrix(0, nrow = 2, ncol = 2 * num_resources)
@@ -92,7 +89,7 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
   alpha_out <- matrix(0, nrow = 2, ncol = bigT)
 
   total_loglike <- 0
-  
+
   input <- list(
     As = As,
     Bn = Bn,
@@ -106,10 +103,10 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
     normalizeLengths = normalizeLengths,
     alpha_out = alpha_out
   )
-# parallel = FALSE
+  # parallel = FALSE
   num_threads <- if (parallel) parallel::detectCores() else 1
   thread_counts <- vector("list", num_threads)
-  
+
   for (thread_num in seq_len(num_threads)) {
     blocklen <- 1 + ((num_sequences - 1) %/% num_threads)
     sequence_idx_start <- blocklen * (thread_num - 1)
@@ -125,7 +122,7 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
     # print(trans_softcounts)
     cl <- makeCluster(num_threads)
     # print("begin")
-    x <- parLapply(cl, thread_counts, inner) 
+    x <- parLapply(cl, thread_counts, inner)
     # print("end")
     stopCluster(cl)
   } else {
@@ -146,12 +143,12 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
 
   all_trans_softcounts <- as.vector(all_trans_softcounts)
   all_emission_softcounts <- as.vector(all_emission_softcounts)
-  
-  total_loglike = total_loglike
-  all_trans_softcounts = reshape_python(all_trans_softcounts, dim = c(num_resources, 2, 2))
-  all_emission_softcounts = reshape_python(all_emission_softcounts, dim = c(num_subparts, 2, 2))
-  all_initial_softcounts = all_initial_softcounts
-  alpha_out = reshape_python(as.vector(alpha_out), dim = dim(alpha_out))
+
+  total_loglike <- total_loglike
+  all_trans_softcounts <- reshape_python(all_trans_softcounts, dim = c(num_resources, 2, 2))
+  all_emission_softcounts <- reshape_python(all_emission_softcounts, dim = c(num_subparts, 2, 2))
+  all_initial_softcounts <- all_initial_softcounts
+  alpha_out <- reshape_python(as.vector(alpha_out), dim = dim(alpha_out))
 
   result <- list(
     total_loglike = total_loglike,
@@ -160,129 +157,129 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
     all_initial_softcounts = all_initial_softcounts,
     alpha_out = alpha_out
   )
-  
+
   return(result)
 }
 
 
 # MARK: inner (R)
 inner <- function(x) {
-    As <- x$As
-    Bn <- x$Bn
-    initial_distn <- x$initial_distn
-    allresources <- x$allresources
-    starts <- x$starts
-    lengths <- x$lengths
-    num_resources <- x$num_resources
-    num_subparts <- x$num_subparts
-    alldata <- x$alldata
-    normalizeLengths <- x$normalizeLengths
-    sequence_idx_start <- x$sequence_idx_start
-    sequence_idx_start = sequence_idx_start + 1 # handle index difference between R and Python
-    sequence_idx_end <- x$sequence_idx_end
+  As <- x$As
+  Bn <- x$Bn
+  initial_distn <- x$initial_distn
+  allresources <- x$allresources
+  starts <- x$starts
+  lengths <- x$lengths
+  num_resources <- x$num_resources
+  num_subparts <- x$num_subparts
+  alldata <- x$alldata
+  normalizeLengths <- x$normalizeLengths
+  sequence_idx_start <- x$sequence_idx_start
+  sequence_idx_start <- sequence_idx_start + 1 # handle index difference between R and Python
+  sequence_idx_end <- x$sequence_idx_end
 
-    N_R <- 2 * num_resources
-    N_S <- 2 * num_subparts
-    trans_softcounts_temp <- matrix(0, nrow = 2, ncol = N_R)
-    emission_softcounts_temp <- matrix(0, nrow = 2, ncol = N_S)
-    init_softcounts_temp <- matrix(0, nrow = 2, ncol = 1)
-    loglike <- 0
+  N_R <- 2 * num_resources
+  N_S <- 2 * num_subparts
+  trans_softcounts_temp <- matrix(0, nrow = 2, ncol = N_R)
+  emission_softcounts_temp <- matrix(0, nrow = 2, ncol = N_S)
+  init_softcounts_temp <- matrix(0, nrow = 2, ncol = 1)
+  loglike <- 0
 
-    alphas <- list()
+  alphas <- list()
 
-    for (sequence_index in sequence_idx_start:sequence_idx_end) {
-        sequence_start <- starts[sequence_index]
-        T <- lengths[sequence_index]
-        # caculate the likelihoods
-        likelihoods <- matrix(1, nrow = 2, ncol = T)
-        alpha <- matrix(NA, nrow = 2, ncol = T)
-        for (t in 0 : (min(2, T) - 1)) {
-            for (n in 0:(num_subparts - 1)) {
-                data_temp <- alldata[1 + n, sequence_start + t]
-                if (!is.na(data_temp)) {
-                    sl <- Bn[, 1 + 2 * n + as.integer(data_temp == 2)]
-                    likelihoods[, 1+t] <- likelihoods[, 1+t] * ifelse(sl == 0, 1, sl)
-                }
-            }
+  for (sequence_index in sequence_idx_start:sequence_idx_end) {
+    sequence_start <- starts[sequence_index]
+    T <- lengths[sequence_index]
+    # caculate the likelihoods
+    likelihoods <- matrix(1, nrow = 2, ncol = T)
+    alpha <- matrix(NA, nrow = 2, ncol = T)
+    for (t in 0:(min(2, T) - 1)) {
+      for (n in 0:(num_subparts - 1)) {
+        data_temp <- alldata[1 + n, sequence_start + t]
+        if (!is.na(data_temp)) {
+          sl <- Bn[, 1 + 2 * n + as.integer(data_temp == 2)]
+          likelihoods[, 1 + t] <- likelihoods[, 1 + t] * ifelse(sl == 0, 1, sl)
         }
-        # forward propagation - alpha
-        alpha[, 1] <- initial_distn * likelihoods[, 1]
-        norm <- sum(alpha[, 1])
-        alpha[, 1] <- alpha[, 1] / norm
-        contribution <- log(norm) / (if (normalizeLengths) T else 1)
-        loglike <- loglike + contribution
-
-        # 结合 t = 2 的情况
-        if (T >= 2) {
-            resources_temp <- allresources[sequence_start]
-            k <- 2 * (resources_temp - 1) + 1
-            alpha[, 2] <- As[1:2, k:(k + 1)] %*% alpha[, 1] * likelihoods[, 2]
-            norm <- sum(alpha[, 2])
-            alpha[, 2] <- alpha[, 2] / norm
-            contribution <- log(norm) / (if (normalizeLengths) T else 1)
-            loglike <- loglike + contribution
-        }
-        if(T > 2) {
-          for (t in 2:(T-1)) {
-              for (n in 0:(num_subparts-1)) {
-                  data_temp <- alldata[1 + n, sequence_start + t]
-                  if (!is.na(data_temp)) {
-                      sl <- Bn[, 1 + 2 * n + as.integer(data_temp == 2)]
-                      likelihoods[, 1+t] <- likelihoods[, 1+t] * ifelse(sl == 0, 1, sl)
-                  }
-              }
-              # 通用的 alpha 计算循环
-              resources_temp <- allresources[sequence_start + t - 1]
-              k <- 2 * (resources_temp - 1) + 1
-              alpha[, t+1] <- As[1:2, k:(k + 1)] %*% alpha[, t] * likelihoods[, t+1]
-              norm <- sum(alpha[, t+1])
-              alpha[, t+1] <- alpha[, t+1] / norm
-              loglike <- loglike + log(norm) / (if (normalizeLengths) T else 1)
-          }
-        }
-
-        # backward pass
-        gamma <- matrix(NA, nrow = 2, ncol = T)
-        gamma[, T] <- alpha[, T]
-
-        As_temp <- As
-        first_pass <- TRUE
-        if(T > 1) {
-          for (t in (T - 2):0) {
-              resources_temp <- allresources[sequence_start + t]
-              k <- 2 * (resources_temp - 1) + 1
-              A <- As_temp[1:2, k:(k + 1)]
-              pair <- A
-              pair[1, ] <- pair[1, ] * alpha[, 1+t]
-              pair[2, ] <- pair[2, ] * alpha[, 1+t]
-              
-              dotted <- A %*% alpha[, 1+t]
-              gamma_t <- gamma[, t + 2]
-              pair[, 1] <- (pair[, 1] * gamma_t) / dotted
-              pair[, 2] <- (pair[, 2] * gamma_t) / dotted
-              pair[is.nan(pair)] <- 0
-              trans_softcounts_temp[1:2, k:(k + 1)] <- trans_softcounts_temp[1:2, k:(k + 1)] + pair
-              gamma[, 1+t] <- colSums(pair)
-              
-              for (n in 0:(num_subparts-1)) {
-                  data_temp <- alldata[n + 1, sequence_start + t]
-                  if (!is.na(data_temp)) {
-                      emission_softcounts_temp[, (1 + 2 * n + as.integer(data_temp == 2))] <- emission_softcounts_temp[, (1 + 2 * n + as.integer(data_temp == 2))] + gamma[, t + 1]
-                  }
-                  if (first_pass) {
-                      data_temp_p <- alldata[n+1, sequence_start + (T - 1)]
-
-                      if (!is.na(data_temp_p)) {
-                          emission_softcounts_temp[, (1 + 2 * n + as.integer(data_temp_p == 2))] <- emission_softcounts_temp[, (1 + 2 * n + as.integer(data_temp_p == 2))] + gamma[, T]
-                      }
-                  }
-              }
-              first_pass <- FALSE
-          }
-        }
-        
-        init_softcounts_temp <- init_softcounts_temp + matrix(gamma[, 1], nrow = 2, ncol = 1)
-        alphas[[length(alphas) + 1]] <- list(sequence_start = sequence_start, T = T, alpha = alpha)
+      }
     }
-    return(list(trans_softcounts_temp = trans_softcounts_temp, emission_softcounts_temp = emission_softcounts_temp, init_softcounts_temp = init_softcounts_temp, loglike = loglike, alphas = alphas))
+    # forward propagation - alpha
+    alpha[, 1] <- initial_distn * likelihoods[, 1]
+    norm <- sum(alpha[, 1])
+    alpha[, 1] <- alpha[, 1] / norm
+    contribution <- log(norm) / (if (normalizeLengths) T else 1)
+    loglike <- loglike + contribution
+
+    # 结合 t = 2 的情况
+    if (T >= 2) {
+      resources_temp <- allresources[sequence_start]
+      k <- 2 * (resources_temp - 1) + 1
+      alpha[, 2] <- As[1:2, k:(k + 1)] %*% alpha[, 1] * likelihoods[, 2]
+      norm <- sum(alpha[, 2])
+      alpha[, 2] <- alpha[, 2] / norm
+      contribution <- log(norm) / (if (normalizeLengths) T else 1)
+      loglike <- loglike + contribution
+    }
+    if (T > 2) {
+      for (t in 2:(T - 1)) {
+        for (n in 0:(num_subparts - 1)) {
+          data_temp <- alldata[1 + n, sequence_start + t]
+          if (!is.na(data_temp)) {
+            sl <- Bn[, 1 + 2 * n + as.integer(data_temp == 2)]
+            likelihoods[, 1 + t] <- likelihoods[, 1 + t] * ifelse(sl == 0, 1, sl)
+          }
+        }
+        # 通用的 alpha 计算循环
+        resources_temp <- allresources[sequence_start + t - 1]
+        k <- 2 * (resources_temp - 1) + 1
+        alpha[, t + 1] <- As[1:2, k:(k + 1)] %*% alpha[, t] * likelihoods[, t + 1]
+        norm <- sum(alpha[, t + 1])
+        alpha[, t + 1] <- alpha[, t + 1] / norm
+        loglike <- loglike + log(norm) / (if (normalizeLengths) T else 1)
+      }
+    }
+
+    # backward pass
+    gamma <- matrix(NA, nrow = 2, ncol = T)
+    gamma[, T] <- alpha[, T]
+
+    As_temp <- As
+    first_pass <- TRUE
+    if (T > 1) {
+      for (t in (T - 2):0) {
+        resources_temp <- allresources[sequence_start + t]
+        k <- 2 * (resources_temp - 1) + 1
+        A <- As_temp[1:2, k:(k + 1)]
+        pair <- A
+        pair[1, ] <- pair[1, ] * alpha[, 1 + t]
+        pair[2, ] <- pair[2, ] * alpha[, 1 + t]
+
+        dotted <- A %*% alpha[, 1 + t]
+        gamma_t <- gamma[, t + 2]
+        pair[, 1] <- (pair[, 1] * gamma_t) / dotted
+        pair[, 2] <- (pair[, 2] * gamma_t) / dotted
+        pair[is.nan(pair)] <- 0
+        trans_softcounts_temp[1:2, k:(k + 1)] <- trans_softcounts_temp[1:2, k:(k + 1)] + pair
+        gamma[, 1 + t] <- colSums(pair)
+
+        for (n in 0:(num_subparts - 1)) {
+          data_temp <- alldata[n + 1, sequence_start + t]
+          if (!is.na(data_temp)) {
+            emission_softcounts_temp[, (1 + 2 * n + as.integer(data_temp == 2))] <- emission_softcounts_temp[, (1 + 2 * n + as.integer(data_temp == 2))] + gamma[, t + 1]
+          }
+          if (first_pass) {
+            data_temp_p <- alldata[n + 1, sequence_start + (T - 1)]
+
+            if (!is.na(data_temp_p)) {
+              emission_softcounts_temp[, (1 + 2 * n + as.integer(data_temp_p == 2))] <- emission_softcounts_temp[, (1 + 2 * n + as.integer(data_temp_p == 2))] + gamma[, T]
+            }
+          }
+        }
+        first_pass <- FALSE
+      }
+    }
+
+    init_softcounts_temp <- init_softcounts_temp + matrix(gamma[, 1], nrow = 2, ncol = 1)
+    alphas[[length(alphas) + 1]] <- list(sequence_start = sequence_start, T = T, alpha = alpha)
+  }
+  return(list(trans_softcounts_temp = trans_softcounts_temp, emission_softcounts_temp = emission_softcounts_temp, init_softcounts_temp = init_softcounts_temp, loglike = loglike, alphas = alphas))
 }

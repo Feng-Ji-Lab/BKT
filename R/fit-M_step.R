@@ -8,21 +8,21 @@ M_step_run <- function(model, trans_softcounts, emission_softcounts, init_softco
       }
     }
   }
-    emission_sums <- apply(emission_softcounts, c(1, 2), sum)
+  emission_sums <- apply(emission_softcounts, c(1, 2), sum)
 
-    zero_indices <- which(emission_sums == 0, arr.ind = TRUE)
+  zero_indices <- which(emission_sums == 0, arr.ind = TRUE)
 
-    for (idx in seq_len(nrow(zero_indices))) {
-        i <- zero_indices[idx, 1]
-        j <- zero_indices[idx, 2]
-        emission_softcounts[i, j, ] <- 1
-    }
+  for (idx in seq_len(nrow(zero_indices))) {
+    i <- zero_indices[idx, 1]
+    j <- zero_indices[idx, 2]
+    emission_softcounts[i, j, ] <- 1
+  }
 
   stopifnot(dim(trans_softcounts)[2] == 2)
   stopifnot(dim(trans_softcounts)[3] == 2)
-  temp <- apply(trans_softcounts, c(1,3), sum)
-trans_sums <- apply(trans_softcounts, c(1,3), sum)
-model$As <- divide_python(trans_softcounts, trans_sums)
+  temp <- apply(trans_softcounts, c(1, 3), sum)
+  trans_sums <- apply(trans_softcounts, c(1, 3), sum)
+  model$As <- divide_python(trans_softcounts, trans_sums)
   model$learns <- model$As[, 2, 1]
 
   if ("learns" %in% names(fixed)) {
@@ -49,8 +49,8 @@ model$As <- divide_python(trans_softcounts, trans_sums)
     }
   }
 
-  temp <- apply(emission_softcounts, c(1,2), sum)
-  model$emissions <- divide_python(emission_softcounts,temp, type = 2)
+  temp <- apply(emission_softcounts, c(1, 2), sum)
+  model$emissions <- divide_python(emission_softcounts, temp, type = 2)
   model$guesses <- model$emissions[, 1, 2]
 
   if ("guesses" %in% names(fixed)) {
@@ -79,18 +79,18 @@ model$As <- divide_python(trans_softcounts, trans_sums)
 }
 
 # special handle python matrix diviations
-divide_python <- function(m1,m2, type = 1) {
-    if (all(dim(m1) == c(1, 2, 2)) && all(dim(m2) == c(1, 2))) {
-        if(type == 1) {
-            m2_rep <- rep(as.vector(m2), 2)
-            m2_tr <- reshape_python(m2_rep, dim = dim(m1))
-            return(m1 / m2_tr)
-        } else {
-            m2_rep <- rep(as.vector(m2), 2)
-            m2_tr <- array(m2_rep, dim = dim(m1))
-            return(m1 / m2_tr)
-        }
+divide_python <- function(m1, m2, type = 1) {
+  if (all(dim(m1) == c(1, 2, 2)) && all(dim(m2) == c(1, 2))) {
+    if (type == 1) {
+      m2_rep <- rep(as.vector(m2), 2)
+      m2_tr <- reshape_python(m2_rep, dim = dim(m1))
+      return(m1 / m2_tr)
     } else {
-        stop("not implemented")
+      m2_rep <- rep(as.vector(m2), 2)
+      m2_tr <- array(m2_rep, dim = dim(m1))
+      return(m1 / m2_tr)
     }
+  } else {
+    stop("not implemented")
+  }
 }

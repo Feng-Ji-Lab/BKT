@@ -1,20 +1,19 @@
-
 # MARK: convert_data
-convert_data <- function(data_path, skill_name, defaults = defaults, model_type = model_type, 
-                           gs_refs = gs_ref, resource_refs = resource_ref, return_df = return_df, folds = folds) {
-  if(is.null(model_type)) {
-    multilearn = multiprior = multipair = multigs = False
-  } else {
-    multilearn = model_type[1]
-    multiprior = model_type[2]
-    multipair = model_type[3]
-    multigs = model_type[4]
-  }
-  df = read.csv(data_path, header = TRUE, sep = ",", stringsAsFactors = FALSE, check.names = FALSE)
-  if (is.null(df)) {
-    stop("Failed to load the CSV file.")
-  }
-  # default column names for cognitive tutors
+convert_data <- function(data_path, skill_name, defaults = defaults, model_type = model_type,
+                         gs_refs = gs_ref, resource_refs = resource_ref, return_df = return_df, folds = folds) {
+    if (is.null(model_type)) {
+        multilearn <- multiprior <- multipair <- multigs <- False
+    } else {
+        multilearn <- model_type[1]
+        multiprior <- model_type[2]
+        multipair <- model_type[3]
+        multigs <- model_type[4]
+    }
+    df <- read.csv(data_path, header = TRUE, sep = ",", stringsAsFactors = FALSE, check.names = FALSE)
+    if (is.null(df)) {
+        stop("Failed to load the CSV file.")
+    }
+    # default column names for cognitive tutors
     ct_default <- list(
         order_id = "Row",
         skill_name = "KC(Default)",
@@ -27,8 +26,8 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
         folds = "Anon Student Id"
     )
     # integrate custom defaults with default assistments/ct columns if they are still unspecified
-    if(is.null(defaults)) {
-        defaults = list()
+    if (is.null(defaults)) {
+        defaults <- list()
     } else {
         stop("not implemented")
     }
@@ -68,16 +67,20 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
     }
     df[["skill_name"]] <- as.character(df[["skill_name"]])
 
-    tryCatch({
-        df[["correct"]] <- as.integer(df[["correct"]])
-    }, warning = function(w) {
-        stop("Invalid Data In Specified Corrects Column")
-    }, error = function(e) {
-        stop("Invalid Data In Specified Corrects Column")
-    })
+    tryCatch(
+        {
+            df[["correct"]] <- as.integer(df[["correct"]])
+        },
+        warning = function(w) {
+            stop("Invalid Data In Specified Corrects Column")
+        },
+        error = function(e) {
+            stop("Invalid Data In Specified Corrects Column")
+        }
+    )
 
     # handle skills
-    datas = list()
+    datas <- list()
     skill_name <- paste0("^(", skill_name, ")$")
     all_skills <- unique(na.omit(df[["skill_name"]]))
     all_skills <- as.character(all_skills)
@@ -86,7 +89,6 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
         stop("No matching skills")
     }
     for (skill_ in all_skills) {
-    
         if (is.null(resource_refs) || !(skill_ %in% names(resource_refs))) {
             resource_ref <- NULL
         } else {
@@ -126,17 +128,17 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
 
         if (multipair) {
             stop("not implemented")
-        } else if(multiprior) {
+        } else if (multiprior) {
             stop("not implemented")
-        } else if(multilearn) {
+        } else if (multilearn) {
             stop("not implemented")
         } else {
             resources <- rep(1, length(data))
             resources <- as.integer(unlist(resources))
             resources <- matrix(resources, ncol = 1)
         }
-        
-        if(multigs) {
+
+        if (multigs) {
             stop("not implemented")
         } else {
             data <- list(data)
@@ -153,25 +155,25 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
             gs_ref <- list()
             gs_ref[["default"]] <- 1
         }
-        Data$starts = starts
-        Data$lengths = lengths
-        Data$resources = resources
-        Data$resource_names = resource_ref
-        Data$gs_names = gs_ref
-        Data$index = stored_index
-        Data$multiprior_index = multiprior_index
+        Data$starts <- starts
+        Data$lengths <- lengths
+        Data$resources <- resources
+        Data$resource_names <- resource_ref
+        Data$gs_names <- gs_ref
+        Data$index <- stored_index
+        Data$multiprior_index <- multiprior_index
 
-        if(folds) {
+        if (folds) {
             Data[["folds"]] <- as.integer(df3[["folds"]])
         }
         datas[[skill_]] <- Data
     }
     return(datas)
-} 
+}
 
 # const require to sort string by ascii
 ascii_order <- function(x) {
-  sapply(seq_along(x), function(i) {
-    paste0(sprintf("%03d", utf8ToInt(substr(x[i], 1, nchar(x[i])))), collapse = "")
-  })
+    sapply(seq_along(x), function(i) {
+        paste0(sprintf("%03d", utf8ToInt(substr(x[i], 1, nchar(x[i])))), collapse = "")
+    })
 }

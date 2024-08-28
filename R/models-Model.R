@@ -19,19 +19,18 @@ setClass(
     folds = "numeric",
     forgets = "logical",
     fixed = "ANY",
-    MODELS_BKT = "character",           
-    MODEL_ARGS = "character",           
-    FIT_ARGS = "character",             
-    CV_ARGS = "character",              
-    DEFAULTS = "list",                  
-    DEFAULTS_BKT = "list",              
-    INITIALIZABLE_PARAMS = "character" 
+    MODELS_BKT = "character",
+    MODEL_ARGS = "character",
+    FIT_ARGS = "character",
+    CV_ARGS = "character",
+    DEFAULTS = "list",
+    DEFAULTS_BKT = "list",
+    INITIALIZABLE_PARAMS = "character"
   )
 )
 
 # MARK: Init Functions
 setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5, folds = 5, seed = sample(1:1e8, 1), defaults = NULL, model_type = rep(FALSE, 4), ...) {
-
   .Object@parallel <- parallel
   .Object@num_fits <- num_fits
   .Object@seed <- seed
@@ -39,18 +38,18 @@ setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5
   .Object@model_type <- model_type
   .Object@fit_model <- list()
   .Object@manual_param_init <- FALSE
-  .Object@skills = ".*"
-  .Object@folds = folds
-  .Object@forgets = FALSE
+  .Object@skills <- ".*"
+  .Object@folds <- folds
+  .Object@forgets <- FALSE
 
   set.seed(.Object@seed)
 
   # MARK: static parameter handle
-  .Object@MODELS_BKT <- c('multilearn', 'multiprior', 'multipair', 'multigs')
-  .Object@MODEL_ARGS <- c('parallel', 'num_fits', 'seed', 'defaults', .Object@MODELS_BKT)
-  .Object@FIT_ARGS <- c('skills', 'num_fits', 'defaults', 'fixed', 'parallel', 'forgets', 'preload', .Object@MODELS_BKT)
-  .Object@CV_ARGS <- c(.Object@FIT_ARGS, 'folds', 'seed')
-  
+  .Object@MODELS_BKT <- c("multilearn", "multiprior", "multipair", "multigs")
+  .Object@MODEL_ARGS <- c("parallel", "num_fits", "seed", "defaults", .Object@MODELS_BKT)
+  .Object@FIT_ARGS <- c("skills", "num_fits", "defaults", "fixed", "parallel", "forgets", "preload", .Object@MODELS_BKT)
+  .Object@CV_ARGS <- c(.Object@FIT_ARGS, "folds", "seed")
+
   .Object@DEFAULTS <- list(
     num_fits = 5,
     defaults = NULL,
@@ -62,21 +61,21 @@ setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5
     fixed = NULL,
     model_type = rep(FALSE, length(.Object@MODELS_BKT))
   )
-  
+
   .Object@DEFAULTS_BKT <- list(
-    order_id = 'order_id',
-    skill_name = 'skill_name',
-    correct = 'correct',
-    user_id = 'user_id',
-    multilearn = 'template_id',
-    multiprior = 'correct',
-    multipair = 'problem_id',
-    multigs = 'template_id',
-    folds = 'template_id'
+    order_id = "order_id",
+    skill_name = "skill_name",
+    correct = "correct",
+    user_id = "user_id",
+    multilearn = "template_id",
+    multiprior = "correct",
+    multipair = "problem_id",
+    multigs = "template_id",
+    folds = "template_id"
   )
-  
-  .Object@INITIALIZABLE_PARAMS <- c('prior', 'learns', 'guesses', 'slips', 'forgets')
-  
+
+  .Object@INITIALIZABLE_PARAMS <- c("prior", "learns", "guesses", "slips", "forgets")
+
   return(.Object)
 })
 
@@ -89,9 +88,9 @@ setMethod("fit", "Model", function(.Object, data_path = NULL, data = NULL, ...) 
   if (!.Object@manual_param_init) {
     .Object@fit_model <- list()
   }
-  
+
   .Object <- partial_fit(.Object, data_path = data_path, data = data, ...)
-  
+
   return(.Object)
 })
 
@@ -101,35 +100,34 @@ setGeneric("partial_fit", function(.Object, data_path = NULL, data = NULL, ...) 
 })
 
 setMethod("partial_fit", "Model", function(.Object, data_path = NULL, data = NULL, ...) {
-  
   .Object <- ._check_data(.Object, data_path, data)
-  
+
   args <- list(...)
-  
+
   .Object <- ._check_args(.Object, .Object@FIT_ARGS, args)
-  
+
   .Object <- ._update_param(.Object, c("skills", "num_fits", "defaults", "fixed", "parallel", "forgets"), args)
-  
+
   if (is.null(.Object@fit_model) || length(.Object@fit_model) == 0) {
     .Object@fit_model <- list()
   }
-  
+
   if (length(.Object@fit_model) == 0 || (.Object@manual_param_init && length(.Object@fit_model) > 0)) {
     .Object <- ._update_param(.Object, "model_type", ._update_defaults(.Object, args))
   }
-  
+
   .Object@manual_param_init <- TRUE
-  
+
   all_data <- ._data_helper(.Object, data_path, data, .Object@defaults, .Object@skills, .Object@model_type)
-  
+
   .Object <- ._update_param(.Object, "skills", list(skills = names(all_data)))
-  
+
   for (skill in names(all_data)) {
     .Object@fit_model[[skill]] <- ._fit(.Object, all_data[[skill]], skill, .Object@forgets, preload = ifelse("preload" %in% names(args), args$preload, FALSE))
   }
-  
+
   .Object@manual_param_init <- FALSE
-  
+
   return(.Object)
 })
 
@@ -227,12 +225,13 @@ setGeneric("._data_helper", function(.Object, data_path, data, defaults, skills,
 })
 
 setMethod("._data_helper", "Model", function(.Object, data_path = NULL, data = NULL, defaults, skills, model_type, gs_ref = NULL, resource_ref = NULL, return_df = FALSE, folds = FALSE) {
-  
   data_p <- NULL
 
   if (!is.null(data_path) && is.character(data_path)) {
-    data_p <- convert_data(data_path, skills, defaults = defaults, model_type = model_type, 
-                           gs_refs = gs_ref, resource_refs = resource_ref, return_df = return_df, folds = folds)
+    data_p <- convert_data(data_path, skills,
+      defaults = defaults, model_type = model_type,
+      gs_refs = gs_ref, resource_refs = resource_ref, return_df = return_df, folds = folds
+    )
   }
 
   if (!return_df) {
@@ -240,7 +239,7 @@ setMethod("._data_helper", "Model", function(.Object, data_path = NULL, data = N
   } else {
     lapply(data_p[[1]], function(d) check_data(d))
   }
-  
+
   return(data_p)
 })
 
@@ -253,18 +252,17 @@ setMethod(
   "._fit",
   signature(object = "Model"),
   function(object, data, skill, forgets, preload = FALSE) {
-
     num_learns <- length(data$resource_names)
     num_gs <- length(data$gs_names)
     check_manual_param_init(object, num_learns, num_gs, skill)
     if (!is.null(object@fixed)) {
       object@check_fixed(object)
     }
-    
+
     num_fit_initializations <- object@num_fits
     best_likelihood <- -Inf
     best_model <- NULL
-    
+
     for (i in seq_len(num_fit_initializations)) {
       fitmodel <- random_model_uni(num_learns, num_gs)
       optional_args <- list(fixed = list())
@@ -285,23 +283,23 @@ setMethod(
       if (forgets) {
         fitmodel$forgets <- runif(length(fitmodel$forgets))
       }
-      
+
       # if (object@model_type[which(Model$MODELS_BKT == 'multiprior')]) {
       #   fitmodel$prior <- 0
       # }
-      
+
       if (object@manual_param_init && skill %in% names(object@fit_model)) {
         for (var in names(object@fit_model[[skill]])) {
           if (!is.null(object@fixed) && skill %in% names(object@fixed) &&
-              var %in% names(object@fixed[[skill]]) &&
-              is.logical(object@fixed[[skill]][[var]]) && object@fixed[[skill]][[var]]) {
+            var %in% names(object@fixed[[skill]]) &&
+            is.logical(object@fixed[[skill]][[var]]) && object@fixed[[skill]][[var]]) {
             optional_args$fixed[[var]] <- object@fit_model[[skill]][[var]]
           } else if (var %in% names(fitmodel)) {
             fitmodel[[var]] <- object@fit_model[[skill]][[var]]
           }
         }
       }
-      
+
       if (!is.null(object@fixed) && skill %in% names(object@fixed)) {
         for (var in names(object@fixed[[skill]])) {
           if (!is.logical(object@fixed[[skill]][[var]])) {
@@ -309,7 +307,7 @@ setMethod(
           }
         }
       }
-      
+
       if (!preload) {
         em_fit_result <- EM_fit(fitmodel, data, parallel = object@parallel, optional_args = optional_args)
         fitmodel <- em_fit_result$model
@@ -326,11 +324,11 @@ setMethod(
     fit_model <- best_model
     fit_model$learns <- fit_model$As[, 2, 1]
     fit_model$forgets <- fit_model$As[, 1, 2]
-    fit_model$prior <- fit_model$pi_0[2,1]
+    fit_model$prior <- fit_model$pi_0[2, 1]
     fit_model$resource_names <- data$resource_names
     fit_model$gs_names <- data$gs_names
     fit_model$likelihood <- best_likelihood
-    
+
     return(fit_model)
   }
 )
@@ -342,22 +340,21 @@ setGeneric("check_manual_param_init", function(object, num_learns, num_gs, skill
 
 setMethod("check_manual_param_init", signature(object = "Model"), function(object, num_learns, num_gs, skill) {
   if (!is.null(object@fit_model) && skill %in% names(object@fit_model)) {
-    
     # Check for 'learns'
     if ("learns" %in% names(object@fit_model[[skill]]) &&
-        length(object@fit_model[[skill]]$learns) != num_learns) {
+      length(object@fit_model[[skill]]$learns) != num_learns) {
       stop("invalid number of learns in initialization")
     }
-    
+
     # Check for 'guesses'
     if ("guesses" %in% names(object@fit_model[[skill]]) &&
-        length(object@fit_model[[skill]]$guesses) != num_gs) {
+      length(object@fit_model[[skill]]$guesses) != num_gs) {
       stop("invalid number of guess classes in initialization")
     }
-    
+
     # Check for 'slips'
     if ("slips" %in% names(object@fit_model[[skill]]) &&
-        length(object@fit_model[[skill]]$slips) != num_gs) {
+      length(object@fit_model[[skill]]$slips) != num_gs) {
       stop("invalid number of slip classes in initialization")
     }
   }
@@ -375,22 +372,22 @@ setMethod(
   function(object) {
     coefs <- coef_(object)
     formatted_coefs <- list()
-    
+
     for (skill in names(coefs)) {
       for (param in names(coefs[[skill]])) {
         classes <- format_param(object, skill, param, coefs[[skill]][[param]])
-        
+
         for (class_ in names(classes)) {
           formatted_coefs <- append(formatted_coefs, list(c(skill, param, class_, classes[[class_]])))
         }
       }
     }
-    
+
     df <- as.data.frame(do.call(rbind, formatted_coefs), stringsAsFactors = FALSE)
     colnames(df) <- c("skill", "param", "class", "value")
-    
-    df <-transform(df, value = sprintf("%.6f", as.numeric(value)))
-    
+
+    df <- transform(df, value = sprintf("%.6f", as.numeric(value)))
+
     return(df)
   }
 )
@@ -407,11 +404,11 @@ setMethod(
     if (length(object@fit_model) == 0) {
       stop("model has not been trained or initialized")
     }
-    
-    initializable_params <- c("learns", "forgets", "guesses", "slips", "prior")  # Equivalent to Model.INITIALIZABLE_PARAMS
-    
+
+    initializable_params <- c("learns", "forgets", "guesses", "slips", "prior") # Equivalent to Model.INITIALIZABLE_PARAMS
+
     coefs <- list()
-    
+
     for (skill in names(object@fit_model)) {
       params <- list()
       for (param in initializable_params) {
@@ -421,7 +418,7 @@ setMethod(
       }
       coefs[[skill]] <- params
     }
-    
+
     return(coefs)
   }
 )
@@ -437,7 +434,7 @@ setMethod(
   function(object, skill, param, value) {
     if (is.numeric(value) && length(value) > 1) {
       ptype <- if (param %in% c("learns", "forgets")) "resource_names" else "gs_names"
-      
+
       if (!is.null(object@fit_model[[skill]][[ptype]])) {
         names <- as.character(object@fit_model[[skill]][[ptype]])
         return(setNames(as.list(value), names))

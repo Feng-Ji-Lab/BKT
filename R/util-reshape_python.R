@@ -3,7 +3,7 @@ reshape_python <- function(x, dim) {
     # vector
     flattened <- as.vector(x)
   } else {
-    rx = reverse_dimensions(x)
+    rx <- reverse_dimensions(x)
     flattened <- as.vector(rx)
   }
   reshaped <- array(flattened, dim = rev(dim))
