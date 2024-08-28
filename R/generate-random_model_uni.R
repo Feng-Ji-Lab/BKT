@@ -22,7 +22,6 @@ random_model_uni <- function(num_resources = 1, num_subparts = 1,
   given_know <- dirrnd(given_know_prior)
   pi_0 <- dirrnd(pi_0_prior)
 
-  # 创建发射矩阵
   given_notknow_reshaped <- t(matrix(given_notknow, nrow = 2, ncol = num_subparts))
   given_know_reshaped <- t(matrix(given_know, nrow = 2, ncol = num_subparts))
   emissions <- array(c(given_notknow_reshaped, given_know_reshaped), 

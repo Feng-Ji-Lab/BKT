@@ -34,7 +34,6 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
     }
 
     df_columns <- colnames(df)
-    # 遍历 ct_default 列表的键值对
     for (key in names(ct_default)) {
         value <- ct_default[[key]]
         if (key %in% df_columns) {
@@ -55,7 +54,6 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
     df$order_id <- as.numeric(df$order_id)
     df <- df[order(df$order_id), ]
 
-    # 检查是否存在 "user_id", "correct", 和 "skill_name" 在 defaults 中
     required_columns <- c("user_id", "correct", "skill_name")
     for (col in required_columns) {
         if (!(col %in% names(df))) {

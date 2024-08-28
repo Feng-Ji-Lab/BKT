@@ -4,7 +4,7 @@
 EM_fit <- function(model, data, tol = 0.005, maxiter = 100, parallel = TRUE, fixed = list(), optional_args = optional_args) {
   
   check_data(data)
-  num_subparts <- nrow(data$data)  # 第一维度对应于每个子部分
+  num_subparts <- nrow(data$data) 
   num_resources <- length(model$learns)
   trans_softcounts <- array(0, dim = c(num_resources, 2, 2))
   emission_softcounts <- array(0, dim = c(num_subparts, 2, 2))
@@ -193,7 +193,7 @@ inner <- function(x) {
     for (sequence_index in sequence_idx_start:sequence_idx_end) {
         sequence_start <- starts[sequence_index]
         T <- lengths[sequence_index]
-        # 计算似然
+        # caculate the likelihoods
         likelihoods <- matrix(1, nrow = 2, ncol = T)
         alpha <- matrix(NA, nrow = 2, ncol = T)
         for (t in 0 : (min(2, T) - 1)) {
@@ -205,7 +205,7 @@ inner <- function(x) {
                 }
             }
         }
-        # 前向传播 alpha
+        # forward propagation - alpha
         alpha[, 1] <- initial_distn * likelihoods[, 1]
         norm <- sum(alpha[, 1])
         alpha[, 1] <- alpha[, 1] / norm
@@ -241,7 +241,7 @@ inner <- function(x) {
           }
         }
 
-        # 后向传递和统计计算
+        # backward pass
         gamma <- matrix(NA, nrow = 2, ncol = T)
         gamma[, T] <- alpha[, T]
 

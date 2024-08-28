@@ -8,17 +8,10 @@ M_step_run <- function(model, trans_softcounts, emission_softcounts, init_softco
       }
     }
   }
-#   emission_softcounts[1,1,1] =2
-#   emission_softcounts[1,1,2] = -2
-#   emission_softcounts[1,2,1] = 2
-#   emission_softcounts[1,2,2] = 3
-    # 计算第三维度上的和
     emission_sums <- apply(emission_softcounts, c(1, 2), sum)
 
-    # 找到和为0的二维索引
     zero_indices <- which(emission_sums == 0, arr.ind = TRUE)
 
-    # 对应位置的三维切片设置为1
     for (idx in seq_len(nrow(zero_indices))) {
         i <- zero_indices[idx, 1]
         j <- zero_indices[idx, 2]
