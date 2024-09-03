@@ -266,19 +266,19 @@ setMethod(
     for (i in seq_len(num_fit_initializations)) {
       fitmodel <- random_model_uni(num_learns, num_gs)
       optional_args <- list(fixed = list())
-      # fitmodel$prior <- 0.3
-      # fitmodel$learns[1] <- 0.28
-      # fitmodel$forgets[1] <- 0
-      # fitmodel$guesses[1] <- 0.35
-      # fitmodel$slips[1] <- 0.27
-      # fitmodel$As[1, 2, 1] <- 0.28
-      # fitmodel$As[1, 2, 2] <- 0.72
-      # fitmodel$emissions[1, 1, 1] <- 0.78
-      # fitmodel$emissions[1, 1, 2] <- 0.21
-      # fitmodel$emissions[1, 2, 1] <- 0.16
-      # fitmodel$emissions[1, 2, 2] <- 0.84
-      # fitmodel$pi_0[1, 1] <- 0.95
-      # fitmodel$pi_0[2, 1] <- 0.33
+      fitmodel$prior <- 0.3
+      fitmodel$learns[1] <- 0.28
+      fitmodel$forgets[1] <- 0
+      fitmodel$guesses[1] <- 0.35
+      fitmodel$slips[1] <- 0.27
+      fitmodel$As[1, 2, 1] <- 0.28
+      fitmodel$As[1, 2, 2] <- 0.72
+      fitmodel$emissions[1, 1, 1] <- 0.78
+      fitmodel$emissions[1, 1, 2] <- 0.21
+      fitmodel$emissions[1, 2, 1] <- 0.16
+      fitmodel$emissions[1, 2, 2] <- 0.84
+      fitmodel$pi_0[1, 1] <- 0.95
+      fitmodel$pi_0[2, 1] <- 0.33
       # print(fitmodel)
       if (forgets) {
         fitmodel$forgets <- runif(length(fitmodel$forgets))
@@ -330,6 +330,85 @@ setMethod(
     fit_model$likelihood <- best_likelihood
 
     return(fit_model)
+  }
+)
+
+# MARK: evaluate
+setGeneric("evaluate", function(object, data = NULL, data_path = NULL, metric = NULL) {
+  standardGeneric("evaluate")
+})
+
+setMethod(
+  f = "evaluate",
+  signature = c("Model"),
+  definition = function(object, data = NULL, data_path = NULL, metric = metrics$rmse) {
+    # 检查数据
+    stop("1")
+    .check_data(object, data_path, data)
+
+    if (!is.list(metric) && !is.vector(metric)) {
+      metric <- list(metric)
+    }
+
+    if (is.null(object@fit_model)) {
+      stop("model has not been fitted yet")
+    } else {
+      for (i in seq_along(metric)) {
+        m <- metric[[i]]
+        if (is.character(m)) {
+          if (!(m %in% metrics$SUPPORTED_METRICS)) {
+            stop(paste("metric must be one of:", paste(metrics$SUPPORTED_METRICS, collapse = ", ")))
+          }
+          metric[[i]] <- metrics$SUPPORTED_METRICS[[m]]
+        } else if (!is.function(m)) {
+          stop("metric must either be a string, function, or list/vector of strings and functions")
+        }
+      }
+    }
+
+    all_data <- .data_helper(object, data_path, data, object@defaults, object@skills, object@model_type,
+      gs_ref = object@fit_model, resource_ref = object@fit_model
+    )
+
+    results <- .evaluate(object, all_data, metric)
+    return(if (length(results) == 1) results[[1]] else results)
+  }
+)
+
+# MARK: ._evaluate
+setGeneric("._evaluate", function(object, all_data, metric) {
+  standardGeneric("._evaluate")
+})
+
+setMethod(
+  f = "._evaluate",
+  signature = c("Model"),
+  definition = function(object, all_data, metric) {
+    per_skill <- list()
+    true <- c()
+    pred <- c()
+
+    for (skill in names(all_data)) {
+      predictions <- .predict(object@fit_model[[skill]], all_data[[skill]])
+      correct_predictions <- predictions$correct_predictions
+      state_predictions <- predictions$state_predictions
+      real_data <- all_data[[skill]]$data
+      true <- c(true, colSums(real_data))
+      pred <- c(pred, correct_predictions)
+    }
+
+    true <- true - 1
+
+    tryCatch(
+      {
+        res <- lapply(metric, function(m) m(true, pred))
+      },
+      error = function(e) {
+        res <- lapply(metric, function(m) m(true, round(pred)))
+      }
+    )
+
+    return(res)
   }
 )
 
