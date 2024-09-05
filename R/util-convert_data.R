@@ -9,6 +9,11 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
         multipair <- model_type[3]
         multigs <- model_type[4]
     }
+    if (is.character(skill_name)) {
+        if (length(skill_name) > 1) {
+            skill_name <- paste(skill_name, collapse = "|")
+        }
+    }
     df <- read.csv(data_path, header = TRUE, sep = ",", stringsAsFactors = FALSE, check.names = FALSE)
     if (is.null(df)) {
         stop("Failed to load the CSV file.")
@@ -167,6 +172,9 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
             Data[["folds"]] <- as.integer(df3[["folds"]])
         }
         datas[[skill_]] <- Data
+    }
+    if (return_df) {
+        return(list(datas = datas, df = df))
     }
     return(datas)
 }

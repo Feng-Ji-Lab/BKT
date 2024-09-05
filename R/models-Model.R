@@ -338,24 +338,27 @@ setGeneric("evaluate", function(object, data = NULL, data_path = NULL, metric = 
   standardGeneric("evaluate")
 })
 
+rmse <- function(true_vals, pred_vals) {
+  sqrt(mean((true_vals - pred_vals)^2))
+}
+
 setMethod(
   f = "evaluate",
   signature = c("Model"),
-  definition = function(object, data = NULL, data_path = NULL, metric = metrics$rmse) {
+  definition = function(object, data = NULL, data_path = NULL, metric = rmse) {
     # 检查数据
-    stop("1")
-    .check_data(object, data_path, data)
+    ._check_data(object, data_path, data)
 
     if (!is.list(metric) && !is.vector(metric)) {
       metric <- list(metric)
     }
-
     if (is.null(object@fit_model)) {
       stop("model has not been fitted yet")
     } else {
       for (i in seq_along(metric)) {
         m <- metric[[i]]
         if (is.character(m)) {
+          stop("not implemented")
           if (!(m %in% metrics$SUPPORTED_METRICS)) {
             stop(paste("metric must be one of:", paste(metrics$SUPPORTED_METRICS, collapse = ", ")))
           }
@@ -365,12 +368,10 @@ setMethod(
         }
       }
     }
-
-    all_data <- .data_helper(object, data_path, data, object@defaults, object@skills, object@model_type,
+    all_data <- ._data_helper(object, data_path, data, object@defaults, object@skills, object@model_type,
       gs_ref = object@fit_model, resource_ref = object@fit_model
     )
-
-    results <- .evaluate(object, all_data, metric)
+    results <- ._evaluate(object, all_data, metric)
     return(if (length(results) == 1) results[[1]] else results)
   }
 )
@@ -389,7 +390,7 @@ setMethod(
     pred <- c()
 
     for (skill in names(all_data)) {
-      predictions <- .predict(object@fit_model[[skill]], all_data[[skill]])
+      predictions <- ._predict(object@fit_model[[skill]], all_data[[skill]])
       correct_predictions <- predictions$correct_predictions
       state_predictions <- predictions$state_predictions
       real_data <- all_data[[skill]]$data
@@ -398,7 +399,6 @@ setMethod(
     }
 
     true <- true - 1
-
     tryCatch(
       {
         res <- lapply(metric, function(m) m(true, pred))
@@ -407,8 +407,20 @@ setMethod(
         res <- lapply(metric, function(m) m(true, round(pred)))
       }
     )
-
     return(res)
+  }
+)
+
+# MARK: ._predict
+setGeneric("._predict", function(model, data) {
+  standardGeneric("._predict")
+})
+
+setMethod(
+  f = "._predict",
+  signature = c("ANY", "ANY"),
+  definition = function(model, data) {
+    return(predict_onestep_run(model, data))
   }
 )
 
@@ -525,3 +537,112 @@ setMethod(
     }
   }
 )
+
+# MARK: crossvalidate
+crossvalidate_single_skill <- function(data, skill, metrics) {
+  lapply(metrics, function(metric) metric(rnorm(nrow(data)), data$truth))
+}
+
+setGeneric("crossvalidate", function(model, data = NULL, data_path = NULL, metric = rmse, ...) {
+  standardGeneric("crossvalidate")
+})
+
+setMethod("crossvalidate", "Model", function(model, data = NULL, data_path = NULL, metric = rmse, ...) {
+  if (is.null(data) && is.null(data_path)) {
+    stop("no data specified")
+  }
+
+  if (!is.list(metric)) {
+    metric <- list(metric)
+  }
+
+  metric_names <- c()
+  metric_functions <- list()
+
+  for (m in metric) {
+    if (is.character(m)) {
+      if (!(m %in% names(model@metrics@supported_metrics))) {
+        stop(paste("metric must be one of:", paste(names(model@metrics@supported_metrics), collapse = ", ")))
+      }
+      metric_functions <- c(metric_functions, model@metrics@supported_metrics[[m]])
+      metric_names <- c(metric_names, m)
+    } else if (is.function(m)) {
+      metric_functions <- c(metric_functions, m)
+      metric_names <- c(metric_names, deparse(substitute(m)))
+    } else {
+      stop("metric must either be a string or function")
+    }
+  }
+
+  if (!is.null(data_path)) {
+    data <- read.csv(data_path)
+  }
+
+  skills_data <- split(data, data$skill)
+
+  metric_vals <- list()
+
+  for (skill in names(skills_data)) {
+    metric_vals[[skill]] <- ._crossvalidate(skills_data[[skill]], skill, metric_functions)
+  }
+
+  df <- as.data.frame(t(sapply(metric_vals, unlist)))
+  colnames(df) <- metric_names
+  df$skill <- rownames(df)
+  return(df)
+})
+
+# MARK: ._crossvalidate
+setGeneric("._crossvalidate", function(model, data, skill, metric) {
+  standardGeneric("._crossvalidate")
+})
+
+setMethod("._crossvalidate", "Model", function(model, data, skill, metric) {
+  if (is.character(model@folds)) {
+    return(crossvalidate_single_skill(data, skill, metric, model@seed, fold_data = TRUE))
+  } else {
+    return(crossvalidate_single_skill(data, skill, metric, model@seed, fold_data = FALSE))
+  }
+})
+
+# MARK: predict
+setGeneric("predict", function(model, data_path = NULL, data = NULL) {
+  standardGeneric("predict")
+})
+
+setMethod("predict", "Model", function(model, data_path = NULL, data = NULL) {
+  ._check_data(model, data_path, data)
+
+  if (is.null(model@fit_model)) {
+    stop("Model has not been fitted yet")
+  }
+
+  data_helper_result <- ._data_helper(
+    model,
+    data_path = data_path, data = data,
+    defaults = model@defaults, skills = model@skills,
+    model_type = model@model_type, gs_ref = model@fit_model,
+    resource_ref = model@fit_model, return_df = TRUE
+  )
+  all_data <- data_helper_result[[1]]
+  df <- data_helper_result[[2]]
+
+  df$correct_predictions <- 0.5
+  df$state_predictions <- 0.5
+
+  for (skill in names(all_data)) {
+    pred_result <- ._predict(model@fit_model[[skill]], all_data[[skill]])
+    correct_predictions <- pred_result[[1]]
+    state_predictions <- pred_result[[2]][[1]]
+
+    if (!is.null(all_data[[skill]]$multiprior_index)) {
+      correct_predictions <- correct_predictions[-all_data[[skill]]$multiprior_index]
+      state_predictions <- state_predictions[-all_data[[skill]]$multiprior_index]
+    }
+
+    df[df$skill_name == skill, "correct_predictions"] <- correct_predictions
+    df[df$skill_name == skill, "state_predictions"] <- state_predictions
+  }
+
+  return(df)
+})
