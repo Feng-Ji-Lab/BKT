@@ -170,8 +170,8 @@ setMethod("._update_param", "Model", function(.Object, params, args, keep = FALS
   if (is.list(args)) {
     for (param in params) {
       if (!param %in% names(args) && (!param %in% names(.Object@keep) || !.Object@keep[[param]])) {
-        # arg <- .Object@DEFAULTS[[param]]
-        # slot(.Object, param) <- if (is.function(arg)) arg() else arg
+        arg <- .Object@DEFAULTS[[param]]
+        slot(.Object, param) <- if (is.function(arg)) arg() else arg
       } else if (param %in% names(args)) {
         slot(.Object, param) <- args[[param]]
       }
@@ -547,9 +547,6 @@ setGeneric("crossvalidate", function(object, data = NULL, data_path = NULL, metr
 })
 
 setMethod("crossvalidate", "Model", function(object, data = NULL, data_path = NULL, metric = rmse, ...) {
-  # TEST ONLY
-  object@folds <- 3
-
   metric_names <- c()
 
   if (!is.list(metric)) {
@@ -576,7 +573,7 @@ setMethod("crossvalidate", "Model", function(object, data = NULL, data_path = NU
   }
 
   ._check_args(object, object@CV_ARGS, list(...))
-  ._update_param(object, c("skills", "num_fits", "defaults", "parallel", "forgets", "seed", "folds"), list(...))
+  object <- ._update_param(object, c("skills", "num_fits", "defaults", "parallel", "forgets", "seed", "folds"), list(...))
   ._update_param(object, "model_type", ._update_defaults(object, list(...)))
 
   metric_vals <- list()

@@ -1,7 +1,7 @@
 unloadNamespace("BKT")
 rm(list = ls())
 devtools::load_all("./")
-
+library("parallel")
 model <- bkt(seed = 2, num_fits = 1, parallel = FALSE)
 fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
 
@@ -35,5 +35,9 @@ model2 <- load(model2, "model.pkl")
 # print(box_and_whisker_preds)
 
 # MARK:Crossvalidate
-result <- crossvalidate(model2, data_path = "ct.csv", folds = 3)
+start_time <- Sys.time()
+result <- crossvalidate(model2, data_path = "ct.csv", skills = ".*Plot.*", folds = 3, parallel = FALSE)
 print(result)
+end_time <- Sys.time()
+elapsed <- difftime(end_time, start_time, units = "secs")
+cat("Elapsed time:", round(elapsed, 2), "seconds\n")
