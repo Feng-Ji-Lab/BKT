@@ -6,15 +6,15 @@ model <- bkt(seed = 2, num_fits = 1, parallel = FALSE)
 fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
 
 # MARK: Fit
-result <- fit(model, data_path = "ct.csv", skills = ".*Plot.*")
-print(params(result))
+# result <- fit(model, data_path = "ct.csv", skills = ".*Plot.*")
+# print(params(result))
 # print("fit finished")
 
-# Save & Load
-save(result, "model.pkl")
+# MARK: Save & Load
+# save(result, "model.pkl")
 model2 <- bkt()
 model2 <- load(model2, "model.pkl")
-print(params(model2))
+# print(params(model2))
 
 # MARK: Evaluate
 # mae <- function(true_vals, pred_vals) {
@@ -34,5 +34,6 @@ print(params(model2))
 # )
 # print(box_and_whisker_preds)
 
-# MARK: Crossvalidate
-# crossvalidate(result, folds = 3)
+# MARK:Crossvalidate
+result <- crossvalidate(model2, data_path = "ct.csv", folds = 3)
+print(result)

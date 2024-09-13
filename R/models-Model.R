@@ -542,55 +542,68 @@ setMethod(
 crossvalidate_single_skill <- function(data, skill, metrics) {
   lapply(metrics, function(metric) metric(rnorm(nrow(data)), data$truth))
 }
-
-setGeneric("crossvalidate", function(model, data = NULL, data_path = NULL, metric = rmse, ...) {
+setGeneric("crossvalidate", function(object, data = NULL, data_path = NULL, metric = rmse, ...) {
   standardGeneric("crossvalidate")
 })
 
-setMethod("crossvalidate", "Model", function(model, data = NULL, data_path = NULL, metric = rmse, ...) {
-  if (is.null(data) && is.null(data_path)) {
-    stop("no data specified")
-  }
+setMethod("crossvalidate", "Model", function(object, data = NULL, data_path = NULL, metric = rmse, ...) {
+  # TEST ONLY
+  object@folds <- 3
+
+  metric_names <- c()
 
   if (!is.list(metric)) {
     metric <- list(metric)
   }
 
-  metric_names <- c()
-  metric_functions <- list()
-
-  for (m in metric) {
-    if (is.character(m)) {
-      if (!(m %in% names(model@metrics@supported_metrics))) {
-        stop(paste("metric must be one of:", paste(names(model@metrics@supported_metrics), collapse = ", ")))
+  if (is.null(data) && is.null(data_path)) {
+    stop("no data specified")
+  } else {
+    for (i in seq_along(metric)) {
+      m <- metric[[i]]
+      if (is.character(m)) {
+        if (!(m %in% metrics$SUPPORTED_METRICS)) {
+          stop(paste("metric must be one of:", paste(metrics$SUPPORTED_METRICS, collapse = ", ")))
+        }
+        metric[[i]] <- metrics$SUPPORTED_METRICS[[m]]
+        metric_names <- c(metric_names, m)
+      } else if (is.function(m)) {
+        metric_names <- c(metric_names, deparse(substitute(m)))
+      } else {
+        stop("metric must either be a string, function, or list/tuple of strings and functions")
       }
-      metric_functions <- c(metric_functions, model@metrics@supported_metrics[[m]])
-      metric_names <- c(metric_names, m)
-    } else if (is.function(m)) {
-      metric_functions <- c(metric_functions, m)
-      metric_names <- c(metric_names, deparse(substitute(m)))
-    } else {
-      stop("metric must either be a string or function")
     }
   }
 
-  if (!is.null(data_path)) {
-    data <- read.csv(data_path)
-  }
-
-  skills_data <- split(data, data$skill)
+  ._check_args(object, object@CV_ARGS, list(...))
+  ._update_param(object, c("skills", "num_fits", "defaults", "parallel", "forgets", "seed", "folds"), list(...))
+  ._update_param(object, "model_type", ._update_defaults(object, list(...)))
 
   metric_vals <- list()
 
-  for (skill in names(skills_data)) {
-    metric_vals[[skill]] <- ._crossvalidate(skills_data[[skill]], skill, metric_functions)
+  if (!object@manual_param_init) {
+    object@fit_model <- list()
   }
 
-  df <- as.data.frame(t(sapply(metric_vals, unlist)))
-  colnames(df) <- metric_names
-  df$skill <- rownames(df)
+  if (is.character(object@folds)) {
+    ._update_defaults(object, list(folds = object@folds))
+  }
+
+  all_data <- ._data_helper(object, data_path, data, object@defaults, object@skills, object@model_type, folds = is.character(object@folds))
+  ._update_param(object, "skills", list(skills = names(all_data)))
+
+  for (skill in names(all_data)) {
+    print(skill)
+    metric_vals[[skill]] <- ._crossvalidate(object, all_data[[skill]], skill, metric)
+  }
+  object@manual_param_init <- FALSE
+  object@fit_model <- list()
+  df <- data.frame(skill = names(metric_vals), dummy = I(unname(metric_vals)))
+  # df[metric_names] <- do.call(rbind, df$dummy)
+  # df <- df[, !(names(df) %in% "dummy")]
   return(df)
 })
+
 
 # MARK: ._crossvalidate
 setGeneric("._crossvalidate", function(model, data, skill, metric) {
@@ -599,9 +612,9 @@ setGeneric("._crossvalidate", function(model, data, skill, metric) {
 
 setMethod("._crossvalidate", "Model", function(model, data, skill, metric) {
   if (is.character(model@folds)) {
-    return(crossvalidate_single_skill(data, skill, metric, model@seed, fold_data = TRUE))
+    return(crossvalidate_single_skill(model, data, skill, model@folds, metric, model@seed, use_folds = TRUE))
   } else {
-    return(crossvalidate_single_skill(data, skill, metric, model@seed, fold_data = FALSE))
+    return(crossvalidate_single_skill(model, data, skill, model@folds, metric, model@seed))
   }
 })
 
