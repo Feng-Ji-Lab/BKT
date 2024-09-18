@@ -2,7 +2,7 @@ unloadNamespace("BKT")
 rm(list = ls())
 devtools::load_all("./")
 library("parallel")
-model <- bkt(seed = 2, num_fits = 1, parallel = FALSE)
+model <- bkt(seed = 37, num_fits = 1, parallel = FALSE)
 fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
 
 # MARK: Fit
@@ -35,9 +35,15 @@ model2 <- load(model2, "model.pkl")
 # print(box_and_whisker_preds)
 
 # MARK:Crossvalidate
-start_time <- Sys.time()
-result <- crossvalidate(model2, data_path = "ct.csv", skills = ".*Plot.*", folds = 3, parallel = FALSE)
-print(result)
-end_time <- Sys.time()
-elapsed <- difftime(end_time, start_time, units = "secs")
-cat("Elapsed time:", round(elapsed, 2), "seconds\n")
+# start_time <- Sys.time()
+# result <- crossvalidate(model2, data_path = "ct.csv", skills = "Plot non-terminating improper fraction", folds = 2, parallel = FALSE)
+# print(result)
+# end_time <- Sys.time()
+# elapsed <- difftime(end_time, start_time, units = "secs")
+# cat("Elapsed time:", round(elapsed, 2), "seconds\n")
+
+# MARK: forgets
+result <- fit(model, data_path = "ct.csv", forgets = TRUE, parallel = FALSE, skills = "Plot non-terminating improper fraction")
+print(params(result))
+result <- fit(model, data_path = "ct.csv", forgets = FALSE, parallel = FALSE, skills = "Plot non-terminating improper fraction")
+print(params(result))

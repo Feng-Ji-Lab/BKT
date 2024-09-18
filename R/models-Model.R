@@ -195,13 +195,31 @@ setGeneric("._update_defaults", function(.Object, args) {
 })
 
 setMethod("._update_defaults", "Model", function(.Object, args) {
-  model_type_defaults <- .Object@DEFAULTS$model_type
-  for (name in names(args)) {
-    if (name %in% .Object@MODEL_ARGS) {
-      model_type_defaults[which(.Object@MODEL_ARGS == name)] <- TRUE
+  # Update the default column names
+  model_types <- rep(FALSE, 4)
+
+  for (d in names(args)) {
+    if (d %in% .Object@MODELS_BKT) {
+      if (is.logical(args[[d]])) {
+        model_types[which(.Object@MODELS_BKT == d)] <- args[[d]]
+      } else if (is.character(args[[d]])) {
+        if (is.null(.Object@defaults)) {
+          .Object@defaults <- list()
+        }
+        .Object@defaults[[d]] <- args[[d]]
+        model_types[which(.Object@MODELS_BKT == d)] <- TRUE
+      } else {
+        stop("model type must either be boolean for automatic column inference or string specifying column")
+      }
+    } else if (d %in% .Object@DEFAULTS_BKT) {
+      if (is.null(.Object@defaults)) {
+        .Object@defaults <- list()
+      }
+      .Object@defaults[[d]] <- args[[d]]
     }
   }
-  return(model_type_defaults)
+
+  return(model_types)
 })
 
 # MARK: fetch_dataset
