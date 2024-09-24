@@ -2,7 +2,7 @@ unloadNamespace("BKT")
 rm(list = ls())
 devtools::load_all("./")
 library("parallel")
-model <- bkt(seed = 37, num_fits = 1, parallel = FALSE)
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
 fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
 
 # MARK: Fit
@@ -43,7 +43,42 @@ model2 <- load(model2, "model.pkl")
 # cat("Elapsed time:", round(elapsed, 2), "seconds\n")
 
 # MARK: forgets
-result <- fit(model, data_path = "ct.csv", forgets = TRUE, parallel = FALSE, skills = "Plot non-terminating improper fraction")
+# result <- fit(model, data_path = "ct.csv", forgets = TRUE, parallel = FALSE, skills = "Plot non-terminating improper fraction")
+# print(params(result))
+# result <- fit(model, data_path = "ct.csv", forgets = FALSE, parallel = FALSE, skills = "Plot non-terminating improper fraction")
+# print(params(result))
+
+# MARK: fixed
+# prior
+# model <- set_coef(model, list("Plot non-terminating improper fraction" = list("prior" = 0.5)))
+# result <- fit(model,
+#     forgets = TRUE,
+#     data_path = "ct.csv", skills = "Plot non-terminating improper fraction",
+#     fixed = list("Plot non-terminating improper fraction" = list("prior" = TRUE))
+# )
+# print(params(result))
+# learns and forgets
+# model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+# model <- set_coef(model, list("Plot non-terminating improper fraction" = list("learns" = c(0.25), "forgets" = c(0.25))))
+# print(params(model))
+# result <- fit(model,
+#     data_path = "ct.csv", forgets = TRUE, skills = "Plot non-terminating improper fraction",
+#     fixed = list("Plot non-terminating improper fraction" = list("learns" = TRUE, "forgets" = TRUE))
+# )
+# print(params(result))
+# guesses and slips
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+model <- set_coef(model, list("Plot non-terminating improper fraction" = list("guesses" = c(0.025), "slips" = c(0.025))))
+print(params(model))
+result <- fit(model,
+    data_path = "ct.csv", forgets = TRUE, skills = "Plot non-terminating improper fraction",
+    fixed = list("Plot non-terminating improper fraction" = list("guesses" = TRUE, "slips" = TRUE))
+)
 print(params(result))
-result <- fit(model, data_path = "ct.csv", forgets = FALSE, parallel = FALSE, skills = "Plot non-terminating improper fraction")
-print(params(result))
+
+# MARK: BKT variants
+# multilearn, multiprior, multipair, multigs
+# multilearn
+# model <- bkt(seed = 42)
+# result <- fit(model, data_path = "ct.csv", multilearn = TRUE, forgets = TRUE, skills = "Plot non-terminating improper fraction")
+# print(params(result))

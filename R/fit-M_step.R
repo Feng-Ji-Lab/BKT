@@ -26,7 +26,6 @@ M_step_run <- function(model, trans_softcounts, emission_softcounts, init_softco
   model$learns <- model$As[, 2, 1]
 
   if ("learns" %in% names(fixed)) {
-    stop("not implemented")
     model$learns <- model$As[, 2, 1] * (fixed$learns < 0) + fixed$learns * (fixed$learns >= 0)
     for (i in seq_len(dim(model$As)[1])) {
       if (fixed$learns[i] >= 0) {
@@ -39,7 +38,6 @@ M_step_run <- function(model, trans_softcounts, emission_softcounts, init_softco
   model$forgets <- model$As[, 1, 2]
 
   if ("forgets" %in% names(fixed)) {
-    stop("not implemented")
     model$forgets <- model$As[, 1, 2] * (fixed$forgets < 0) + fixed$forgets * (fixed$forgets >= 0)
     for (i in seq_len(dim(model$As)[1])) {
       if (fixed$forgets[i] >= 0) {
@@ -54,19 +52,16 @@ M_step_run <- function(model, trans_softcounts, emission_softcounts, init_softco
   model$guesses <- model$emissions[, 1, 2]
 
   if ("guesses" %in% names(fixed)) {
-    stop("not implemented")
     model$guesses <- model$guesses * (fixed$guesses < 0) + fixed$guesses * (fixed$guesses >= 0)
   }
 
   model$slips <- model$emissions[, 2, 1]
 
   if ("slips" %in% names(fixed)) {
-    stop("not implemented")
     model$slips <- model$slips * (fixed$slips < 0) + fixed$slips * (fixed$slips >= 0)
   }
 
   if ("prior" %in% names(fixed)) {
-    stop("not implemented")
     model$pi_0 <- matrix(c(1 - fixed$prior, fixed$prior), ncol = 1)
     model$prior <- model$pi_0[2, 1]
   } else {

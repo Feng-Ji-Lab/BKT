@@ -1,6 +1,4 @@
-#' Say hello
-#'
-#' This function prints 'Hello, world!'.
+
 #' @import RCurl
 
 # MARK: setClass Model
@@ -274,7 +272,7 @@ setMethod(
     num_gs <- length(data$gs_names)
     check_manual_param_init(object, num_learns, num_gs, skill)
     if (!is.null(object@fixed)) {
-      object@check_fixed(object)
+      object <- ._check_fixed(object)
     }
 
     num_fit_initializations <- object@num_fits
@@ -327,7 +325,7 @@ setMethod(
       }
 
       if (!preload) {
-        em_fit_result <- EM_fit(fitmodel, data, parallel = object@parallel, optional_args = optional_args)
+        em_fit_result <- EM_fit(fitmodel, data, parallel = object@parallel, fixed = optional_args$fixed)
         fitmodel <- em_fit_result$model
         log_likelihoods <- em_fit_result$log_likelihoods
         if (log_likelihoods[length(log_likelihoods)] > best_likelihood) {
@@ -351,6 +349,20 @@ setMethod(
   }
 )
 
+# MARK: ._check_fixed
+._check_fixed <- function(object, fixed) {
+  # Checks the fixed parameter
+  if (is.null(object@fixed)) {
+  } else if (is.logical(object@fixed) && object@fixed) {
+    object@fixed <- object@fit_model
+  } else if (is.list(object@fixed)) {
+  } else {
+    stop("fixed parameter incorrectly specified")
+  }
+  return(object)
+}
+
+
 # MARK: evaluate
 setGeneric("evaluate", function(object, data = NULL, data_path = NULL, metric = NULL) {
   standardGeneric("evaluate")
@@ -364,7 +376,6 @@ setMethod(
   f = "evaluate",
   signature = c("Model"),
   definition = function(object, data = NULL, data_path = NULL, metric = rmse) {
-    # 检查数据
     ._check_data(object, data_path, data)
 
     if (!is.list(metric) && !is.vector(metric)) {
@@ -674,3 +685,52 @@ setMethod("predict", "Model", function(model, data_path = NULL, data = NULL) {
 
   return(df)
 })
+
+# MARK: set_coef (coef_)
+setGeneric("set_coef", function(object, values, fixed = FALSE) standardGeneric("set_coef"))
+
+setMethod("set_coef", "Model", function(object, values, fixed = FALSE) {
+  # Sets or initializes parameters in the BKT model
+  # Values must be organized by skill and BKT parameters
+
+  object@fit_model <- list()
+
+  for (skill in names(values)) {
+    if (!skill %in% names(object@fit_model)) {
+      object@fit_model[[skill]] <- list()
+    }
+    if (!._check_params(object, values[[skill]])) {
+      stop("error in length, type or non-existent parameter")
+    }
+    for (param in names(values[[skill]])) {
+      object@fit_model[[skill]][[param]] <- values[[skill]][[param]]
+    }
+  }
+
+  object@manual_param_init <- TRUE
+  return(object)
+})
+
+# ._check_params
+._check_params <- function(object, params) {
+  # Checks if BKT parameters are valid
+  valid <- TRUE
+
+  for (param in names(params)) {
+    if (param == "prior") {
+      valid <- valid && is.numeric(params[[param]])
+    } else {
+      valid <- valid && is(params[[param]], "numeric") && param %in% object@INITIALIZABLE_PARAMS
+    }
+  }
+
+  if ("learns" %in% names(params) && "forgets" %in% names(params)) {
+    valid <- valid && (length(params[["learns"]]) == length(params[["forgets"]]))
+  }
+
+  if ("guesses" %in% names(params) && "slips" %in% names(params)) {
+    valid <- valid && (length(params[["slips"]]) == length(params[["guesses"]]))
+  }
+
+  return(valid)
+}

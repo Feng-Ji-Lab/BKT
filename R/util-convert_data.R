@@ -137,6 +137,26 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
             stop("not implemented")
         } else if (multilearn) {
             stop("not implemented")
+            if (!("multilearn" %in% colnames(df3))) {
+                stop("specified multilearn default column not in data")
+            }
+
+            all_learns <- unique(df3[["multilearn"]])
+            all_learns <- sort(all_learns)
+
+            if (is.null(resource_ref)) {
+                resource_ref <- setNames(1:length(unique(df3[["multilearn"]])), all_learns)
+            } else {
+                for (i in all_learns) {
+                    if (!(i %in% names(resource_ref))) {
+                        stop(paste("Learn rate", i, "not fitted"))
+                    }
+                }
+            }
+
+            resources <- sapply(df3[["multilearn"]], function(x) resource_ref[[x]])
+            resources <- as.integer(resources)
+            resources <- matrix(resources, ncol = 1)
         } else {
             resources <- rep(1, length(data))
             resources <- as.integer(unlist(resources))

@@ -1,6 +1,6 @@
 #' @import parallel
 
-EM_fit <- function(model, data, tol = 0.005, maxiter = 100, parallel = TRUE, fixed = list(), optional_args = optional_args) {
+EM_fit <- function(model, data, tol = 0.005, maxiter = 100, parallel = TRUE, fixed = list()) {
   check_data(data)
   num_subparts <- nrow(data$data)
   num_resources <- length(model$learns)
@@ -228,7 +228,6 @@ inner <- function(x) {
             likelihoods[, 1 + t] <- likelihoods[, 1 + t] * ifelse(sl == 0, 1, sl)
           }
         }
-        # 通用的 alpha 计算循环
         resources_temp <- allresources[sequence_start + t - 1]
         k <- 2 * (resources_temp - 1) + 1
         alpha[, t + 1] <- As[1:2, k:(k + 1)] %*% alpha[, t] * likelihoods[, t + 1]
@@ -238,7 +237,6 @@ inner <- function(x) {
       }
     }
 
-    # backward pass
     gamma <- matrix(NA, nrow = 2, ncol = T)
     gamma[, T] <- alpha[, T]
 
