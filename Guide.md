@@ -27,3 +27,13 @@ some **util** files used by Model.py
    convert unformat data into format ones. Mainly handle the type errors.
 5. **c++BKT**
    BKT in c++ and R
+
+## Code Format
+1. S4 to S3 class style
+2. code format  (https://r-pkgs.org/code.html#code-style) styler::style_pkg()
+   1. function api arguments format
+   2. names format
+   3. syntax (linter installed)
+
+## Document
+1. roxygen2 document format (https://style.tidyverse.org/documentation.html)

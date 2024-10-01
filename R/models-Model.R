@@ -1,4 +1,3 @@
-
 #' @import RCurl
 
 # MARK: setClass Model
@@ -78,11 +77,17 @@ setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5
 })
 
 # MARK: fit
-setGeneric("fit", function(.Object, data_path = NULL, data = NULL, ...) {
-  standardGeneric("fit")
-})
-
-setMethod("fit", "Model", function(.Object, data_path = NULL, data = NULL, ...) {
+#' fit(...)
+#'
+#' fit bkt model.
+#'
+#' @param data_path data file path.
+#' @param data data filter.
+#' @param forgets switch of using forget model.
+#' @param skills skill name filter.
+#' @return a bkt model object, used by other bkt functions.
+#' @export
+fit <- function(.Object, data_path = NULL, data = NULL, ...) {
   if (!.Object@manual_param_init) {
     .Object@fit_model <- list()
   }
@@ -90,7 +95,7 @@ setMethod("fit", "Model", function(.Object, data_path = NULL, data = NULL, ...) 
   .Object <- partial_fit(.Object, data_path = data_path, data = data, ...)
 
   return(.Object)
-})
+}
 
 # MARK: partial_fit
 setGeneric("partial_fit", function(.Object, data_path = NULL, data = NULL, ...) {

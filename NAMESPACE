@@ -2,3 +2,4 @@
 
 export(bkt)
 import(RCurl)
+import(parallel)
