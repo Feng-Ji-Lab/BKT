@@ -108,7 +108,6 @@ setMethod("partial_fit", "Model", function(.Object, data_path = NULL, data = NUL
   args <- list(...)
 
   .Object <- ._check_args(.Object, .Object@FIT_ARGS, args)
-
   .Object <- ._update_param(.Object, c("skills", "num_fits", "defaults", "fixed", "parallel", "forgets"), args)
 
   if (is.null(.Object@fit_model) || length(.Object@fit_model) == 0) {
@@ -174,7 +173,10 @@ setMethod("._update_param", "Model", function(.Object, params, args, keep = FALS
     for (param in params) {
       if (!param %in% names(args) && (!param %in% names(.Object@keep) || !.Object@keep[[param]])) {
         arg <- .Object@DEFAULTS[[param]]
-        slot(.Object, param) <- if (is.function(arg)) arg() else arg
+        default_arg <- if (is.function(arg)) arg() else arg
+        if (!is.null(slot(.Object, param))) {
+          slot(.Object, param) <- default_arg
+        }
       } else if (param %in% names(args)) {
         slot(.Object, param) <- args[[param]]
       }
@@ -608,7 +610,7 @@ setMethod("crossvalidate", "Model", function(object, data = NULL, data_path = NU
 
   ._check_args(object, object@CV_ARGS, list(...))
   object <- ._update_param(object, c("skills", "num_fits", "defaults", "parallel", "forgets", "seed", "folds"), list(...))
-  ._update_param(object, "model_type", ._update_defaults(object, list(...)))
+  object <- ._update_param(object, "model_type", ._update_defaults(object, list(...)))
 
   metric_vals <- list()
 
@@ -621,7 +623,7 @@ setMethod("crossvalidate", "Model", function(object, data = NULL, data_path = NU
   }
 
   all_data <- ._data_helper(object, data_path, data, object@defaults, object@skills, object@model_type, folds = is.character(object@folds))
-  ._update_param(object, "skills", list(skills = names(all_data)))
+  object <- ._update_param(object, "skills", list(skills = names(all_data)))
 
   for (skill in names(all_data)) {
     print(skill)
