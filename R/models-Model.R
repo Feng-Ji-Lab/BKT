@@ -119,11 +119,9 @@ setMethod("partial_fit", "Model", function(.Object, data_path = NULL, data = NUL
   }
 
   .Object@manual_param_init <- TRUE
-
   all_data <- ._data_helper(.Object, data_path, data, .Object@defaults, .Object@skills, .Object@model_type)
 
   .Object <- ._update_param(.Object, "skills", list(skills = names(all_data)))
-
   for (skill in names(all_data)) {
     .Object@fit_model[[skill]] <- ._fit(.Object, all_data[[skill]], skill, .Object@forgets, preload = ifelse("preload" %in% names(args), args$preload, FALSE))
   }
@@ -174,7 +172,7 @@ setMethod("._update_param", "Model", function(.Object, params, args, keep = FALS
       if (!param %in% names(args) && (!param %in% names(.Object@keep) || !.Object@keep[[param]])) {
         arg <- .Object@DEFAULTS[[param]]
         default_arg <- if (is.function(arg)) arg() else arg
-        if (!is.null(slot(.Object, param))) {
+        if (is.null(slot(.Object, param))) {
           slot(.Object, param) <- default_arg
         }
       } else if (param %in% names(args)) {
@@ -626,7 +624,6 @@ setMethod("crossvalidate", "Model", function(object, data = NULL, data_path = NU
   object <- ._update_param(object, "skills", list(skills = names(all_data)))
 
   for (skill in names(all_data)) {
-    print(skill)
     metric_vals[[skill]] <- ._crossvalidate(object, all_data[[skill]], skill, metric)
   }
   object@manual_param_init <- FALSE
