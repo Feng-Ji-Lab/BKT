@@ -27,7 +27,7 @@ setClass(
 )
 
 # MARK: Init Functions
-setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5, folds = 5, seed = sample(1:1e8, 1), model_type = rep(FALSE, 4), ...) {
+setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5, folds = 5, seed = sample(1:1e8, 1), defaults = NULL, model_type = rep(FALSE, 4), ...) {
   .Object@parallel <- parallel
   .Object@num_fits <- num_fits
   .Object@seed <- seed
