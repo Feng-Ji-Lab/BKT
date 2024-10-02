@@ -27,7 +27,7 @@ setClass(
 )
 
 # MARK: Init Functions
-setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5, folds = 5, seed = sample(1:1e8, 1), defaults = NULL, model_type = rep(FALSE, 4), ...) {
+setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5, folds = 5, seed = sample(1:1e8, 1), model_type = rep(FALSE, 4), ...) {
   .Object@parallel <- parallel
   .Object@num_fits <- num_fits
   .Object@seed <- seed
@@ -77,15 +77,41 @@ setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5
 })
 
 # MARK: fit
-#' fit(...)
+#' fit bkt model
 #'
-#' fit bkt model.
-#'
-#' @param data_path data file path.
-#' @param data data filter.
-#' @param forgets switch of using forget model.
-#' @param skills skill name filter.
-#' @return a bkt model object, used by other bkt functions.
+#' Fit a BKT (Bayesian Knowledge Tracing) model.
+#' This function fits the BKT model using the provided data and various options, such as
+#' skill filtering, forget model, and parallelization. The function uses the model object
+#' created by `bkt()` and fits the data according to the specified parameters.
+#' @param object A BKT model object. The model to be cross-validated.
+#' @param data Data frame. The dataset to be used for cross-validation. If `data` is not provided,
+#'   `data_path` should be used to load the dataset from a file.
+#' @param data_path Character. The file path to the dataset. This will be used if `data` is not provided.
+#' @param parallel Logical. Indicates whether to use parallel computation.
+#'   If set to `TRUE`, multithreading will be used to speed up model training.
+#' @param seed Numeric. Seed for the random number generator, which ensures reproducibility
+#'   of results.
+#' @param num_fits Integer. Number of fit iterations. The best model is selected from
+#'   the total iterations.
+#' @param folds Integer. Number of folds used for cross-validation.
+#'   This parameter is used during cross-validation to divide the data into parts.
+#' @param forgets Logical. Whether to include a forgetting factor in the model.
+#'   If set to `TRUE`, the model will account for the possibility that learners may forget knowledge.
+#' @param fixed List. A nested list specifying which parameters to fix for specific skills during
+#'   model fitting. Each skill can have certain parameters, such as "guesses" and "slips", set to
+#'   `TRUE` (to fix) or `FALSE` (to let them vary). For example:
+#'   \code{list("skill_name" = list("guesses" = TRUE, "slips" = TRUE))}.
+#' @param model_type Logical vector. Specifies model variants to use. There are four possible
+#'   variants: 'multilearn', 'multiprior', 'multipair', and 'multigs'. Each corresponds to
+#'   a different modeling strategy.
+#' @return A fitted BKT model object, which can be used for predictions, cross-validation,
+#'   or parameter analysis.
+#' @examples
+#' model <- bkt(seed = 42, parallel = FALSE, num_fits = 1)
+#' result <- fit(
+#'   model,
+#'   data_path = "data.csv"
+#' )
 #' @export
 fit <- function(.Object, data_path = NULL, data = NULL, ...) {
   if (!.Object@manual_param_init) {
@@ -206,6 +232,21 @@ partial_fit <- function(.Object, data_path = NULL, data = NULL, ...) {
 }
 
 # MARK: fetch_dataset
+#' Fetch a dataset
+#'
+#' Fetch a dataset from an online source.
+#' This function downloads a dataset from a provided URL and saves it to a specified location
+#' on the local system. The dataset must be publicly accessible, without requiring any
+#' password or authentication. It can then be used for further analysis or modeling.
+#'
+#' @param object A BKT model object. The model can use the fetched dataset for fitting or other tasks.
+#' @param link Character. The URL where the dataset is located. This must be a publicly accessible URL.
+#' @param loc Character. The local file path where the dataset will be saved. The dataset will
+#'   be stored at this location after download.
+#' @examples
+#' model <- bkt()
+#' fetch_dataset(model, "http://example.com/dataset.csv", "data.csv")
+#' @export
 fetch_dataset <- function(object, link, loc) {
   name <- basename(link)
   file_path <- file.path(loc, name)
@@ -339,6 +380,27 @@ rmse <- function(true_vals, pred_vals) {
   sqrt(mean((true_vals - pred_vals)^2))
 }
 
+#' Evaluate
+#'
+#' Evaluate a BKT (Bayesian Knowledge Tracing) model using a specified metric.
+#' This function evaluates a fitted BKT model on a given dataset using a chosen performance metric.
+#' It takes either a data frame or a file path to the data and returns the evaluation result
+#' based on the specified metric (e.g., RMSE or accuracy).
+#'
+#' @param object A fitted BKT model object. This is the model to be evaluated.
+#' @param data Data frame. The dataset on which the model will be evaluated. If `data` is not provided,
+#'   the function will attempt to load the dataset from the file specified by `data_path`.
+#' @param data_path Character. The file path to the dataset for evaluation. This will be used if `data` is not provided.
+#' @param metric Function or Function List. The evaluation metric used to assess the model performance.
+#'   (Root Mean Square Error), but other metrics can also be specified.
+#' @return Numeric or List. The result of the evaluation based on the specified metric(s). For example, if `rmse` is used,
+#'   the function will return the root mean square error for the model on the dataset.
+#' @examples
+#' model <- bkt(seed = 42, parallel = TRUE, num_fits = 5)
+#' result <- fit(model, data_path = "ct.csv", skills = "Plot non-terminating improper fraction")
+#' eval_result <- evaluate(result, data_path = "ct_test.csv", metric = rmse)
+#' print(eval_result)
+#' @export
 evaluate <- function(object, data = NULL, data_path = NULL, metric = rmse) {
   ._check_data(object, data_path, data)
 
@@ -424,7 +486,23 @@ check_manual_param_init <- function(object, num_learns, num_gs, skill) {
 }
 
 # MARK: params
-# Placeholder for format_param function, which should be defined elsewhere
+#' Extract Parameters from BKT model
+#'
+#' Extract fitted parameters from a BKT model.
+#' This function retrieves the parameters from a fitted BKT model object. The parameters
+#' include model-specific values such as "learns", "guesses", "slips", and "forgets".
+#' These parameters are returned in a format that is easy to print or manipulate for further analysis.
+#'
+#' @param object A fitted BKT model object. The model should have been previously fitted using
+#'   the `fit()` function, otherwise no parameters will be available.
+#' @return A data frame containing the fitted model parameters. The data frame will typically include
+#'   columns such as 'learns', 'guesses', 'slips', and other model-specific values.
+#' @examples
+#' model <- bkt(seed = 42, parallel = TRUE, num_fits = 5)
+#' result <- fit(model, data_path = "data.csv", skills = "skill name")
+#' params_df <- params(result)
+#' print(params_df)
+#' @export
 params <- function(object) {
   coefs <- coef_(object)
   formatted_coefs <- list()
@@ -490,6 +568,42 @@ format_param <- function(object, skill, param, value) {
 crossvalidate_single_skill <- function(data, skill, metrics) {
   lapply(metrics, function(metric) metric(rnorm(nrow(data)), data$truth))
 }
+#' Cross Validation
+#'
+#' Perform cross-validation on a BKT (Bayesian Knowledge Tracing) model.
+#' This function trains and evaluates the BKT model using cross-validation. It splits
+#' the dataset into training and validation sets, trains the model on the training data,
+#' and evaluates it on the validation data according to a specified metric.
+#'
+#' @param metric Function. The metric function used to evaluate model performance.
+#' @param data Data frame. The dataset to be used for cross-validation. If `data` is not provided,
+#'   `data_path` should be used to load the dataset from a file.
+#' @param data_path Character. The file path to the dataset. This will be used if `data` is not provided.
+#' @param object A BKT model object. The model to be cross-validated.
+#' @param parallel Logical. Indicates whether to use parallel computation.
+#'   If set to `TRUE`, multithreading will be used to speed up model training.
+#' @param seed Numeric. Seed for the random number generator, which ensures reproducibility
+#'   of results.
+#' @param num_fits Integer. Number of fit iterations. The best model is selected from
+#'   the total iterations.
+#' @param folds Integer. Number of folds used for cross-validation.
+#'   This parameter is used during cross-validation to divide the data into parts.
+#' @param forgets Logical. Whether to include a forgetting factor in the model.
+#'   If set to `TRUE`, the model will account for the possibility that learners may forget knowledge.
+#' @param fixed List. A nested list specifying which parameters to fix for specific skills during
+#'   model fitting. Each skill can have certain parameters, such as "guesses" and "slips", set to
+#'   `TRUE` (to fix) or `FALSE` (to let them vary). For example:
+#'   \code{list("skill_name" = list("guesses" = TRUE, "slips" = TRUE))}.
+#' @param model_type Logical vector. Specifies model variants to use. There are four possible
+#'   variants: 'multilearn', 'multiprior', 'multipair', and 'multigs'. Each corresponds to
+#'   a different modeling strategy.
+#' @return A list containing the cross-validation results, including the average performance metric
+#'   and any other relevant details from the validation process.
+#' @examples
+#' model <- bkt(seed = 42, parallel = TRUE, num_fits = 5)
+#' cv_results <- crossvalidate(model, data_path = "ct.csv", metric = rmse, folds = 5)
+#' print(cv_results)
+#' @export
 crossvalidate <- function(object, data = NULL, data_path = NULL, metric = rmse, ...) {
   metric_names <- c()
 
@@ -555,6 +669,27 @@ crossvalidate <- function(object, data = NULL, data_path = NULL, metric = rmse, 
 }
 
 # MARK: predict
+#' Predict
+#'
+#' Predict outcomes using a fitted BKT model.
+#' This function uses a trained Bayesian Knowledge Tracing (BKT) model to make predictions
+#' on new data. The predictions include both the likelihood of a correct response (`correct_predictions`)
+#' and the estimated hidden state of the learner's knowledge (`state_predictions`).
+#'
+#' @param model A trained BKT model object. The model must have been previously fitted using
+#'   the `fit()` function. If the model is not fitted, an error will be raised.
+#' @param data_path Character. The file path to the dataset on which predictions will be made.
+#'   If this is provided, the function will read data from the file.
+#' @param data Data frame. A pre-loaded dataset to be used for predictions. This can be used
+#'   instead of specifying `data_path`.
+#' @return A data frame containing the original data with two additional columns:
+#'   `correct_predictions` and `state_predictions`.
+#' @examples
+#' model <- bkt(seed = 42)
+#' fit_model <- fit(model, data_path = "ct.csv")
+#' predictions <- predict(fit_model, data_path = "ct_test.csv")
+#' head(predictions)
+#' @export
 predict <- function(model, data_path = NULL, data = NULL) {
   ._check_data(model, data_path, data)
 

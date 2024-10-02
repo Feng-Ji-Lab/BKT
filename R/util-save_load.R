@@ -1,16 +1,35 @@
-setGeneric("save", function(model, loc) {
-    standardGeneric("save")
-})
-
-setMethod("save", "Model", function(model, loc) {
+#' Save
+#'
+#' Save a BKT model to a file.
+#' This function saves a trained BKT model to a specified file location. The model is stored
+#' as an RDS file, which can be loaded back into R using the `load()` function.
+#'
+#' @param model A trained BKT model object to be saved.
+#' @param loc Character. The file path where the model will be saved, typically with an `.rds` extension.
+#' @return None. The function saves the model to the specified location.
+#' @examples
+#' model <- bkt(seed = 42)
+#' fit_model <- fit(model, data_path = "ct.csv")
+#' save(fit_model, "bkt_model.rds")
+#' @export
+save <- function(model, loc) {
     saveRDS(object = model, file = loc)
-})
+}
 
-setGeneric("load", function(model, loc) {
-    standardGeneric("load")
-})
-
-setMethod("load", "Model", function(model, loc) {
+#' Load
+#'
+#' Load a BKT model from a file.
+#' This function loads a previously saved BKT model from an RDS file. The model attributes
+#' are restored into the provided model object, allowing it to be used for further analysis or predictions.
+#'
+#' @param model A BKT model object into which the saved model's attributes will be loaded.
+#' @param loc Character. The file path from which the model will be loaded, typically an `.rds` file.
+#' @return The updated BKT model object with the restored attributes from the saved model.
+#' @examples
+#' model <- bkt(seed = 42)
+#' loaded_model <- load(model, "bkt_model.rds")
+#' @export
+load <- function(model, loc) {
     orig_model <- readRDS(loc)
 
     for (attr in slotNames(orig_model)) {
@@ -18,4 +37,4 @@ setMethod("load", "Model", function(model, loc) {
     }
 
     return(model)
-})
+}

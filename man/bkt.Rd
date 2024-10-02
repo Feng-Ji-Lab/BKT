@@ -2,20 +2,52 @@
 % Please edit documentation in R/models-bkt.R
 \name{bkt}
 \alias{bkt}
-\title{bkt(...)}
+\title{Bayesian Knowledge Tracing}
 \usage{
-bkt(...)
+bkt(
+  parallel = TRUE,
+  num_fits = 5,
+  folds = 5,
+  seed = sample(1:1e+08, 1),
+  model_type = rep(FALSE, 4),
+  ...
+)
 }
 \arguments{
-\item{parallel}{switch of parallel caculation.}
+\item{parallel}{Logical. Indicates whether to use parallel computation.
+If set to \code{TRUE}, multithreading will be used to speed up model training.}
 
-\item{seed}{seed for random number generate.}
+\item{num_fits}{Integer. Number of fit iterations. The best model is selected from
+the total iterations.}
 
-\item{num_fits}{fits times}
+\item{folds}{Integer. Number of folds used for cross-validation.
+This parameter is used during cross-validation to divide the data into parts.}
+
+\item{seed}{Numeric. Seed for the random number generator, which ensures reproducibility
+of results.}
+
+\item{model_type}{Logical vector. Specifies model variants to use. There are four possible
+variants: 'multilearn', 'multiprior', 'multipair', and 'multigs'. Each corresponds to
+a different modeling strategy.}
+
+\item{forgets}{Logical. Whether to include a forgetting factor in the model.
+If set to \code{TRUE}, the model will account for the possibility that learners may forget knowledge.}
+
+\item{fixed}{List. A nested list specifying which parameters to fix for specific skills during
+model fitting. Each skill can have certain parameters, such as "guesses" and "slips", set to
+\code{TRUE} (to fix) or \code{FALSE} (to let them vary). For example:
+\code{list("skill_name" = list("guesses" = TRUE, "slips" = TRUE))}.}
 }
 \value{
-a bkt model object, used by other bkt functions.
+A BKT model object, which can be used by other functions such as fitting
+the model, cross-validation, or making predictions.
 }
 \description{
-create bkt model object with initial parameters.
+Create a BKT (Bayesian Knowledge Tracing) model object with initial parameters.
+This function constructs a BKT model by taking in various parameters such as
+parallelization options, number of fits, random seed, and other model-specific settings.
+These parameters can later be modified during the fitting or cross-validation process.
+}
+\examples{
+model <- bkt(seed = 42, parallel = FALSE, num_fits = 1)
 }
