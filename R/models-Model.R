@@ -98,11 +98,7 @@ fit <- function(.Object, data_path = NULL, data = NULL, ...) {
 }
 
 # MARK: partial_fit
-setGeneric("partial_fit", function(.Object, data_path = NULL, data = NULL, ...) {
-  standardGeneric("partial_fit")
-})
-
-setMethod("partial_fit", "Model", function(.Object, data_path = NULL, data = NULL, ...) {
+partial_fit <- function(.Object, data_path = NULL, data = NULL, ...) {
   .Object <- ._check_data(.Object, data_path, data)
 
   args <- list(...)
@@ -129,14 +125,10 @@ setMethod("partial_fit", "Model", function(.Object, data_path = NULL, data = NUL
   .Object@manual_param_init <- FALSE
 
   return(.Object)
-})
+}
 
 # MARK: ._check_data
-setGeneric("._check_data", function(.Object, data_path, data) {
-  standardGeneric("._check_data")
-})
-
-setMethod("._check_data", "Model", function(.Object, data_path, data) {
+._check_data <- function(.Object, data_path, data) {
   if (is.null(data_path) && is.null(data)) {
     stop("No data specified")
   } else if (!is.null(data_path) && !is.null(data)) {
@@ -145,28 +137,20 @@ setMethod("._check_data", "Model", function(.Object, data_path, data) {
     stop("Data path is invalid or file not found")
   }
   return(.Object)
-})
+}
 
 # MARK: ._check_args
-setGeneric("._check_args", function(.Object, expected_args, args) {
-  standardGeneric("._check_args")
-})
-
-setMethod("._check_args", "Model", function(.Object, expected_args, args) {
+._check_args <- function(.Object, expected_args, args) {
   for (arg in names(args)) {
     if (!(arg %in% expected_args)) {
       stop("Provided arguments are not recognized. They must be one or more of: ", paste(expected_args, collapse = ", "))
     }
   }
   return(.Object)
-})
+}
 
 # MARK: ._update_param
-setGeneric("._update_param", function(.Object, params, args, keep = FALSE) {
-  standardGeneric("._update_param")
-})
-
-setMethod("._update_param", "Model", function(.Object, params, args, keep = FALSE) {
+._update_param <- function(.Object, params, args, keep = FALSE) {
   if (is.list(args)) {
     for (param in params) {
       if (!param %in% names(args) && (!param %in% names(.Object@keep) || !.Object@keep[[param]])) {
@@ -190,14 +174,10 @@ setMethod("._update_param", "Model", function(.Object, params, args, keep = FALS
   }
 
   return(.Object)
-})
+}
 
 # MARK:._update_defaults
-setGeneric("._update_defaults", function(.Object, args) {
-  standardGeneric("._update_defaults")
-})
-
-setMethod("._update_defaults", "Model", function(.Object, args) {
+._update_defaults <- function(.Object, args) {
   # Update the default column names
   model_types <- rep(FALSE, 4)
 
@@ -223,12 +203,10 @@ setMethod("._update_defaults", "Model", function(.Object, args) {
   }
 
   return(model_types)
-})
+}
 
 # MARK: fetch_dataset
-setGeneric("fetch_dataset", function(object, link, loc) standardGeneric("fetch_dataset"))
-
-setMethod("fetch_dataset", "Model", function(object, link, loc) {
+fetch_dataset <- function(object, link, loc) {
   name <- basename(link)
   file_path <- file.path(loc, name)
   if (file.exists(file_path)) {
@@ -238,14 +216,10 @@ setMethod("fetch_dataset", "Model", function(object, link, loc) {
     writeBin(file_data, file_path)
     message("File downloaded to: ", file_path)
   }
-})
+}
 
 # MARK: ._data_helper
-setGeneric("._data_helper", function(.Object, data_path, data, defaults, skills, model_type, gs_ref = NULL, resource_ref = NULL, return_df = FALSE, folds = FALSE) {
-  standardGeneric("._data_helper")
-})
-
-setMethod("._data_helper", "Model", function(.Object, data_path = NULL, data = NULL, defaults, skills, model_type, gs_ref = NULL, resource_ref = NULL, return_df = FALSE, folds = FALSE) {
+._data_helper <- function(.Object, data_path, data, defaults, skills, model_type, gs_ref = NULL, resource_ref = NULL, return_df = FALSE, folds = FALSE) {
   data_p <- NULL
 
   if (!is.null(data_path) && is.character(data_path)) {
@@ -262,97 +236,89 @@ setMethod("._data_helper", "Model", function(.Object, data_path = NULL, data = N
   }
 
   return(data_p)
-})
+}
 
 # MARK: ._fit
-setGeneric("._fit", function(object, data, skill, forgets, preload = FALSE) {
-  standardGeneric("._fit")
-})
+._fit <- function(object, data, skill, forgets, preload = FALSE) {
+  num_learns <- length(data$resource_names)
+  num_gs <- length(data$gs_names)
+  check_manual_param_init(object, num_learns, num_gs, skill)
+  if (!is.null(object@fixed)) {
+    object <- ._check_fixed(object)
+  }
 
-setMethod(
-  "._fit",
-  signature(object = "Model"),
-  function(object, data, skill, forgets, preload = FALSE) {
-    num_learns <- length(data$resource_names)
-    num_gs <- length(data$gs_names)
-    check_manual_param_init(object, num_learns, num_gs, skill)
-    if (!is.null(object@fixed)) {
-      object <- ._check_fixed(object)
+  num_fit_initializations <- object@num_fits
+  best_likelihood <- -Inf
+  best_model <- NULL
+
+  for (i in seq_len(num_fit_initializations)) {
+    fitmodel <- random_model_uni(num_learns, num_gs)
+    optional_args <- list(fixed = list())
+    fitmodel$prior <- 0.3
+    fitmodel$learns[1] <- 0.28
+    fitmodel$forgets[1] <- 0
+    fitmodel$guesses[1] <- 0.35
+    fitmodel$slips[1] <- 0.27
+    fitmodel$As[1, 2, 1] <- 0.28
+    fitmodel$As[1, 2, 2] <- 0.72
+    fitmodel$emissions[1, 1, 1] <- 0.78
+    fitmodel$emissions[1, 1, 2] <- 0.21
+    fitmodel$emissions[1, 2, 1] <- 0.16
+    fitmodel$emissions[1, 2, 2] <- 0.84
+    fitmodel$pi_0[1, 1] <- 0.95
+    fitmodel$pi_0[2, 1] <- 0.33
+    # print(fitmodel)
+    if (forgets) {
+      fitmodel$forgets <- runif(length(fitmodel$forgets))
     }
 
-    num_fit_initializations <- object@num_fits
-    best_likelihood <- -Inf
-    best_model <- NULL
+    # if (object@model_type[which(Model$MODELS_BKT == 'multiprior')]) {
+    #   fitmodel$prior <- 0
+    # }
 
-    for (i in seq_len(num_fit_initializations)) {
-      fitmodel <- random_model_uni(num_learns, num_gs)
-      optional_args <- list(fixed = list())
-      fitmodel$prior <- 0.3
-      fitmodel$learns[1] <- 0.28
-      fitmodel$forgets[1] <- 0
-      fitmodel$guesses[1] <- 0.35
-      fitmodel$slips[1] <- 0.27
-      fitmodel$As[1, 2, 1] <- 0.28
-      fitmodel$As[1, 2, 2] <- 0.72
-      fitmodel$emissions[1, 1, 1] <- 0.78
-      fitmodel$emissions[1, 1, 2] <- 0.21
-      fitmodel$emissions[1, 2, 1] <- 0.16
-      fitmodel$emissions[1, 2, 2] <- 0.84
-      fitmodel$pi_0[1, 1] <- 0.95
-      fitmodel$pi_0[2, 1] <- 0.33
-      # print(fitmodel)
-      if (forgets) {
-        fitmodel$forgets <- runif(length(fitmodel$forgets))
-      }
-
-      # if (object@model_type[which(Model$MODELS_BKT == 'multiprior')]) {
-      #   fitmodel$prior <- 0
-      # }
-
-      if (object@manual_param_init && skill %in% names(object@fit_model)) {
-        for (var in names(object@fit_model[[skill]])) {
-          if (!is.null(object@fixed) && skill %in% names(object@fixed) &&
-            var %in% names(object@fixed[[skill]]) &&
-            is.logical(object@fixed[[skill]][[var]]) && object@fixed[[skill]][[var]]) {
-            optional_args$fixed[[var]] <- object@fit_model[[skill]][[var]]
-          } else if (var %in% names(fitmodel)) {
-            fitmodel[[var]] <- object@fit_model[[skill]][[var]]
-          }
+    if (object@manual_param_init && skill %in% names(object@fit_model)) {
+      for (var in names(object@fit_model[[skill]])) {
+        if (!is.null(object@fixed) && skill %in% names(object@fixed) &&
+          var %in% names(object@fixed[[skill]]) &&
+          is.logical(object@fixed[[skill]][[var]]) && object@fixed[[skill]][[var]]) {
+          optional_args$fixed[[var]] <- object@fit_model[[skill]][[var]]
+        } else if (var %in% names(fitmodel)) {
+          fitmodel[[var]] <- object@fit_model[[skill]][[var]]
         }
       }
+    }
 
-      if (!is.null(object@fixed) && skill %in% names(object@fixed)) {
-        for (var in names(object@fixed[[skill]])) {
-          if (!is.logical(object@fixed[[skill]][[var]])) {
-            optional_args$fixed[[var]] <- object@fixed[[skill]][[var]]
-          }
+    if (!is.null(object@fixed) && skill %in% names(object@fixed)) {
+      for (var in names(object@fixed[[skill]])) {
+        if (!is.logical(object@fixed[[skill]][[var]])) {
+          optional_args$fixed[[var]] <- object@fixed[[skill]][[var]]
         }
       }
+    }
 
-      if (!preload) {
-        em_fit_result <- EM_fit(fitmodel, data, parallel = object@parallel, fixed = optional_args$fixed)
-        fitmodel <- em_fit_result$model
-        log_likelihoods <- em_fit_result$log_likelihoods
-        if (log_likelihoods[length(log_likelihoods)] > best_likelihood) {
-          best_likelihood <- log_likelihoods[length(log_likelihoods)]
-          best_model <- fitmodel
-        }
-      } else {
+    if (!preload) {
+      em_fit_result <- EM_fit(fitmodel, data, parallel = object@parallel, fixed = optional_args$fixed)
+      fitmodel <- em_fit_result$model
+      log_likelihoods <- em_fit_result$log_likelihoods
+      if (log_likelihoods[length(log_likelihoods)] > best_likelihood) {
+        best_likelihood <- log_likelihoods[length(log_likelihoods)]
         best_model <- fitmodel
       }
+    } else {
+      best_model <- fitmodel
     }
-
-    fit_model <- best_model
-    fit_model$learns <- fit_model$As[, 2, 1]
-    fit_model$forgets <- fit_model$As[, 1, 2]
-    fit_model$prior <- fit_model$pi_0[2, 1]
-    fit_model$resource_names <- data$resource_names
-    fit_model$gs_names <- data$gs_names
-    fit_model$likelihood <- best_likelihood
-
-    return(fit_model)
   }
-)
+
+  fit_model <- best_model
+  fit_model$learns <- fit_model$As[, 2, 1]
+  fit_model$forgets <- fit_model$As[, 1, 2]
+  fit_model$prior <- fit_model$pi_0[2, 1]
+  fit_model$resource_names <- data$resource_names
+  fit_model$gs_names <- data$gs_names
+  fit_model$likelihood <- best_likelihood
+
+  return(fit_model)
+}
 
 # MARK: ._check_fixed
 ._check_fixed <- function(object, fixed) {
@@ -369,101 +335,73 @@ setMethod(
 
 
 # MARK: evaluate
-setGeneric("evaluate", function(object, data = NULL, data_path = NULL, metric = NULL) {
-  standardGeneric("evaluate")
-})
-
 rmse <- function(true_vals, pred_vals) {
   sqrt(mean((true_vals - pred_vals)^2))
 }
 
-setMethod(
-  f = "evaluate",
-  signature = c("Model"),
-  definition = function(object, data = NULL, data_path = NULL, metric = rmse) {
-    ._check_data(object, data_path, data)
+evaluate <- function(object, data = NULL, data_path = NULL, metric = rmse) {
+  ._check_data(object, data_path, data)
 
-    if (!is.list(metric) && !is.vector(metric)) {
-      metric <- list(metric)
-    }
-    if (is.null(object@fit_model)) {
-      stop("model has not been fitted yet")
-    } else {
-      for (i in seq_along(metric)) {
-        m <- metric[[i]]
-        if (is.character(m)) {
-          stop("not implemented")
-          if (!(m %in% metrics$SUPPORTED_METRICS)) {
-            stop(paste("metric must be one of:", paste(metrics$SUPPORTED_METRICS, collapse = ", ")))
-          }
-          metric[[i]] <- metrics$SUPPORTED_METRICS[[m]]
-        } else if (!is.function(m)) {
-          stop("metric must either be a string, function, or list/vector of strings and functions")
+  if (!is.list(metric) && !is.vector(metric)) {
+    metric <- list(metric)
+  }
+  if (is.null(object@fit_model)) {
+    stop("model has not been fitted yet")
+  } else {
+    for (i in seq_along(metric)) {
+      m <- metric[[i]]
+      if (is.character(m)) {
+        stop("not implemented")
+        if (!(m %in% metrics$SUPPORTED_METRICS)) {
+          stop(paste("metric must be one of:", paste(metrics$SUPPORTED_METRICS, collapse = ", ")))
         }
+        metric[[i]] <- metrics$SUPPORTED_METRICS[[m]]
+      } else if (!is.function(m)) {
+        stop("metric must either be a string, function, or list/vector of strings and functions")
       }
     }
-    all_data <- ._data_helper(object, data_path, data, object@defaults, object@skills, object@model_type,
-      gs_ref = object@fit_model, resource_ref = object@fit_model
-    )
-    results <- ._evaluate(object, all_data, metric)
-    return(if (length(results) == 1) results[[1]] else results)
   }
-)
+  all_data <- ._data_helper(object, data_path, data, object@defaults, object@skills, object@model_type,
+    gs_ref = object@fit_model, resource_ref = object@fit_model
+  )
+  results <- ._evaluate(object, all_data, metric)
+  return(if (length(results) == 1) results[[1]] else results)
+}
 
 # MARK: ._evaluate
-setGeneric("._evaluate", function(object, all_data, metric) {
-  standardGeneric("._evaluate")
-})
+._evaluate <- function(object, all_data, metric) {
+  per_skill <- list()
+  true <- c()
+  pred <- c()
 
-setMethod(
-  f = "._evaluate",
-  signature = c("Model"),
-  definition = function(object, all_data, metric) {
-    per_skill <- list()
-    true <- c()
-    pred <- c()
-
-    for (skill in names(all_data)) {
-      predictions <- ._predict(object@fit_model[[skill]], all_data[[skill]])
-      correct_predictions <- predictions$correct_predictions
-      state_predictions <- predictions$state_predictions
-      real_data <- all_data[[skill]]$data
-      true <- c(true, colSums(real_data))
-      pred <- c(pred, correct_predictions)
-    }
-
-    true <- true - 1
-    tryCatch(
-      {
-        res <- lapply(metric, function(m) m(true, pred))
-      },
-      error = function(e) {
-        res <- lapply(metric, function(m) m(true, round(pred)))
-      }
-    )
-    return(res)
+  for (skill in names(all_data)) {
+    predictions <- ._predict(object@fit_model[[skill]], all_data[[skill]])
+    correct_predictions <- predictions$correct_predictions
+    state_predictions <- predictions$state_predictions
+    real_data <- all_data[[skill]]$data
+    true <- c(true, colSums(real_data))
+    pred <- c(pred, correct_predictions)
   }
-)
+
+  true <- true - 1
+  tryCatch(
+    {
+      res <- lapply(metric, function(m) m(true, pred))
+    },
+    error = function(e) {
+      res <- lapply(metric, function(m) m(true, round(pred)))
+    }
+  )
+  return(res)
+}
 
 # MARK: ._predict
-setGeneric("._predict", function(model, data) {
-  standardGeneric("._predict")
-})
-
-setMethod(
-  f = "._predict",
-  signature = c("ANY", "ANY"),
-  definition = function(model, data) {
-    return(predict_onestep_run(model, data))
-  }
-)
+._predict <- function(model, data) {
+  return(predict_onestep_run(model, data))
+}
 
 # MARK: check_manual_param_init
-setGeneric("check_manual_param_init", function(object, num_learns, num_gs, skill) {
-  standardGeneric("check_manual_param_init")
-})
-
-setMethod("check_manual_param_init", signature(object = "Model"), function(object, num_learns, num_gs, skill) {
+check_manual_param_init <- function(object, num_learns, num_gs, skill) {
   if (!is.null(object@fit_model) && skill %in% names(object@fit_model)) {
     # Check for 'learns'
     if ("learns" %in% names(object@fit_model[[skill]]) &&
@@ -483,104 +421,76 @@ setMethod("check_manual_param_init", signature(object = "Model"), function(objec
       stop("invalid number of slip classes in initialization")
     }
   }
-})
+}
 
 # MARK: params
 # Placeholder for format_param function, which should be defined elsewhere
-setGeneric("params", function(object, skill, param, param_value) {
-  standardGeneric("params")
-})
+params <- function(object) {
+  coefs <- coef_(object)
+  formatted_coefs <- list()
 
-setMethod(
-  "params",
-  "Model",
-  function(object) {
-    coefs <- coef_(object)
-    formatted_coefs <- list()
+  for (skill in names(coefs)) {
+    for (param in names(coefs[[skill]])) {
+      classes <- format_param(object, skill, param, coefs[[skill]][[param]])
 
-    for (skill in names(coefs)) {
-      for (param in names(coefs[[skill]])) {
-        classes <- format_param(object, skill, param, coefs[[skill]][[param]])
-
-        for (class_ in names(classes)) {
-          formatted_coefs <- append(formatted_coefs, list(c(skill, param, class_, classes[[class_]])))
-        }
+      for (class_ in names(classes)) {
+        formatted_coefs <- append(formatted_coefs, list(c(skill, param, class_, classes[[class_]])))
       }
     }
-
-    df <- as.data.frame(do.call(rbind, formatted_coefs), stringsAsFactors = FALSE)
-    colnames(df) <- c("skill", "param", "class", "value")
-
-    df <- transform(df, value = sprintf("%.6f", as.numeric(value)))
-
-    return(df)
   }
-)
+
+  df <- as.data.frame(do.call(rbind, formatted_coefs), stringsAsFactors = FALSE)
+  colnames(df) <- c("skill", "param", "class", "value")
+
+  df <- transform(df, value = sprintf("%.6f", as.numeric(value)))
+
+  return(df)
+}
 
 # MARK: coef_
-setGeneric("coef_", function(object) {
-  standardGeneric("coef_")
-})
-
-setMethod(
-  "coef_",
-  "Model",
-  function(object) {
-    if (length(object@fit_model) == 0) {
-      stop("model has not been trained or initialized")
-    }
-
-    initializable_params <- c("learns", "forgets", "guesses", "slips", "prior") # Equivalent to Model.INITIALIZABLE_PARAMS
-
-    coefs <- list()
-
-    for (skill in names(object@fit_model)) {
-      params <- list()
-      for (param in initializable_params) {
-        if (!is.null(object@fit_model[[skill]][[param]])) {
-          params[[param]] <- object@fit_model[[skill]][[param]]
-        }
-      }
-      coefs[[skill]] <- params
-    }
-
-    return(coefs)
+coef_ <- function(object) {
+  if (length(object@fit_model) == 0) {
+    stop("model has not been trained or initialized")
   }
-)
+
+  initializable_params <- c("learns", "forgets", "guesses", "slips", "prior") # Equivalent to Model.INITIALIZABLE_PARAMS
+
+  coefs <- list()
+
+  for (skill in names(object@fit_model)) {
+    params <- list()
+    for (param in initializable_params) {
+      if (!is.null(object@fit_model[[skill]][[param]])) {
+        params[[param]] <- object@fit_model[[skill]][[param]]
+      }
+    }
+    coefs[[skill]] <- params
+  }
+
+  return(coefs)
+}
 
 # MARK: format_param
-setGeneric("format_param", function(object, skill, param, value) {
-  standardGeneric("format_param")
-})
+format_param <- function(object, skill, param, value) {
+  if (is.numeric(value) && length(value) > 1) {
+    ptype <- if (param %in% c("learns", "forgets")) "resource_names" else "gs_names"
 
-setMethod(
-  "format_param",
-  "Model",
-  function(object, skill, param, value) {
-    if (is.numeric(value) && length(value) > 1) {
-      ptype <- if (param %in% c("learns", "forgets")) "resource_names" else "gs_names"
-
-      if (!is.null(object@fit_model[[skill]][[ptype]])) {
-        names <- as.character(object@fit_model[[skill]][[ptype]])
-        return(setNames(as.list(value), names))
-      } else {
-        stop(paste("Parameter type", ptype, "not found for skill", skill))
-      }
+    if (!is.null(object@fit_model[[skill]][[ptype]])) {
+      names <- as.character(object@fit_model[[skill]][[ptype]])
+      return(setNames(as.list(value), names))
     } else {
-      return(list("default" = value))
+      stop(paste("Parameter type", ptype, "not found for skill", skill))
     }
+  } else {
+    return(list("default" = value))
   }
-)
+}
 
 # MARK: crossvalidate
 crossvalidate_single_skill <- function(data, skill, metrics) {
   lapply(metrics, function(metric) metric(rnorm(nrow(data)), data$truth))
 }
-setGeneric("crossvalidate", function(object, data = NULL, data_path = NULL, metric = rmse, ...) {
-  standardGeneric("crossvalidate")
-})
-
-setMethod("crossvalidate", "Model", function(object, data = NULL, data_path = NULL, metric = rmse, ...) {
+crossvalidate <- function(object, data = NULL, data_path = NULL, metric = rmse, ...) {
   metric_names <- c()
 
   if (!is.list(metric)) {
@@ -632,28 +542,20 @@ setMethod("crossvalidate", "Model", function(object, data = NULL, data_path = NU
   # df[metric_names] <- do.call(rbind, df$dummy)
   # df <- df[, !(names(df) %in% "dummy")]
   return(df)
-})
+}
 
 
 # MARK: ._crossvalidate
-setGeneric("._crossvalidate", function(model, data, skill, metric) {
-  standardGeneric("._crossvalidate")
-})
-
-setMethod("._crossvalidate", "Model", function(model, data, skill, metric) {
+._crossvalidate <- function(model, data, skill, metric) {
   if (is.character(model@folds)) {
     return(crossvalidate_single_skill(model, data, skill, model@folds, metric, model@seed, use_folds = TRUE))
   } else {
     return(crossvalidate_single_skill(model, data, skill, model@folds, metric, model@seed))
   }
-})
+}
 
 # MARK: predict
-setGeneric("predict", function(model, data_path = NULL, data = NULL) {
-  standardGeneric("predict")
-})
-
-setMethod("predict", "Model", function(model, data_path = NULL, data = NULL) {
+predict <- function(model, data_path = NULL, data = NULL) {
   ._check_data(model, data_path, data)
 
   if (is.null(model@fit_model)) {
@@ -688,12 +590,10 @@ setMethod("predict", "Model", function(model, data_path = NULL, data = NULL) {
   }
 
   return(df)
-})
+}
 
 # MARK: set_coef (coef_)
-setGeneric("set_coef", function(object, values, fixed = FALSE) standardGeneric("set_coef"))
-
-setMethod("set_coef", "Model", function(object, values, fixed = FALSE) {
+set_coef <- function(object, values, fixed = FALSE) {
   # Sets or initializes parameters in the BKT model
   # Values must be organized by skill and BKT parameters
 
@@ -713,7 +613,7 @@ setMethod("set_coef", "Model", function(object, values, fixed = FALSE) {
 
   object@manual_param_init <- TRUE
   return(object)
-})
+}
 
 # ._check_params
 ._check_params <- function(object, params) {
