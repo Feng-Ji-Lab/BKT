@@ -23,9 +23,6 @@ devtools::build_manual()
 # build
 devtools::build()
 
-# install local
-devtools::install_local("../BKT_0.0.1.tar.gz")
-
-# install local and test
+# install local and load
 devtools::install_local("../BKT_0.0.1.tar.gz")
 library(BKT)
