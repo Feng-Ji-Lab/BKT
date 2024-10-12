@@ -687,10 +687,10 @@ crossvalidate <- function(object, data = NULL, data_path = NULL, metric = rmse, 
 #' @examples
 #' model <- bkt(seed = 42)
 #' fit_model <- fit(model, data_path = "ct.csv")
-#' predictions <- predict(fit_model, data_path = "ct_test.csv")
+#' predictions <- predict_bkt(fit_model, data_path = "ct_test.csv")
 #' head(predictions)
 #' @export
-predict <- function(model, data_path = NULL, data = NULL) {
+predict_bkt <- function(model, data_path = NULL, data = NULL) {
   ._check_data(model, data_path, data)
 
   if (is.null(model@fit_model)) {
