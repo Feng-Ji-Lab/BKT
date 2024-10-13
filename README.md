@@ -1,26 +1,27 @@
-# BKT
+# Bayesian Knowledge Tracing in R
 
-R implementation of the Bayesian Knowledge Tracing algorithm and variants, estimating student cognitive mastery from problem solving sequences.
+We introduce an **R** implementation of the Bayesian Knowledge Tracing algorithm and its variants, which estimate student cognitive mastery from problem-solving sequences.
 
-The R package ``BKT`` is publicly available on [Github](https://github.com/Feng-Ji-Lab/bkt). It could be installed and imported by using the following R commands:
-
-``` R
-devtools::install_github("Feng-Ji-Lab/bkt")
-library(BKT)
-```
-
-Based on the work of [pyBKT](https://github.com/CAHLR/pyBKT).
-
-# Installation and import
-
-`BKT` could be installed and imported by using the following R commands:
+The R package `BKT` is publicly available on [GitHub](https://github.com/Feng-Ji-Lab/bkt). It can be installed and loaded using the following R commands:
 
 ``` R
 devtools::install_github("Feng-Ji-Lab/bkt")
 library(BKT)
 ```
 
-# Preparing Data and Running Model
+This package is based on the work of [pyBKT](https://github.com/CAHLR/pyBKT).
+
+
+# Installation and Import
+
+`BKT` can be installed and loaded using the following R commands:
+
+``` R
+devtools::install_github("Feng-Ji-Lab/bkt")
+library(BKT)
+```
+
+# Preparing Data and Running the Model
 
 The following serves as a mini-tutorial for how to get started with `BKT`.
 
