@@ -9,16 +9,7 @@ devtools::install_github("Feng-Ji-Lab/bkt")
 library(BKT)
 ```
 
-This package is based on the work of [pyBKT](https://github.com/CAHLR/pyBKT).
-
-## Installation and Import
-
-`BKT` can be installed and loaded using the following R commands:
-
-```r
-devtools::install_github("Feng-Ji-Lab/bkt")
-library(BKT)
-```
+This package is based on the work of pyBKT in Python [pyBKT](https://github.com/CAHLR/pyBKT).
 
 ## Preparing Data and Running the Model
 
