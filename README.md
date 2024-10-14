@@ -254,6 +254,25 @@ crossvalidated_mae_errs <- crossvalidate(model, data_path = 'ct.csv', skills = "
 print(crossvalidated_mae_errs)
 ```
 
+```
+> print(crossvalidated_errors)
+                                   skill        dummy
+1 Plot non-terminating improper fraction 0.483330....
+```
+
+ The result for Plot non-terminating improper fraction with an RMSE of approximately 0.483 indicates that the model's predicted values differ from the actual values by an average of about 0.483 across the 5 cross-validation folds.
+
+```
+> print(crossvalidated_mae_errs)
+                                         skill        dummy
+1       Plot non-terminating improper fraction 0.465849....
+2             Plot terminating proper fraction 0.490182....
+3  Calculate part in proportion with fractions 0.366942....
+4 Calculate total in proportion with fractions 0.361044....
+```
+
+The result for multiple skills (such as Plot non-terminating improper fraction with an MAE of 0.466, Plot terminating proper fraction with an MAE of 0.490, etc.) represents the average absolute difference between the predicted and actual values for each skill across the 5 cross-validation folds.
+
 ### Parameter Fixing
 
 Another advanced feature supported by `BKT` is parameter fixing, where we can fix one or more parameters and train the model conditioned on those fixed parameters. This can be useful if you already know the ground truth value of some parameters beforehand or to avoid degenerate model creation by fixing parameters at reasonable values. To specify which parameters and values we want fixed for any skill, we can pass in a list to `set_coef`, and then specify `fixed = TRUE` in the `fit` call:
