@@ -209,7 +209,22 @@ print(training_mae)
 
 ```
 
+We can see the following results:
+```
+> training_rmse <- evaluate(result, data_path = "ct.csv")
+> print(training_rmse)
+[1] 0.480762
+```
 
+The RMSE (Root Mean Squared Error) result of 0.480762 indicates that, on average, the difference between the predicted values and the actual values for the skill "Plot non-terminating improper fraction" in the dataset is approximately 0.48. This provides an overall measure of how well the model predictions fit the data, with lower values indicating better performance.
+
+```
+> training_mae <- evaluate(result, data_path = "ct.csv", metric = mae)
+> print(training_mae)
+[1] 0.4632682
+```
+
+The MAE (Mean Absolute Error) result of 0.4632682 shows that, on average, the absolute difference between the predicted and actual values is around 0.46. This metric focuses on the average magnitude of errors, without considering their direction, and it also suggests a reasonably good fit between the model's predictions and the actual data.
 
 ### Cross-Validation
 
