@@ -189,16 +189,24 @@ The table box_and_whisker_preds contains the following columns:
 
 ```R
 library(BKT)
+
+# Firstly, fit the model.
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+result <- fit(model, data_path = "ct.csv", skills = "Plot non-terminating improper fraction")
+
 # Evaluate the RMSE of the model on the training data.
 # Note that the default evaluate metric is RMSE.
-training_rmse = evaluate(model, data_path = 'ct.csv')
+training_rmse <- evaluate(result, data_path = "ct.csv")
+print(training_rmse)
 
 # We can define a custom metric as well
 mae <- function(true_vals, pred_vals) {
-  # Calculates the mean absolute error
-  mean(abs(true_vals - pred_vals))
+    return(mean(abs(true_vals - pred_vals)))
 }
-result <- evaluate(model, data_path = "ct.csv", metric = mae)
+training_mae <- evaluate(result, data_path = "ct.csv", metric = mae)
+print(training_mae)
+
 ```
 
 
