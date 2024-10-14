@@ -47,6 +47,75 @@ result_double <- fit(model, data_path = "ct.csv", skills = c("Plot imperfect rad
 print(params(result_all))
 ```
 
+The results will be shown as below: 
+
+```
+> print(params(result_all))
+                                          skill   param   class    value
+1        Plot non-terminating improper fraction  learns default 0.222808
+2        Plot non-terminating improper fraction forgets default 0.000000
+3        Plot non-terminating improper fraction guesses default 0.003382
+4        Plot non-terminating improper fraction   slips default 0.322177
+5        Plot non-terminating improper fraction   prior default 0.737443
+6                        Plot imperfect radical  learns default 0.134145
+7                        Plot imperfect radical forgets default 0.000000
+8                        Plot imperfect radical guesses default 0.077672
+9                        Plot imperfect radical   slips default 0.298567
+10                       Plot imperfect radical   prior default 0.286065
+11             Plot terminating proper fraction  learns default 0.039221
+12             Plot terminating proper fraction forgets default 0.000000
+13             Plot terminating proper fraction guesses default 0.310272
+14             Plot terminating proper fraction   slips default 0.329641
+15             Plot terminating proper fraction   prior default 0.572755
+16                                      Plot pi  learns default 0.966132
+17                                      Plot pi forgets default 0.000000
+18                                      Plot pi guesses default 0.000000
+19                                      Plot pi   slips default 0.391130
+20                                      Plot pi   prior default 0.996233
+21                            Plot whole number  learns default 0.332330
+22                            Plot whole number forgets default 0.000000
+23                            Plot whole number guesses default 0.790995
+24                            Plot whole number   slips default 0.032996
+25                            Plot whole number   prior default 0.574087
+26                   Plot decimal - thousandths  learns default 0.959413
+27                   Plot decimal - thousandths forgets default 0.000000
+28                   Plot decimal - thousandths guesses default 0.000000
+29                   Plot decimal - thousandths   slips default 0.617645
+30                   Plot decimal - thousandths   prior default 0.708424
+31                          Calculate unit rate  learns default 0.066416
+32                          Calculate unit rate forgets default 0.000000
+33                          Calculate unit rate guesses default 0.501578
+34                          Calculate unit rate   slips default 0.113609
+35                          Calculate unit rate   prior default 0.000048
+36  Calculate part in proportion with fractions  learns default 0.136166
+37  Calculate part in proportion with fractions forgets default 0.000000
+38  Calculate part in proportion with fractions guesses default 0.394147
+39  Calculate part in proportion with fractions   slips default 0.133619
+40  Calculate part in proportion with fractions   prior default 0.557565
+41 Calculate total in proportion with fractions  learns default 0.269612
+42 Calculate total in proportion with fractions forgets default 0.000000
+43 Calculate total in proportion with fractions guesses default 0.300150
+44 Calculate total in proportion with fractions   slips default 0.125299
+45 Calculate total in proportion with fractions   prior default 0.438129
+46              Finding the intersection, Mixed  learns default 0.084853
+47              Finding the intersection, Mixed forgets default 0.000000
+48              Finding the intersection, Mixed guesses default 0.295654
+49              Finding the intersection, Mixed   slips default 0.357887
+50              Finding the intersection, Mixed   prior default 0.509688
+51                Finding the intersection, GLF  learns default 0.060822
+52                Finding the intersection, GLF forgets default 0.000000
+53                Finding the intersection, GLF guesses default 0.424778
+54                Finding the intersection, GLF   slips default 0.078708
+55                Finding the intersection, GLF   prior default 0.225888
+56                Finding the intersection, SIF  learns default 0.121315
+57                Finding the intersection, SIF forgets default 0.000000
+58                Finding the intersection, SIF guesses default 0.406944
+59                Finding the intersection, SIF   slips default 0.009698
+60                Finding the intersection, SIF   prior default 0.004261
+```
+
+In the result, the first column is the name of the skills, the second column indicates the type of parameters, including `learns`, `forgets`, `guesses`, `slips`, and `prior`. The laset column shows the estimated parameter value. 
+
 Note that if you train on a dataset that has unfamiliar columns to `BKT`, you will be required to specify a mapping of column names in that dataset to the expected `BKT` columns. This is referred to as the model defaults (i.e., it specifies the default column names to look up in the dataset). An example usage is provided below for an unknown dataset that has column names "row", "skill_t", "answer", and "gs_classes".
 
 ```r
@@ -70,19 +139,53 @@ fit(model, data_path = file, defaults = defaults)
 Prediction and evaluation behave similarly to scikit-learn. `BKT` offers a variety of features for prediction and evaluation.
 
 ```r
+# Load the BKT library (Bayesian Knowledge Tracing)
 library(BKT)
 
+# Initialize the BKT model with a specific seed for reproducibility and disable parallel processing
 model <- bkt(seed = 42, parallel = FALSE)
+
+# Fetch the dataset from the given URL and store it in the current directory
 fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/as.csv", ".")
+
+# Fit the BKT model using the provided dataset, disabling the 'forgets' option,
+# and focusing on the skill labeled as "Box and Whisker"
 result <- fit(model, data_path = "as.csv", forgets = FALSE, skills = "Box and Whisker")
+
+# Print the learned parameters of the model
 print(params(result))
+
+# Make predictions using the trained BKT model on the same dataset
 preds_df <- predict_bkt(result, data_path = "as.csv")
+
+# Filter predictions for the specific skill "Box and Whisker" and select relevant columns:
+# 'user_id', 'correct' (actual performance), 'correct_predictions', and 'state_predictions' (predicted states)
 box_and_whisker_preds <- subset(preds_df, skill_name == "Box and Whisker",
     select = c("user_id", "correct", "correct_predictions", "state_predictions")
 )
-print(box_and_whisker_preds)
 
+# Print the filtered predictions
+print(box_and_whisker_preds)
 ```
+
+The sample result is shown below.
+```
+> print(box_and_whisker_preds)
+    user_id correct correct_predictions state_predictions
+1     64525       1           0.7181133         0.2739769
+2     64525       1           0.7860666         0.2739769
+3     70363       0           0.7181133         0.2739769
+4     70363       1           0.6005254         0.2739769
+5     70363       0           0.7090231         0.2739769
+...
+```
+
+The table box_and_whisker_preds contains the following columns:
+
+`user_id`: This is the ID of each individual user. Each row represents an attempt by the user at a question.  
+`correct`: This column represents whether the user's response was correct (1 for correct, 0 for incorrect) for that particular question attempt.  
+`correct_predictions`: This column shows the model's predicted probbaility that the user's response would be correct. It is a value between 0 and 1, indicating the likelihood of the correct answer.  
+`state_predictions`: This column reflects the predicted probability that the user is in a "learned" state or has mastered the skill. It's a measure of how likely it is that the user has learned the skill in question.
 
 ```R
 library(BKT)
@@ -97,6 +200,8 @@ mae <- function(true_vals, pred_vals) {
 }
 result <- evaluate(model, data_path = "ct.csv", metric = mae)
 ```
+
+
 
 ### Cross-Validation
 
