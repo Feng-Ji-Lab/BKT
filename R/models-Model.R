@@ -728,7 +728,41 @@ predict_bkt <- function(model, data_path = NULL, data = NULL) {
 }
 
 # MARK: set_coef (coef_)
-set_coef <- function(object, values, fixed = FALSE) {
+#' Set Coefficients for BKT Model
+#'
+#' This function sets or initializes the parameters of a Bayesian Knowledge Tracing (BKT) model.
+#' The user can manually specify the values for different parameters associated with specific skills.
+#'
+#' @param object An object of the BKT model. This is the model for which the parameters will be set or initialized.
+#' @param values A list containing the skill names and their corresponding BKT parameters.
+#'   Each skill should have its own list of parameters.
+#'   The parameters can include 'prior', 'learns', 'forgets', 'guesses', and 'slips'.
+#'   Example structure: \code{list("skill_name" = list("learns" = ..., "guesses" = ...))}.
+#'
+#' @return The updated BKT model object with the newly set coefficients.
+#'
+#' @details
+#' This function allows users to manually specify or update the parameters of a BKT model for different skills.
+#' The values should be provided as a named list, with each skill having its own sublist of BKT parameters.
+#' The function performs checks to ensure that the provided parameters are valid in terms of type, length, and existence.
+#'
+#' @examples
+#' # Initialize a BKT model
+#' model <- bkt(seed = 42)
+#'
+#' # Set custom parameters for a specific skill
+#' model <- set_coef(model, list("Plot non-terminating improper fraction" = list("prior" = 0.5, "learns" = 0.2)))
+#'
+#' # Fit the model with fixed parameters
+#' result <- fit(model,
+#'   forgets = TRUE,
+#'   data_path = "ct.csv",
+#'   skills = "Plot non-terminating improper fraction",
+#'   fixed = list("Plot non-terminating improper fraction" = list("prior" = TRUE))
+#' )
+#'
+#' @export
+set_coef <- function(object, values) {
   # Sets or initializes parameters in the BKT model
   # Values must be organized by skill and BKT parameters
 
