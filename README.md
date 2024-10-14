@@ -238,6 +238,7 @@ model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
 
 # Cross-validate with 5 folds on all skills in the CT dataset
 crossvalidated_errors <- crossvalidate(model, data_path = 'ct.csv', skills = "Plot non-terminating improper fraction", folds = 5)
+print(crossvalidated_errors)
 
 # Cross-validate on a particular set of skills with a given
 # seed, folds, and metric
@@ -250,6 +251,7 @@ mae <- function(true_vals, pred_vals) {
 # cross-validates on all skills containing the word 'fraction'.
 crossvalidated_mae_errs <- crossvalidate(model, data_path = 'ct.csv', skills = ".*fraction.*",
                                          folds = 5, metric = mae)
+print(crossvalidated_mae_errs)
 ```
 
 ### Parameter Fixing
