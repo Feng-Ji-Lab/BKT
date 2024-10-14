@@ -713,7 +713,7 @@ predict_bkt <- function(model, data_path = NULL, data = NULL) {
   for (skill in names(all_data)) {
     pred_result <- ._predict(model@fit_model[[skill]], all_data[[skill]])
     correct_predictions <- pred_result[[1]]
-    state_predictions <- pred_result[[2]][[1]]
+    state_predictions <- pred_result[[2]][1, ]
 
     if (!is.null(all_data[[skill]]$multiprior_index)) {
       correct_predictions <- correct_predictions[-all_data[[skill]]$multiprior_index]
