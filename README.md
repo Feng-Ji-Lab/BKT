@@ -150,9 +150,6 @@ fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/mas
 
 # Fit the BKT model using the provided dataset, disabling the 'forgets' option,
 # and focusing on the skill labeled as "Box and Whisker"
-result <- fit(model, data_path = "as.csv", forgets = FALSE, skills = "Box and Whisker")
-
-# Print the learned parameters of the model
 result <- fit(model, data_path = "as.csv", forgets = TRUE, skills = "Box and Whisker")
 
 print(params(result))
@@ -166,22 +163,20 @@ box_and_whisker_preds <- subset(preds_df, skill_name == "Box and Whisker",
     select = c("user_id", "correct", "correct_predictions", "state_predictions")
 )
 
-print(head(box_and_whisker_preds))
-
-
 # Print the filtered predictions
-print(box_and_whisker_preds)
+print(head(box_and_whisker_preds))
 ```
 
 The sample result is shown below.
 ```
 > print(box_and_whisker_preds)
-    user_id correct correct_predictions state_predictions
-1     64525       1           0.7181133         0.2739769
-2     64525       1           0.7860666         0.2739769
-3     70363       0           0.7181133         0.2739769
-4     70363       1           0.6005254         0.2739769
-5     70363       0           0.7090231         0.2739769
+  user_id correct correct_predictions state_predictions
+1   64525       1           0.6923705         0.3048028
+2   64525       1           0.8003175         0.1188919
+3   70363       0           0.6923705         0.3048028
+4   70363       1           0.5550472         0.5413068
+5   70363       0           0.7347318         0.2318463
+6   70363       1           0.5903234         0.4805526
 ...
 ```
 
