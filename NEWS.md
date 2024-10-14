@@ -1,3 +1,3 @@
-# bkt (development version)
+# BKT (development version)
 
-* Initial CRAN submission.
+* Initial open version on Github.
