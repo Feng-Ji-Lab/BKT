@@ -74,13 +74,13 @@ library(BKT)
 
 model <- bkt(seed = 42, parallel = FALSE)
 fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/as.csv", ".")
-result <- fit(model, data_path = "as.csv", forgets = FALSE, skills = "Box and Whisker")
+result <- fit(model, data_path = "as.csv", forgets = TRUE, skills = "Box and Whisker")
 print(params(result))
 preds_df <- predict_bkt(result, data_path = "as.csv")
 box_and_whisker_preds <- subset(preds_df, skill_name == "Box and Whisker",
     select = c("user_id", "correct", "correct_predictions", "state_predictions")
 )
-print(box_and_whisker_preds)
+print(head(box_and_whisker_preds))
 
 ```
 
