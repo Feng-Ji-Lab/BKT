@@ -72,9 +72,17 @@ Prediction and evaluation behave similarly to scikit-learn. `BKT` offers a varie
 ```r
 library(BKT)
 
-# Initialize the model with an optional seed
-model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+model <- bkt(seed = 42, parallel = FALSE)
+fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/as.csv", ".")
+result <- fit(model, data_path = "as.csv", forgets = FALSE, skills = "Box and Whisker")
+print(params(result))
+preds_df <- predict_bkt(result, data_path = "as.csv")
+box_and_whisker_preds <- subset(preds_df, skill_name == "Box and Whisker",
+    select = c("user_id", "correct", "correct_predictions", "state_predictions")
+)
+print(box_and_whisker_preds)
 
+<<<<<<< HEAD
 # Train a simple BKT model on all skills in the CT dataset
 fit(model, data_path = 'ct.csv')
 
@@ -84,6 +92,15 @@ preds_df <- predict(model, data_path = 'ct.csv')
 # Evaluate the RMSE of the model on the training data
 # Note that the default evaluation metric is RMSE
 training_rmse <- evaluate(model, data_path = 'ct.csv')
+=======
+```
+
+```R
+library(BKT)
+# Evaluate the RMSE of the model on the training data.
+# Note that the default evaluate metric is RMSE.
+training_rmse = evaluate(model, data_path = 'ct.csv')
+>>>>>>> 4c96738 (fix predict readme)
 
 # We can define a custom metric as well
 mae <- function(true_vals, pred_vals) {

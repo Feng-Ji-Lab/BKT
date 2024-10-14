@@ -26,3 +26,7 @@ devtools::build()
 # install local and load
 devtools::install_local("../BKT_0.0.1.tar.gz")
 library(BKT)
+
+# install online and load
+devtools::install_github("Feng-Ji-Lab/bkt")
+library(BKT)
