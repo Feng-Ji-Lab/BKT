@@ -293,6 +293,20 @@ result <- fit(model,
 print(params(result))
 ```
 
+The results are shown below:
+
+```
+> print(params(result))
+                                   skill   param   class    value
+1 Plot non-terminating improper fraction  learns default 0.236883
+2 Plot non-terminating improper fraction forgets default 0.001726
+3 Plot non-terminating improper fraction guesses default 0.135079
+4 Plot non-terminating improper fraction   slips default 0.227050
+5 Plot non-terminating improper fraction   prior default 0.500000
+```
+
+In this example, the model was trained with the prior probability fixed at 0.5 for the "Plot non-terminating improper fraction" skill, and it estimated the other parameters (learns, forgets, guesses, slips) based on the data. The model predicts a moderate probability of learning (23.7%), a very low chance of forgetting (0.17%), a moderate guess rate (13.5%), and a significant slip rate (22.7%). The fixed prior indicates that the model started with the assumption that the student had a 50% chance of already knowing the skill before any questions were answered.
+
 Within the `set_coef` list, the 'prior' parameter takes a scalar, while 'learns', 'forgets', 'guesses', and 'slips' take a vector, in order to provide support for parameter fixing in model extensions with multiple learn or guess classes. An example of such is shown below:
 
 ```r
@@ -311,6 +325,19 @@ result <- fit(model,
 print(params(result))
 
 ```
+
+The result are shown below:
+```
+> print(params(result))
+                                   skill   param   class    value
+1 Plot non-terminating improper fraction  learns default 0.250000
+2 Plot non-terminating improper fraction forgets default 0.250000
+3 Plot non-terminating improper fraction guesses default 0.182944
+4 Plot non-terminating improper fraction   slips default 0.112771
+5 Plot non-terminating improper fraction   prior default 0.483079
+```
+
+In this example, the learns and forgets parameters were manually fixed at 0.25 using the `set_coef` function, meaning the model was not allowed to adjust these values during training. The model then estimated the other parameters (guesses, slips, and prior) based on the data. The fixed learns and forgets parameters indicate a constant 25% chance of learning or forgetting the skill, while the model predicted an 18.3% chance of guessing correctly and an 11.3% chance of slipping. The prior probability indicates that, initially, there was a 48.3% chance the student already knew the skill.
 
 ## Internal Data Format
 
