@@ -261,12 +261,15 @@ Another advanced feature supported by `BKT` is parameter fixing, where we can fi
 ```r
 library(BKT)
 
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+
 # Fixes the prior rate to 0.5 for the 'Plot non-terminating improper fraction' skill, and trains the model given those fixed parameters
 model <- set_coef(model, list("Plot non-terminating improper fraction" = list("prior" = 0.5)))
 result <- fit(model,
-              forgets = TRUE,
-              data_path = "ct.csv", skills = "Plot non-terminating improper fraction",
-              fixed = list("Plot non-terminating improper fraction" = list("prior" = TRUE))
+    forgets = TRUE,
+    data_path = "ct.csv", skills = "Plot non-terminating improper fraction",
+    fixed = list("Plot non-terminating improper fraction" = list("prior" = TRUE))
 )
 print(params(result))
 ```
@@ -274,14 +277,20 @@ print(params(result))
 Within the `set_coef` list, the 'prior' parameter takes a scalar, while 'learns', 'forgets', 'guesses', and 'slips' take a vector, in order to provide support for parameter fixing in model extensions with multiple learn or guess classes. An example of such is shown below:
 
 ```r
+library(BKT)
+
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+
 model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
 model <- set_coef(model, list("Plot non-terminating improper fraction" = list("learns" = c(0.25), "forgets" = c(0.25))))
 print(params(model))
 result <- fit(model,
-              data_path = "ct.csv", forgets = TRUE, skills = "Plot non-terminating improper fraction",
-              fixed = list("Plot non-terminating improper fraction" = list("learns" = TRUE, "forgets" = TRUE))
+    data_path = "ct.csv", forgets = TRUE, skills = "Plot non-terminating improper fraction",
+    fixed = list("Plot non-terminating improper fraction" = list("learns" = TRUE, "forgets" = TRUE))
 )
 print(params(result))
+
 ```
 
 ## Internal Data Format
