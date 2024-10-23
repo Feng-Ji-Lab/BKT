@@ -78,9 +78,10 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
     slips <- slips * (fixed$slips < 0) + fixed$slips * (fixed$slips >= 0)
   }
   Bn <- matrix(0, nrow = 2, ncol = 2 * num_subparts)
-  Bn[1, ] <- c(1 - guesses, guesses)
-  Bn[2, ] <- c(slips, 1 - slips)
-
+  Bn[1, seq(1, 2 * num_subparts, by = 2)] <- 1 - guesses
+  Bn[1, seq(2, 2 * num_subparts, by = 2)] <- guesses
+  Bn[2, seq(1, 2 * num_subparts, by = 2)] <- slips
+  Bn[2, seq(2, 2 * num_subparts, by = 2)] <- 1 - slips
   # Outputs
   all_trans_softcounts <- matrix(0, nrow = 2, ncol = 2 * num_resources)
   all_emission_softcounts <- matrix(0, nrow = 2, ncol = 2 * num_subparts)
@@ -183,7 +184,6 @@ inner <- function(x) {
   loglike <- 0
 
   alphas <- list()
-
   for (sequence_index in sequence_idx_start:sequence_idx_end) {
     sequence_start <- starts[sequence_index]
     T <- lengths[sequence_index]
@@ -193,7 +193,7 @@ inner <- function(x) {
     for (t in 0:(min(2, T) - 1)) {
       for (n in 0:(num_subparts - 1)) {
         data_temp <- alldata[1 + n, sequence_start + t]
-        if (!is.na(data_temp)) {
+        if (0 != data_temp) {
           sl <- Bn[, 1 + 2 * n + as.integer(data_temp == 2)]
           likelihoods[, 1 + t] <- likelihoods[, 1 + t] * ifelse(sl == 0, 1, sl)
         }
@@ -205,7 +205,6 @@ inner <- function(x) {
     alpha[, 1] <- alpha[, 1] / norm
     contribution <- log(norm) / (if (normalizeLengths) T else 1)
     loglike <- loglike + contribution
-
     # 结合 t = 2 的情况
     if (T >= 2) {
       resources_temp <- allresources[sequence_start]
@@ -220,7 +219,7 @@ inner <- function(x) {
       for (t in 2:(T - 1)) {
         for (n in 0:(num_subparts - 1)) {
           data_temp <- alldata[1 + n, sequence_start + t]
-          if (!is.na(data_temp)) {
+          if (0 != (data_temp)) {
             sl <- Bn[, 1 + 2 * n + as.integer(data_temp == 2)]
             likelihoods[, 1 + t] <- likelihoods[, 1 + t] * ifelse(sl == 0, 1, sl)
           }
@@ -239,6 +238,7 @@ inner <- function(x) {
 
     As_temp <- As
     first_pass <- TRUE
+
     if (T > 1) {
       for (t in (T - 2):0) {
         resources_temp <- allresources[sequence_start + t]
@@ -247,7 +247,6 @@ inner <- function(x) {
         pair <- A
         pair[1, ] <- pair[1, ] * alpha[, 1 + t]
         pair[2, ] <- pair[2, ] * alpha[, 1 + t]
-
         dotted <- A %*% alpha[, 1 + t]
         gamma_t <- gamma[, t + 2]
         pair[, 1] <- (pair[, 1] * gamma_t) / dotted
@@ -258,13 +257,13 @@ inner <- function(x) {
 
         for (n in 0:(num_subparts - 1)) {
           data_temp <- alldata[n + 1, sequence_start + t]
-          if (!is.na(data_temp)) {
+          if (0 != (data_temp)) {
             emission_softcounts_temp[, (1 + 2 * n + as.integer(data_temp == 2))] <- emission_softcounts_temp[, (1 + 2 * n + as.integer(data_temp == 2))] + gamma[, t + 1]
           }
           if (first_pass) {
             data_temp_p <- alldata[n + 1, sequence_start + (T - 1)]
 
-            if (!is.na(data_temp_p)) {
+            if (0 != (data_temp_p)) {
               emission_softcounts_temp[, (1 + 2 * n + as.integer(data_temp_p == 2))] <- emission_softcounts_temp[, (1 + 2 * n + as.integer(data_temp_p == 2))] + gamma[, T]
             }
           }

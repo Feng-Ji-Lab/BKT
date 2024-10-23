@@ -50,7 +50,6 @@ M_step_run <- function(model, trans_softcounts, emission_softcounts, init_softco
   temp <- apply(emission_softcounts, c(1, 2), sum)
   model$emissions <- divide_python(emission_softcounts, temp, type = 2)
   model$guesses <- model$emissions[, 1, 2]
-
   if ("guesses" %in% names(fixed)) {
     model$guesses <- model$guesses * (fixed$guesses < 0) + fixed$guesses * (fixed$guesses >= 0)
   }
@@ -75,7 +74,10 @@ M_step_run <- function(model, trans_softcounts, emission_softcounts, init_softco
 
 # special handle python matrix diviations
 divide_python <- function(m1, m2, type = 1) {
-  if (all(dim(m1) == c(1, 2, 2)) && all(dim(m2) == c(1, 2))) {
+  dim_m1 <- dim(m1)
+  dim_m2 <- dim(m2)
+
+  if (all(dim_m1 == c(1, 2, 2)) && all(dim_m2 == c(1, 2))) {
     if (type == 1) {
       m2_rep <- rep(as.vector(m2), 2)
       m2_tr <- reshape_python(m2_rep, dim = dim(m1))
@@ -85,7 +87,22 @@ divide_python <- function(m1, m2, type = 1) {
       m2_tr <- array(m2_rep, dim = dim(m1))
       return(m1 / m2_tr)
     }
-  } else {
-    stop("not implemented")
+  } else if (length(dim_m1) == 3 && dim_m1[2] == 2 && dim_m1[3] == 2 && length(dim_m2) == 2 && dim_m2[1] == dim_m1[1]) {
+    result <- array(0, dim = dim_m1)
+    for (i in seq_len(dim_m1[1])) {
+      sub_m1 <- m1[i, , ]
+      sub_m1 <- reshape_python(sub_m1, dim = c(1, 2, 2))
+      sub_m2 <- m2[i, ]
+      if (type == 1) {
+        sub_m2_rep <- rep(as.vector(sub_m2), 2)
+        sub_m2_tr <- reshape_python(sub_m2_rep, dim = c(1, 2, 2))
+        result[i, , ] <- sub_m1 / sub_m2_tr
+      } else {
+        sub_m2_rep <- rep(as.vector(sub_m2), 2)
+        sub_m2_tr <- array(sub_m2_rep, dim = c(1, 2, 2))
+        result[i, , ] <- sub_m1 / sub_m2_tr
+      }
+    }
+    return(result)
   }
 }

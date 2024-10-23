@@ -163,8 +163,34 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
             resources <- matrix(resources, ncol = 1)
         }
 
-        if (multigs) {
-            stop("not implemented")
+        if (exists("multigs")) {
+            if (!("multigs" %in% names(defaults))) {
+                stop("multigs default column not specified")
+            } else if (!("multilearn" %in% colnames(df3))) {
+                stop("specified multigs default column not in data")
+            }
+
+            all_guess <- unique(df3[["multilearn"]])
+            all_guess <- sort(all_guess)
+
+            # map each new guess/slip case to a row [0, # total]
+            if (is.null(gs_ref)) {
+                gs_ref <- as.list(setNames(seq_along(all_guess), all_guess))
+            } else {
+                for (i in all_guess) {
+                    if (!(i %in% names(gs_ref))) {
+                        stop("Guess rate ", i, " not previously fitted")
+                    }
+                }
+            }
+            data_ref <- sapply(df3[["multilearn"]], function(x) gs_ref[[x]])
+
+            # make data n-dimensional, fill in corresponding row and make other non-row entries 0
+            data_temp <- matrix(0, nrow = length(unique(df3[["multilearn"]])), ncol = nrow(df3))
+            for (i in seq_len(ncol(data_temp))) {
+                data_temp[data_ref[i], i] <- data[i]
+            }
+            Data$data <- data_temp
         } else {
             data <- list(data)
             data <- as.integer(unlist(data))
@@ -187,7 +213,6 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
         Data$gs_names <- gs_ref
         Data$index <- stored_index
         Data$multiprior_index <- multiprior_index
-
         if (folds) {
             Data[["folds"]] <- as.integer(df3[["folds"]])
         }

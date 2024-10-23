@@ -295,19 +295,21 @@ fetch_dataset <- function(object, link, loc) {
   for (i in seq_len(num_fit_initializations)) {
     fitmodel <- random_model_uni(num_learns, num_gs)
     optional_args <- list(fixed = list())
-    fitmodel$prior <- 0.3
-    fitmodel$learns[1] <- 0.28
-    fitmodel$forgets[1] <- 0
-    fitmodel$guesses[1] <- 0.35
-    fitmodel$slips[1] <- 0.27
-    fitmodel$As[1, 2, 1] <- 0.28
-    fitmodel$As[1, 2, 2] <- 0.72
-    fitmodel$emissions[1, 1, 1] <- 0.78
-    fitmodel$emissions[1, 1, 2] <- 0.21
-    fitmodel$emissions[1, 2, 1] <- 0.16
-    fitmodel$emissions[1, 2, 2] <- 0.84
-    fitmodel$pi_0[1, 1] <- 0.95
-    fitmodel$pi_0[2, 1] <- 0.33
+    # fitmodel$prior <- 0.3
+    # fitmodel$learns[1] <- 0.28
+    # fitmodel$forgets[1] <- 0
+    # for (i in 1:10) {
+    #   fitmodel$guesses[i] <- i * 0.05
+    #   fitmodel$slips[i] <- i * 0.04
+    #   fitmodel$emissions[i, 1, 1] <- i * 0.03
+    #   fitmodel$emissions[i, 1, 2] <- 1 - fitmodel$emissions[i, 1, 1]
+    #   fitmodel$emissions[i, 2, 1] <- i * 0.02
+    #   fitmodel$emissions[i, 2, 2] <- 1 - fitmodel$emissions[i, 2, 1]
+    # }
+    # fitmodel$As[1, 2, 1] <- 0.28
+    # fitmodel$As[1, 2, 2] <- 0.72
+    # fitmodel$pi_0[1, 1] <- 0.95
+    # fitmodel$pi_0[2, 1] <- 0.33
     # print(fitmodel)
     if (forgets) {
       fitmodel$forgets <- runif(length(fitmodel$forgets))
@@ -349,7 +351,6 @@ fetch_dataset <- function(object, link, loc) {
       best_model <- fitmodel
     }
   }
-
   fit_model <- best_model
   fit_model$learns <- fit_model$As[, 2, 1]
   fit_model$forgets <- fit_model$As[, 1, 2]
