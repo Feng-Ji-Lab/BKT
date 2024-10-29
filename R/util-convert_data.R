@@ -128,16 +128,16 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
         }
 
         if (multipair + multiprior + multilearn > 1) {
-            stop("cannot specify more than 1 resource handling")
+            stop("cannot specify more than 1 resource handling (only one of multipair, multiprior or multilearn)")
         }
-
         if (multipair) {
             stop("not implemented")
         } else if (multiprior) {
             stop("not implemented")
         } else if (multilearn) {
-            stop("not implemented")
-            if (!("multilearn" %in% colnames(df3))) {
+            if (!"multilearn" %in% names(defaults)) {
+                stop("multilearn default column not specified")
+            } else if (!("multilearn" %in% colnames(df3))) {
                 stop("specified multilearn default column not in data")
             }
 
@@ -163,13 +163,12 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
             resources <- matrix(resources, ncol = 1)
         }
 
-        if (exists("multigs")) {
+        if (multigs) {
             if (!("multigs" %in% names(defaults))) {
                 stop("multigs default column not specified")
             } else if (!("multilearn" %in% colnames(df3))) {
                 stop("specified multigs default column not in data")
             }
-
             all_guess <- unique(df3[["multilearn"]])
             all_guess <- sort(all_guess)
 

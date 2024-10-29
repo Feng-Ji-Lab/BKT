@@ -91,9 +91,18 @@ model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
 # MARK: BKT variants
 # multilearn, multiprior, multipair, multigs
 # multilearn
-# model <- bkt(seed = 42)
+# model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
 # result <- fit(model, data_path = "ct.csv", multilearn = TRUE, forgets = TRUE, skills = "Plot non-terminating improper fraction")
 # print(params(result))
+
+# MARK: multigs
+# result <- fit(model, data_path = "ct.csv", skills = c("Plot imperfect radical", "Plot pi"), multigs = TRUE)
+# print(params(result))
+
+# MARK: multigs and multilearn
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+result <- fit(model, data_path = "ct.csv", multilearn = TRUE, multigs = TRUE, forgets = TRUE, skills = "Plot non-terminating improper fraction")
+print(params(result))
 
 # library(BKT)
 
@@ -122,7 +131,3 @@ model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
 #     fixed = list("Plot non-terminating improper fraction" = list("learns" = TRUE, "forgets" = TRUE))
 # )
 # print(params(result))
-
-# MARK: multigs
-result <- fit(model, data_path = "ct.csv", skills = c("Plot imperfect radical", "Plot pi"), multigs = TRUE)
-print(params(result))

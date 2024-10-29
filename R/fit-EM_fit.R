@@ -68,8 +68,10 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
     forgets <- forgets * (fixed$forgets < 0) + fixed$forgets * (fixed$forgets >= 0)
   }
   As <- matrix(0, nrow = 2, ncol = 2 * num_resources)
-  As[1, ] <- c(1 - learns, forgets)
-  As[2, ] <- c(learns, 1 - forgets)
+  As[1, seq(1, 2 * num_resources, by = 2)] <- 1 - learns
+  As[1, seq(2, 2 * num_resources, by = 2)] <- forgets
+  As[2, seq(1, 2 * num_resources, by = 2)] <- learns
+  As[2, seq(2, 2 * num_resources, by = 2)] <- 1 - forgets
 
   if (!is.null(fixed$guesses)) {
     guesses <- guesses * (fixed$guesses < 0) + fixed$guesses * (fixed$guesses >= 0)

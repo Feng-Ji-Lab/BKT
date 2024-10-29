@@ -291,14 +291,18 @@ fetch_dataset <- function(object, link, loc) {
   num_fit_initializations <- object@num_fits
   best_likelihood <- -Inf
   best_model <- NULL
-
   for (i in seq_len(num_fit_initializations)) {
     fitmodel <- random_model_uni(num_learns, num_gs)
     optional_args <- list(fixed = list())
     # fitmodel$prior <- 0.3
-    # fitmodel$learns[1] <- 0.28
-    # fitmodel$forgets[1] <- 0
-    # for (i in 1:10) {
+    # for (i in 1:13) {
+    #   fitmodel$learns[i] <- i * 0.03
+    #   fitmodel$forgets[i] <- i * 0.02
+    #   fitmodel$As[i, 1, 2] <- 0.02 * i
+    #   fitmodel$As[i, 2, 1] <- 0.03 * i
+    #   fitmodel$As[i, 2, 2] <- (1 - fitmodel$As[i, 2, 1])
+    # }
+    # for (i in 1:1) {
     #   fitmodel$guesses[i] <- i * 0.05
     #   fitmodel$slips[i] <- i * 0.04
     #   fitmodel$emissions[i, 1, 1] <- i * 0.03
@@ -358,7 +362,6 @@ fetch_dataset <- function(object, link, loc) {
   fit_model$resource_names <- data$resource_names
   fit_model$gs_names <- data$gs_names
   fit_model$likelihood <- best_likelihood
-
   return(fit_model)
 }
 
