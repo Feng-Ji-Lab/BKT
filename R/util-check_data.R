@@ -1,5 +1,5 @@
 check_data <- function(data) {
-  if (ncol(data$data) != nrow(data$resources)) {
+  if (ncol(data$data) != length(data$resources)) {
     stop("data and resource sizes must match")
   }
 

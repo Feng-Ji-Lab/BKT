@@ -161,12 +161,10 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
                     resources[i] <- new_resource_ref[[k]]
                 }
             }
-
             if (is.null(resource_ref)) {
                 resource_ref <- new_resource_ref
             }
         } else if (multiprior) {
-            stop("1")
             if (!"multiprior" %in% names(defaults)) {
                 stop("multiprior default column not specified")
             } else if (!(defaults[["multiprior"]] %in% colnames(df3))) {
@@ -175,7 +173,6 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
 
             resources <- rep(1L, length(data) + length(starts))
             new_data <- rep(0L, length(data) + length(starts))
-
             # create new resources [2, #total + 1] based on how student initially responds
             all_priors <- unique(df3[[defaults[["multiprior"]]]])
             all_priors <- sort(all_priors)
@@ -192,17 +189,16 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
                 }
             }
 
-            all_resources <- sapply(df3[[defaults[["multiprior"]]]], function(x) resource_ref[[x]])
+            all_resources <- sapply(df3[[defaults[["multiprior"]]]], function(x) resource_ref[[as.character(x)]])
 
             # create phantom timeslices with resource 2 or 3 in front of each new student based on their initial response
             for (i in seq_along(starts)) {
-                new_data[(i + starts[i]):(i + starts[i] + lengths[i] - 1)] <- data[(starts[i] - 1):(starts[i] + lengths[i] - 2)]
-                resources[i + starts[i] - 1] <- all_resources[starts[i] - 1]
+                new_data[(i + starts[i]):(i + starts[i] + lengths[i] - 1)] <- data[(starts[i]):(starts[i] + lengths[i] - 1)]
+                resources[i + starts[i] - 1] <- all_resources[starts[i]]
                 resources[(i + starts[i]):(i + starts[i] + lengths[i] - 1)] <- rep(1L, lengths[i])
-                starts[i] <- starts[i] + i
+                starts[i] <- starts[i] + i - 1
                 lengths[i] <- lengths[i] + 1
             }
-
             multiprior_index <- sapply(seq_along(starts), function(i) starts[i] - 1)
             data <- new_data
         } else if (multilearn) {
@@ -237,10 +233,10 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
         if (multigs) {
             if (!("multigs" %in% names(defaults))) {
                 stop("multigs default column not specified")
-            } else if (!(defaults[["multilearn"]] %in% colnames(df3))) {
+            } else if (!(defaults[["multigs"]] %in% colnames(df3))) {
                 stop("specified multigs default column not in data")
             }
-            all_guess <- unique(df3[[defaults[["multilearn"]]]])
+            all_guess <- unique(df3[[defaults[["multigs"]]]])
             all_guess <- sort(all_guess)
 
             # map each new guess/slip case to a row [0, # total]
@@ -253,10 +249,9 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
                     }
                 }
             }
-            data_ref <- sapply(df3[[defaults[["multilearn"]]]], function(x) gs_ref[[x]])
-
+            data_ref <- sapply(df3[[defaults[["multigs"]]]], function(x) gs_ref[[x]])
             # make data n-dimensional, fill in corresponding row and make other non-row entries 0
-            data_temp <- matrix(0, nrow = length(unique(df3[[defaults[["multilearn"]]]])), ncol = nrow(df3))
+            data_temp <- matrix(0, nrow = length(unique(df3[[defaults[["multigs"]]]])), ncol = nrow(df3))
             for (i in seq_len(ncol(data_temp))) {
                 data_temp[data_ref[i], i] <- data[i]
             }

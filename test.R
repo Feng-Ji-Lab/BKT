@@ -105,12 +105,21 @@ model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
 # print(params(result))
 
 # MARK: multipair
-result <- fit(model, data_path = "ct.csv", skills = c("Plot imperfect radical", "Plot pi"), multipair = TRUE)
-print(params(result))
+# result <- fit(model, data_path = "ct.csv", skills = c("Plot pi"), multipair = TRUE)
+# print(params(result))
 
-# MARK: multipair and multilearn
+# MARK: multipair and multigs
 # model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
-# result <- fit(model, data_path = "ct.csv", multilearn = TRUE, multipair = TRUE, forgets = TRUE, skills = "Plot non-terminating improper fraction")
+# result <- fit(model, data_path = "ct.csv", multigs = TRUE, multipair = TRUE, forgets = TRUE, skills = "Plot non-terminating improper fraction")
+# print(params(result))
+
+# MARK: multiprior
+# result <- fit(model, data_path = "ct.csv", skills = c("Plot pi"), multiprior = TRUE)
+# print(params(result))
+
+# MARK: multiprior and multigs
+# model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+# result <- fit(model, data_path = "ct.csv", multigs = TRUE, multiprior = TRUE, forgets = TRUE, skills = "Plot non-terminating improper fraction")
 # print(params(result))
 
 # library(BKT)
