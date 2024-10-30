@@ -100,9 +100,18 @@ model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
 # print(params(result))
 
 # MARK: multigs and multilearn
-model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
-result <- fit(model, data_path = "ct.csv", multilearn = TRUE, multigs = TRUE, forgets = TRUE, skills = "Plot non-terminating improper fraction")
+# model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+# result <- fit(model, data_path = "ct.csv", multilearn = TRUE, multigs = TRUE, forgets = TRUE, skills = "Plot non-terminating improper fraction")
+# print(params(result))
+
+# MARK: multipair
+result <- fit(model, data_path = "ct.csv", skills = c("Plot imperfect radical", "Plot pi"), multipair = TRUE)
 print(params(result))
+
+# MARK: multipair and multilearn
+# model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+# result <- fit(model, data_path = "ct.csv", multilearn = TRUE, multipair = TRUE, forgets = TRUE, skills = "Plot non-terminating improper fraction")
+# print(params(result))
 
 # library(BKT)
 
