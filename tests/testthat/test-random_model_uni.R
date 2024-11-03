@@ -1,3 +1,4 @@
+library(testthat)
 test_that("test-random_model_uni.R", {
     # 示例使用
     # set.seed(123)

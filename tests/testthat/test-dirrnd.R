@@ -1,3 +1,4 @@
+library(testthat)
 test_that("test-dirrnd.R", {
   # 2,3,4
   target <- c(1, 10, 100, 1000)

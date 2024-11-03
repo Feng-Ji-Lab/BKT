@@ -1,3 +1,4 @@
+library(testthat)
 test_that("test-usage_1", {
     # parallel off
     model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)

@@ -20,7 +20,9 @@ This function saves a trained BKT model to a specified file location. The model 
 as an RDS file, which can be loaded back into R using the \code{load_model()} function.
 }
 \examples{
+\dontrun{
 model <- bkt(seed = 42)
 fit_model <- fit(model, data_path = "ct.csv")
 save_model(fit_model, "bkt_model.rds")
+}
 }

@@ -28,8 +28,10 @@ It takes either a data frame or a file path to the data and returns the evaluati
 based on the specified metric (e.g., RMSE or accuracy).
 }
 \examples{
+\dontrun{
 model <- bkt(seed = 42, parallel = TRUE, num_fits = 5)
 result <- fit(model, data_path = "ct.csv", skills = "Plot non-terminating improper fraction")
 eval_result <- evaluate(result, data_path = "ct_test.csv", metric = rmse)
 print(eval_result)
+}
 }

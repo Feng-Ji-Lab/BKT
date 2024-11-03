@@ -27,8 +27,10 @@ on new data. The predictions include both the likelihood of a correct response (
 and the estimated hidden state of the learner's knowledge (\code{state_predictions}).
 }
 \examples{
+\dontrun{
 model <- bkt(seed = 42)
 fit_model <- fit(model, data_path = "ct.csv")
 predictions <- predict_bkt(fit_model, data_path = "ct_test.csv")
 head(predictions)
+}
 }

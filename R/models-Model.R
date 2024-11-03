@@ -28,7 +28,7 @@ setClass(
 
 # MARK: Init Functions
 setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5, folds = 5, seed = sample(1:1e8, 1), defaults = NULL, model_type = rep(FALSE, 4), ...) {
-  object = .Object
+  object <- .Object
   object@parallel <- parallel
   object@num_fits <- num_fits
   object@seed <- seed
@@ -103,14 +103,17 @@ setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5
 #' @param model_type Logical vector. Specifies model variants to use. There are four possible
 #'   variants: 'multilearn', 'multiprior', 'multipair', and 'multigs'. Each corresponds to
 #'   a different modeling strategy.
+#' @param ... Other parameters.
 #' @return A fitted BKT model object, which can be used for predictions, cross-validation,
 #'   or parameter analysis.
 #' @examples
+#' \dontrun{
 #' model <- bkt(seed = 42, parallel = FALSE, num_fits = 1)
 #' result <- fit(
 #'   model,
 #'   data_path = "data.csv"
 #' )
+#' }
 #' @export
 fit <- function(object, data_path = NULL, data = NULL, parallel = FALSE, seed = NULL, num_fits = 1, forgets = FALSE, fixed = NULL, model_type = NULL, ...) {
   if (!object@manual_param_init) {
@@ -243,8 +246,10 @@ partial_fit <- function(object, data_path = NULL, data = NULL, ...) {
 #' @param loc Character. The local file path where the dataset will be saved. The dataset will
 #'   be stored at this location after download.
 #' @examples
+#' \dontrun{
 #' model <- bkt()
 #' fetch_dataset(model, "http://example.com/dataset.csv", "data.csv")
+#' }
 #' @export
 fetch_dataset <- function(object, link, loc) {
   name <- basename(link)
@@ -399,10 +404,12 @@ rmse <- function(true_vals, pred_vals) {
 #' @return Numeric or List. The result of the evaluation based on the specified metric(s). For example, if `rmse` is used,
 #'   the function will return the root mean square error for the model on the dataset.
 #' @examples
+#' \dontrun{
 #' model <- bkt(seed = 42, parallel = TRUE, num_fits = 5)
 #' result <- fit(model, data_path = "ct.csv", skills = "Plot non-terminating improper fraction")
 #' eval_result <- evaluate(result, data_path = "ct_test.csv", metric = rmse)
 #' print(eval_result)
+#' }
 #' @export
 evaluate <- function(object, data = NULL, data_path = NULL, metric = rmse) {
   ._check_data(object, data_path, data)
@@ -501,10 +508,12 @@ check_manual_param_init <- function(object, num_learns, num_gs, skill) {
 #' @return A data frame containing the fitted model parameters. The data frame will typically include
 #'   columns such as 'learns', 'guesses', 'slips', and other model-specific values.
 #' @examples
+#' \dontrun{
 #' model <- bkt(seed = 42, parallel = TRUE, num_fits = 5)
 #' result <- fit(model, data_path = "data.csv", skills = "skill name")
 #' params_df <- params(result)
 #' print(params_df)
+#' }
 #' @export
 params <- function(object) {
   coefs <- coef_(object)
@@ -604,9 +613,11 @@ crossvalidate_single_skill <- function(data, skill, metrics) {
 #' @return A list containing the cross-validation results, including the average performance metric
 #'   and any other relevant details from the validation process.
 #' @examples
+#' \dontrun{
 #' model <- bkt(seed = 42, parallel = TRUE, num_fits = 5)
 #' cv_results <- crossvalidate(model, data_path = "ct.csv", folds = 5)
 #' print(cv_results)
+#' }
 #' @export
 crossvalidate <- function(object, data = NULL, data_path = NULL, metric = rmse, parallel = FALSE, seed = NULL, num_fits = 1, folds = 5, forgets = FALSE, fixed = NULL, model_type = NULL, ...) {
   metric_names <- c()
@@ -689,10 +700,12 @@ crossvalidate <- function(object, data = NULL, data_path = NULL, metric = rmse, 
 #' @return A data frame containing the original data with two additional columns:
 #'   `correct_predictions` and `state_predictions`.
 #' @examples
+#' \dontrun{
 #' model <- bkt(seed = 42)
 #' fit_model <- fit(model, data_path = "ct.csv")
 #' predictions <- predict_bkt(fit_model, data_path = "ct_test.csv")
 #' head(predictions)
+#' }
 #' @export
 predict_bkt <- function(model, data_path = NULL, data = NULL) {
   ._check_data(model, data_path, data)
@@ -751,6 +764,7 @@ predict_bkt <- function(model, data_path = NULL, data = NULL) {
 #' The function performs checks to ensure that the provided parameters are valid in terms of type, length, and existence.
 #'
 #' @examples
+#' \dontrun{
 #' # Initialize a BKT model
 #' model <- bkt(seed = 42)
 #'
@@ -764,7 +778,7 @@ predict_bkt <- function(model, data_path = NULL, data = NULL) {
 #'   skills = "Plot non-terminating improper fraction",
 #'   fixed = list("Plot non-terminating improper fraction" = list("prior" = TRUE))
 #' )
-#'
+#' }
 #' @export
 set_coef <- function(object, values) {
   # Sets or initializes parameters in the BKT model

@@ -1,3 +1,4 @@
+library(testthat)
 test_that("test-reshape_python.R", {
   # [1 2
   #  3 4] ->

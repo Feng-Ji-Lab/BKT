@@ -27,6 +27,7 @@ The values should be provided as a named list, with each skill having its own su
 The function performs checks to ensure that the provided parameters are valid in terms of type, length, and existence.
 }
 \examples{
+\dontrun{
 # Initialize a BKT model
 model <- bkt(seed = 42)
 
@@ -40,5 +41,5 @@ result <- fit(model,
   skills = "Plot non-terminating improper fraction",
   fixed = list("Plot non-terminating improper fraction" = list("prior" = TRUE))
 )
-
+}
 }
