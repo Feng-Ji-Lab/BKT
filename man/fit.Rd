@@ -4,15 +4,26 @@
 \alias{fit}
 \title{fit bkt model}
 \usage{
-fit(.Object, data_path = NULL, data = NULL, ...)
+fit(
+  object,
+  data_path = NULL,
+  data = NULL,
+  parallel = FALSE,
+  seed = NULL,
+  num_fits = 1,
+  forgets = FALSE,
+  fixed = NULL,
+  model_type = NULL,
+  ...
+)
 }
 \arguments{
+\item{object}{A BKT model object. The model to be cross-validated.}
+
 \item{data_path}{Character. The file path to the dataset. This will be used if \code{data} is not provided.}
 
 \item{data}{Data frame. The dataset to be used for cross-validation. If \code{data} is not provided,
 \code{data_path} should be used to load the dataset from a file.}
-
-\item{object}{A BKT model object. The model to be cross-validated.}
 
 \item{parallel}{Logical. Indicates whether to use parallel computation.
 If set to \code{TRUE}, multithreading will be used to speed up model training.}
@@ -22,9 +33,6 @@ of results.}
 
 \item{num_fits}{Integer. Number of fit iterations. The best model is selected from
 the total iterations.}
-
-\item{folds}{Integer. Number of folds used for cross-validation.
-This parameter is used during cross-validation to divide the data into parts.}
 
 \item{forgets}{Logical. Whether to include a forgetting factor in the model.
 If set to \code{TRUE}, the model will account for the possibility that learners may forget knowledge.}

@@ -4,12 +4,6 @@ rm(list = ls())
 devtools::load_all("./")
 devtools::test()
 
-# check
-unloadNamespace("BKT")
-rm(list = ls())
-devtools::load_all("./")
-devtools::check()
-
 # document
 unloadNamespace("BKT")
 rm(list = ls())
@@ -30,3 +24,12 @@ library(BKT)
 # install online and load
 devtools::install_github("Feng-Ji-Lab/bkt")
 library(BKT)
+
+# check
+unloadNamespace("BKT")
+devtools::build_manual()
+rm(list = ls())
+devtools::load_all("./")
+devtools::check()
+
+# check cran

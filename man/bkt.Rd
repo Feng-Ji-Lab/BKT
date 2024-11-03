@@ -10,6 +10,8 @@ bkt(
   folds = 5,
   seed = sample(1:1e+08, 1),
   model_type = rep(FALSE, 4),
+  forgets = FALSE,
+  fixed = NULL,
   ...
 )
 }
@@ -37,6 +39,8 @@ If set to \code{TRUE}, the model will account for the possibility that learners 
 model fitting. Each skill can have certain parameters, such as "guesses" and "slips", set to
 \code{TRUE} (to fix) or \code{FALSE} (to let them vary). For example:
 \code{list("skill_name" = list("guesses" = TRUE, "slips" = TRUE))}.}
+
+\item{...}{Other parameters.}
 }
 \value{
 A BKT model object, which can be used by other functions such as fitting

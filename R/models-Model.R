@@ -28,26 +28,27 @@ setClass(
 
 # MARK: Init Functions
 setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5, folds = 5, seed = sample(1:1e8, 1), defaults = NULL, model_type = rep(FALSE, 4), ...) {
-  .Object@parallel <- parallel
-  .Object@num_fits <- num_fits
-  .Object@seed <- seed
-  .Object@defaults <- defaults
-  .Object@model_type <- model_type
-  .Object@fit_model <- list()
-  .Object@manual_param_init <- FALSE
-  .Object@skills <- ".*"
-  .Object@folds <- folds
-  .Object@forgets <- FALSE
+  object = .Object
+  object@parallel <- parallel
+  object@num_fits <- num_fits
+  object@seed <- seed
+  object@defaults <- defaults
+  object@model_type <- model_type
+  object@fit_model <- list()
+  object@manual_param_init <- FALSE
+  object@skills <- ".*"
+  object@folds <- folds
+  object@forgets <- FALSE
 
-  set.seed(.Object@seed)
+  set.seed(object@seed)
 
   # MARK: static parameter handle
-  .Object@MODELS_BKT <- c("multilearn", "multiprior", "multipair", "multigs")
-  .Object@MODEL_ARGS <- c("parallel", "num_fits", "seed", "defaults", .Object@MODELS_BKT)
-  .Object@FIT_ARGS <- c("skills", "num_fits", "defaults", "fixed", "parallel", "forgets", "preload", .Object@MODELS_BKT)
-  .Object@CV_ARGS <- c(.Object@FIT_ARGS, "folds", "seed")
+  object@MODELS_BKT <- c("multilearn", "multiprior", "multipair", "multigs")
+  object@MODEL_ARGS <- c("parallel", "num_fits", "seed", "defaults", object@MODELS_BKT)
+  object@FIT_ARGS <- c("skills", "num_fits", "defaults", "fixed", "parallel", "forgets", "preload", object@MODELS_BKT)
+  object@CV_ARGS <- c(object@FIT_ARGS, "folds", "seed")
 
-  .Object@DEFAULTS <- list(
+  object@DEFAULTS <- list(
     num_fits = 5,
     defaults = NULL,
     parallel = TRUE,
@@ -56,10 +57,10 @@ setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5
     folds = 5,
     forgets = FALSE,
     fixed = NULL,
-    model_type = rep(FALSE, length(.Object@MODELS_BKT))
+    model_type = rep(FALSE, length(object@MODELS_BKT))
   )
 
-  .Object@DEFAULTS_BKT <- list(
+  object@DEFAULTS_BKT <- list(
     order_id = "order_id",
     skill_name = "skill_name",
     correct = "correct",
@@ -71,9 +72,9 @@ setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5
     folds = "template_id"
   )
 
-  .Object@INITIALIZABLE_PARAMS <- c("prior", "learns", "guesses", "slips", "forgets")
+  object@INITIALIZABLE_PARAMS <- c("prior", "learns", "guesses", "slips", "forgets")
 
-  return(.Object)
+  return(object)
 })
 
 # MARK: fit
@@ -93,8 +94,6 @@ setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5
 #'   of results.
 #' @param num_fits Integer. Number of fit iterations. The best model is selected from
 #'   the total iterations.
-#' @param folds Integer. Number of folds used for cross-validation.
-#'   This parameter is used during cross-validation to divide the data into parts.
 #' @param forgets Logical. Whether to include a forgetting factor in the model.
 #'   If set to `TRUE`, the model will account for the possibility that learners may forget knowledge.
 #' @param fixed List. A nested list specifying which parameters to fix for specific skills during
@@ -113,48 +112,48 @@ setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5
 #'   data_path = "data.csv"
 #' )
 #' @export
-fit <- function(.Object, data_path = NULL, data = NULL, ...) {
-  if (!.Object@manual_param_init) {
-    .Object@fit_model <- list()
+fit <- function(object, data_path = NULL, data = NULL, parallel = FALSE, seed = NULL, num_fits = 1, forgets = FALSE, fixed = NULL, model_type = NULL, ...) {
+  if (!object@manual_param_init) {
+    object@fit_model <- list()
   }
 
-  .Object <- partial_fit(.Object, data_path = data_path, data = data, ...)
+  object <- partial_fit(object, data_path = data_path, data = data, ...)
 
-  return(.Object)
+  return(object)
 }
 
 # MARK: partial_fit
-partial_fit <- function(.Object, data_path = NULL, data = NULL, ...) {
-  .Object <- ._check_data(.Object, data_path, data)
+partial_fit <- function(object, data_path = NULL, data = NULL, ...) {
+  object <- ._check_data(object, data_path, data)
 
   args <- list(...)
 
-  .Object <- ._check_args(.Object, .Object@FIT_ARGS, args)
-  .Object <- ._update_param(.Object, c("skills", "num_fits", "defaults", "fixed", "parallel", "forgets"), args)
+  object <- ._check_args(object, object@FIT_ARGS, args)
+  object <- ._update_param(object, c("skills", "num_fits", "defaults", "fixed", "parallel", "forgets"), args)
 
-  if (is.null(.Object@fit_model) || length(.Object@fit_model) == 0) {
-    .Object@fit_model <- list()
+  if (is.null(object@fit_model) || length(object@fit_model) == 0) {
+    object@fit_model <- list()
   }
 
-  if (length(.Object@fit_model) == 0 || (.Object@manual_param_init && length(.Object@fit_model) > 0)) {
-    .Object <- ._update_param(.Object, "model_type", ._update_defaults(.Object, args))
+  if (length(object@fit_model) == 0 || (object@manual_param_init && length(object@fit_model) > 0)) {
+    object <- ._update_param(object, "model_type", ._update_defaults(object, args))
   }
 
-  .Object@manual_param_init <- TRUE
-  all_data <- ._data_helper(.Object, data_path, data, .Object@defaults, .Object@skills, .Object@model_type)
+  object@manual_param_init <- TRUE
+  all_data <- ._data_helper(object, data_path, data, object@defaults, object@skills, object@model_type)
 
-  .Object <- ._update_param(.Object, "skills", list(skills = names(all_data)))
+  object <- ._update_param(object, "skills", list(skills = names(all_data)))
   for (skill in names(all_data)) {
-    .Object@fit_model[[skill]] <- ._fit(.Object, all_data[[skill]], skill, .Object@forgets, preload = ifelse("preload" %in% names(args), args$preload, FALSE))
+    object@fit_model[[skill]] <- ._fit(object, all_data[[skill]], skill, object@forgets, preload = ifelse("preload" %in% names(args), args$preload, FALSE))
   }
 
-  .Object@manual_param_init <- FALSE
+  object@manual_param_init <- FALSE
 
-  return(.Object)
+  return(object)
 }
 
 # MARK: ._check_data
-._check_data <- function(.Object, data_path, data) {
+._check_data <- function(object, data_path, data) {
   if (is.null(data_path) && is.null(data)) {
     stop("No data specified")
   } else if (!is.null(data_path) && !is.null(data)) {
@@ -162,69 +161,69 @@ partial_fit <- function(.Object, data_path = NULL, data = NULL, ...) {
   } else if (!is.null(data_path) && !file.exists(data_path)) {
     stop("Data path is invalid or file not found")
   }
-  return(.Object)
+  return(object)
 }
 
 # MARK: ._check_args
-._check_args <- function(.Object, expected_args, args) {
+._check_args <- function(object, expected_args, args) {
   for (arg in names(args)) {
     if (!(arg %in% expected_args)) {
       stop("Provided arguments are not recognized. They must be one or more of: ", paste(expected_args, collapse = ", "))
     }
   }
-  return(.Object)
+  return(object)
 }
 
 # MARK: ._update_param
-._update_param <- function(.Object, params, args, keep = FALSE) {
+._update_param <- function(object, params, args, keep = FALSE) {
   if (is.list(args)) {
     for (param in params) {
-      if (!param %in% names(args) && (!param %in% names(.Object@keep) || !.Object@keep[[param]])) {
-        arg <- .Object@DEFAULTS[[param]]
+      if (!param %in% names(args) && (!param %in% names(object@keep) || !object@keep[[param]])) {
+        arg <- object@DEFAULTS[[param]]
         default_arg <- if (is.function(arg)) arg() else arg
-        if (is.null(slot(.Object, param))) {
-          slot(.Object, param) <- default_arg
+        if (is.null(slot(object, param))) {
+          slot(object, param) <- default_arg
         }
       } else if (param %in% names(args)) {
-        slot(.Object, param) <- args[[param]]
+        slot(object, param) <- args[[param]]
       }
-      .Object@keep[[param]] <- keep
+      object@keep[[param]] <- keep
     }
   } else {
-    slot(.Object, params) <- args
-    .Object@keep[[params]] <- keep
+    slot(object, params) <- args
+    object@keep[[params]] <- keep
   }
 
   if ("seed" %in% params) {
-    set.seed(.Object@seed)
+    set.seed(object@seed)
   }
 
-  return(.Object)
+  return(object)
 }
 
 # MARK:._update_defaults
-._update_defaults <- function(.Object, args) {
+._update_defaults <- function(object, args) {
   # Update the default column names
   model_types <- rep(FALSE, 4)
 
   for (d in names(args)) {
-    if (d %in% .Object@MODELS_BKT) {
+    if (d %in% object@MODELS_BKT) {
       if (is.logical(args[[d]])) {
-        model_types[which(.Object@MODELS_BKT == d)] <- args[[d]]
+        model_types[which(object@MODELS_BKT == d)] <- args[[d]]
       } else if (is.character(args[[d]])) {
-        if (is.null(.Object@defaults)) {
-          .Object@defaults <- list()
+        if (is.null(object@defaults)) {
+          object@defaults <- list()
         }
-        .Object@defaults[[d]] <- args[[d]]
-        model_types[which(.Object@MODELS_BKT == d)] <- TRUE
+        object@defaults[[d]] <- args[[d]]
+        model_types[which(object@MODELS_BKT == d)] <- TRUE
       } else {
         stop("model type must either be boolean for automatic column inference or string specifying column")
       }
-    } else if (d %in% .Object@DEFAULTS_BKT) {
-      if (is.null(.Object@defaults)) {
-        .Object@defaults <- list()
+    } else if (d %in% object@DEFAULTS_BKT) {
+      if (is.null(object@defaults)) {
+        object@defaults <- list()
       }
-      .Object@defaults[[d]] <- args[[d]]
+      object@defaults[[d]] <- args[[d]]
     }
   }
 
@@ -260,7 +259,7 @@ fetch_dataset <- function(object, link, loc) {
 }
 
 # MARK: ._data_helper
-._data_helper <- function(.Object, data_path, data, defaults, skills, model_type, gs_ref = NULL, resource_ref = NULL, return_df = FALSE, folds = FALSE) {
+._data_helper <- function(object, data_path, data, defaults, skills, model_type, gs_ref = NULL, resource_ref = NULL, return_df = FALSE, folds = FALSE) {
   data_p <- NULL
 
   if (!is.null(data_path) && is.character(data_path)) {
@@ -601,14 +600,15 @@ crossvalidate_single_skill <- function(data, skill, metrics) {
 #' @param model_type Logical vector. Specifies model variants to use. There are four possible
 #'   variants: 'multilearn', 'multiprior', 'multipair', and 'multigs'. Each corresponds to
 #'   a different modeling strategy.
+#' @param ... Other parameters.
 #' @return A list containing the cross-validation results, including the average performance metric
 #'   and any other relevant details from the validation process.
 #' @examples
 #' model <- bkt(seed = 42, parallel = TRUE, num_fits = 5)
-#' cv_results <- crossvalidate(model, data_path = "ct.csv", metric = rmse, folds = 5)
+#' cv_results <- crossvalidate(model, data_path = "ct.csv", folds = 5)
 #' print(cv_results)
 #' @export
-crossvalidate <- function(object, data = NULL, data_path = NULL, metric = rmse, ...) {
+crossvalidate <- function(object, data = NULL, data_path = NULL, metric = rmse, parallel = FALSE, seed = NULL, num_fits = 1, folds = 5, forgets = FALSE, fixed = NULL, model_type = NULL, ...) {
   metric_names <- c()
 
   if (!is.list(metric)) {

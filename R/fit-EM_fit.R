@@ -122,9 +122,17 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
 
   x <- list()
   if (parallel) {
-    cl <- makeCluster(num_threads)
-    x <- parLapply(cl, thread_counts, inner)
-    stopCluster(cl)
+    tryCatch(
+      {
+        cl <- makeCluster(num_threads)
+        x <- parLapply(cl, thread_counts, inner)
+        stopCluster(cl)
+      },
+      error = function(e) {
+        message(paste("Parallel computing error occurred:", conditionMessage(e), ". Automatically switching to serial computing."))
+        x <- lapply(thread_counts, inner)
+      }
+    )
   } else {
     x <- lapply(thread_counts, inner)
   }

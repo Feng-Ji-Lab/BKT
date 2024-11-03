@@ -4,7 +4,20 @@
 \alias{crossvalidate}
 \title{Cross Validation}
 \usage{
-crossvalidate(object, data = NULL, data_path = NULL, metric = rmse, ...)
+crossvalidate(
+  object,
+  data = NULL,
+  data_path = NULL,
+  metric = rmse,
+  parallel = FALSE,
+  seed = NULL,
+  num_fits = 1,
+  folds = 5,
+  forgets = FALSE,
+  fixed = NULL,
+  model_type = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{A BKT model object. The model to be cross-validated.}
@@ -39,6 +52,8 @@ model fitting. Each skill can have certain parameters, such as "guesses" and "sl
 \item{model_type}{Logical vector. Specifies model variants to use. There are four possible
 variants: 'multilearn', 'multiprior', 'multipair', and 'multigs'. Each corresponds to
 a different modeling strategy.}
+
+\item{...}{Other parameters.}
 }
 \value{
 A list containing the cross-validation results, including the average performance metric
@@ -52,6 +67,6 @@ and evaluates it on the validation data according to a specified metric.
 }
 \examples{
 model <- bkt(seed = 42, parallel = TRUE, num_fits = 5)
-cv_results <- crossvalidate(model, data_path = "ct.csv", metric = rmse, folds = 5)
+cv_results <- crossvalidate(model, data_path = "ct.csv", folds = 5)
 print(cv_results)
 }
