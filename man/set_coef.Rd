@@ -32,7 +32,9 @@ The function performs checks to ensure that the provided parameters are valid in
 model <- bkt(seed = 42)
 
 # Set custom parameters for a specific skill
-model <- set_coef(model, list("Plot non-terminating improper fraction" = list("prior" = 0.5, "learns" = 0.2)))
+model <- set_coef(model, list(
+  "Plot non-terminating improper fraction" = list("prior" = 0.5, "learns" = 0.2)
+))
 
 # Fit the model with fixed parameters
 result <- fit(model,

@@ -1,6 +1,6 @@
 #' @import RCurl
-#' @importFrom stats runif setNames na.omit
-#' @importFrom methods slot new slotNames
+#' @importFrom stats runif setNames na.omit rgamma
+#' @importFrom methods slot new slotNames slot<-
 #' @importFrom utils read.csv
 
 # MARK: setClass Model

@@ -1,6 +1,7 @@
 ^.*\.Rproj$
 ^\.vscode$
-^.*\.R$
+^goldenCmd\.R$
+^test\.R$
 ^.*\.csv$
 ^.*\.pkl$
 ^.*\.pdf$

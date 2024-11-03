@@ -2,7 +2,7 @@
 convert_data <- function(data_path, skill_name, defaults = defaults, model_type = model_type,
                          gs_refs = gs_ref, resource_refs = resource_ref, return_df = return_df, folds = folds) {
     if (is.null(model_type)) {
-        multilearn <- multiprior <- multipair <- multigs <- False
+        multilearn <- multiprior <- multipair <- multigs <- FALSE
     } else {
         multilearn <- model_type[1]
         multiprior <- model_type[2]

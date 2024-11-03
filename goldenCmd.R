@@ -27,6 +27,11 @@ library(BKT)
 
 # check
 unloadNamespace("BKT")
+devtools::load_all("./")
+library(roxygen2)
+roxygen2::roxygenise()
+unloadNamespace("BKT")
+devtools::load_all("./")
 devtools::build_manual()
 rm(list = ls())
 devtools::load_all("./")

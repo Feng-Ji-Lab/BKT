@@ -45,6 +45,8 @@ model fitting. Each skill can have certain parameters, such as "guesses" and "sl
 \item{model_type}{Logical vector. Specifies model variants to use. There are four possible
 variants: 'multilearn', 'multiprior', 'multipair', and 'multigs'. Each corresponds to
 a different modeling strategy.}
+
+\item{...}{Other parameters.}
 }
 \value{
 A fitted BKT model object, which can be used for predictions, cross-validation,
