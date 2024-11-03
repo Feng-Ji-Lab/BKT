@@ -5,7 +5,7 @@ Authors@R: c(
     person("Yuhao", "Yuan", email = "325063151@qq.com", role = c("aut", "cre")),
     person("Biying", "Zhou", email = "zby.zhou@mail.utoronto.ca", role = "aut"),
     person("Feng", "Ji", email = "f.ji@utoronto.ca", role = "aut"))
-Description: This package provides tools for fitting, cross-validating, and predicting with Bayesian Knowledge Tracing (BKT) models. It is designed for analyzing educational datasets to trace student knowledge over time. The package includes functions for fitting BKT models, evaluating their performance using various metrics, and making predictions on new data.
+Description: Provides tools for fitting, cross-validating, and predicting with Bayesian Knowledge Tracing (BKT) models. It is designed for analyzing educational datasets to trace student knowledge over time. The package includes functions for fitting BKT models, evaluating their performance using various metrics, and making predictions on new data.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -13,3 +13,8 @@ RoxygenNote: 7.3.2
 Imports:
     RCurl,
     parallel,
+    methods,
+    stats,
+    utils,
+Suggests: 
+    testthat (>= 3.0.0)

@@ -1,4 +1,9 @@
 ^.*\.Rproj$
+^\.vscode$
+^.*\.R$
+^.*\.csv$
+^.*\.pkl$
+^.*\.pdf$
 ^\.Rproj\.user$
 ^README\.Rmd$
 ^LICENSE\.md$
@@ -9,4 +14,4 @@
 ^pkgdown$
 ^_pkgdown\.yml$
 ^\.github$
-*\.url
+^.*\.url$

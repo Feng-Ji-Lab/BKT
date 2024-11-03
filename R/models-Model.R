@@ -1,4 +1,7 @@
 #' @import RCurl
+#' @importFrom stats runif setNames na.omit
+#' @importFrom methods slot new slotNames
+#' @importFrom utils read.csv
 
 # MARK: setClass Model
 setClass(
@@ -769,7 +772,9 @@ predict_bkt <- function(model, data_path = NULL, data = NULL) {
 #' model <- bkt(seed = 42)
 #'
 #' # Set custom parameters for a specific skill
-#' model <- set_coef(model, list("Plot non-terminating improper fraction" = list("prior" = 0.5, "learns" = 0.2)))
+#' model <- set_coef(model, list(
+#'   "Plot non-terminating improper fraction" = list("prior" = 0.5, "learns" = 0.2)
+#' ))
 #'
 #' # Fit the model with fixed parameters
 #' result <- fit(model,
@@ -811,7 +816,7 @@ set_coef <- function(object, values) {
     if (param == "prior") {
       valid <- valid && is.numeric(params[[param]])
     } else {
-      valid <- valid && is(params[[param]], "numeric") && param %in% object@INITIALIZABLE_PARAMS
+      valid <- valid && is.numeric(params[[param]]) && param %in% object@INITIALIZABLE_PARAMS
     }
   }
 
