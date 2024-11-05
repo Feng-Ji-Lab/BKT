@@ -427,10 +427,10 @@ evaluate <- function(object, data = NULL, data_path = NULL, metric = rmse) {
       m <- metric[[i]]
       if (is.character(m)) {
         stop("not implemented")
-        if (!(m %in% metrics$SUPPORTED_METRICS)) {
-          stop(paste("metric must be one of:", paste(metrics$SUPPORTED_METRICS, collapse = ", ")))
+        if (!(m %in% metric$SUPPORTED_METRICS)) {
+          stop(paste("metric must be one of:", paste(metric$SUPPORTED_METRICS, collapse = ", ")))
         }
-        metric[[i]] <- metrics$SUPPORTED_METRICS[[m]]
+        metric[[i]] <- metric$SUPPORTED_METRICS[[m]]
       } else if (!is.function(m)) {
         stop("metric must either be a string, function, or list/vector of strings and functions")
       }
@@ -535,7 +535,7 @@ params <- function(object) {
   df <- as.data.frame(do.call(rbind, formatted_coefs), stringsAsFactors = FALSE)
   colnames(df) <- c("skill", "param", "class", "value")
 
-  df <- transform(df, value = sprintf("%.6f", as.numeric(value)))
+  df <- transform(df, value = sprintf("%.6f", as.numeric(df)))
 
   return(df)
 }
@@ -635,10 +635,10 @@ crossvalidate <- function(object, data = NULL, data_path = NULL, metric = rmse, 
     for (i in seq_along(metric)) {
       m <- metric[[i]]
       if (is.character(m)) {
-        if (!(m %in% metrics$SUPPORTED_METRICS)) {
-          stop(paste("metric must be one of:", paste(metrics$SUPPORTED_METRICS, collapse = ", ")))
+        if (!(m %in% metric$SUPPORTED_METRICS)) {
+          stop(paste("metric must be one of:", paste(metric$SUPPORTED_METRICS, collapse = ", ")))
         }
-        metric[[i]] <- metrics$SUPPORTED_METRICS[[m]]
+        metric[[i]] <- metric$SUPPORTED_METRICS[[m]]
         metric_names <- c(metric_names, m)
       } else if (is.function(m)) {
         metric_names <- c(metric_names, deparse(substitute(m)))

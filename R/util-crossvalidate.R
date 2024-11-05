@@ -19,8 +19,8 @@ crossvalidate_single_skill <- function(model, data, skill, folds, metric, rand, 
             training_data <- fix_data_specified(data, label, count)
             test_data <- fix_data_specified(data, label, count)
 
-            model@fit_model[[skill]] <- ._fit(object, training_data, skill, model@forgets)
-            metrics <- metrics + ._evaluate(object, list(skill = test_data), metric)
+            model@fit_model[[skill]] <- ._fit(model, training_data, skill, model@forgets)
+            metrics <- metrics + ._evaluate(model, list(skill = test_data), metric)
         }
     } else {
         split_size <- floor(length(data$starts) / folds)
@@ -99,4 +99,8 @@ cut_array <- function(array, l, r) {
         return(array[integer(0)])
     }
     return(array[l:r])
+}
+
+fix_data_specified <- function(data, label, count) {
+    stop("not implemented")
 }
