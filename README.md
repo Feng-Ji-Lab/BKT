@@ -1,4 +1,4 @@
-# Bayesian Knowledge Tracing in R
+# BKT: Bayesian Knowledge Tracing in R
 
 We introduce an **R** implementation of the Bayesian Knowledge Tracing algorithm and its variants, which estimate student cognitive mastery from problem-solving sequences.
 
