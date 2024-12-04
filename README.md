@@ -339,6 +339,292 @@ The result are shown below:
 
 In this example, the learns and forgets parameters were manually fixed at 0.25 using the `set_coef` function, meaning the model was not allowed to adjust these values during training. The model then estimated the other parameters (guesses, slips, and prior) based on the data. The fixed learns and forgets parameters indicate a constant 25% chance of learning or forgetting the skill, while the model predicted an 18.3% chance of guessing correctly and an 11.3% chance of slipping. The prior probability indicates that, initially, there was a 48.3% chance the student already knew the skill.
 
+### BKT Variants
+
+
+#### Multiple Guess
+
+Train a multiple guess and slip BKT model on multiple skills in the CT dataset. Switch parameter `multigs = TRUE` in fit function.
+
+Multiple Guess refers to Item Difficulty Effect (IDE) Model.
+
+```r
+library(BKT)
+
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+
+result <- fit(model, data_path = "ct.csv", skills = c("Plot pi"), multigs = TRUE)
+print(params(result))
+```
+
+The result are shown below:
+```
+     skill   param   class    value
+1  Plot pi  learns default 0.995657
+2  Plot pi forgets default 0.000000
+3  Plot pi guesses       1 0.000000
+4  Plot pi guesses       2 0.000000
+5  Plot pi guesses       3 0.000000
+6  Plot pi guesses       4 0.000000
+7  Plot pi guesses       5 0.000000
+8  Plot pi guesses       6 0.000000
+9  Plot pi guesses       7 0.000000
+10 Plot pi guesses       8 0.000000
+11 Plot pi guesses       9 0.000000
+12 Plot pi guesses      10 0.000000
+13 Plot pi   slips       1 0.577002
+14 Plot pi   slips       2 0.220335
+15 Plot pi   slips       3 0.246635
+16 Plot pi   slips       4 0.426740
+17 Plot pi   slips       5 0.238321
+18 Plot pi   slips       6 0.560898
+19 Plot pi   slips       7 0.381043
+20 Plot pi   slips       8 0.477167
+21 Plot pi   slips       9 0.235853
+22 Plot pi   slips      10 0.472197
+23 Plot pi   prior default 0.992952
+```
+Note column `class` refers to different items.
+
+#### Multiple Learn
+
+Train a multiple learn BKT model on multiple skills in the CT dataset. Switch parameter `multilearn = TRUE` in fit function.
+
+multilearn refers to Item Learning Effect (ILE) Model.
+
+```r
+library(BKT)
+
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+
+result <- fit(model, data_path = "ct.csv", skills = c("Plot pi"), multilearn = TRUE)
+print(params(result))
+```
+
+The result are shown below:
+
+```
+     skill   param   class    value
+1  Plot pi  learns       1 0.968846
+2  Plot pi  learns       2 1.000000
+3  Plot pi  learns       3 1.000000
+4  Plot pi  learns       4 1.000000
+5  Plot pi  learns       5 1.000000
+6  Plot pi  learns       6 0.334115
+7  Plot pi  learns       7 0.775121
+8  Plot pi  learns       8 0.742444
+9  Plot pi  learns       9 0.000000
+10 Plot pi  learns      10 0.000372
+11 Plot pi forgets       1 0.000000
+12 Plot pi forgets       2 0.000000
+13 Plot pi forgets       3 0.000000
+14 Plot pi forgets       4 0.000000
+15 Plot pi forgets       5 0.000000
+16 Plot pi forgets       6 0.000000
+17 Plot pi forgets       7 0.000000
+18 Plot pi forgets       8 0.000000
+19 Plot pi forgets       9 0.000000
+20 Plot pi forgets      10 0.000000
+21 Plot pi guesses default 0.000000
+22 Plot pi   slips default 0.352701
+23 Plot pi   prior default 0.936924
+```
+
+Note column `class` refers to different items.
+
+
+#### Multiple Pair
+
+Train a multiple pair BKT model on multiple skills in the CT dataset. Switch parameter `multipair = TRUE` in fit function.
+
+Multiple Pair refers to Item Order Effect (IOE) Model.
+
+```r
+library(BKT)
+
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+
+result <- fit(model, data_path = "ct.csv", skills = c("Plot pi"), multipair = TRUE)
+print(params(result))
+```
+
+The result are shown below:
+
+```
+      skill   param   class    value
+1   Plot pi  learns       1 0.363054
+2   Plot pi  learns       2 1.000000
+3   Plot pi  learns       3 1.000000
+4   Plot pi  learns       4 1.000000
+5   Plot pi  learns       5 1.000000
+6   Plot pi  learns       6 1.000000
+7   Plot pi  learns       7 1.000000
+8   Plot pi  learns       8 1.000000
+9   Plot pi  learns       9 1.000000
+10  Plot pi  learns      10 1.000000
+11  Plot pi  learns      11 0.000000
+12  Plot pi  learns      12 1.000000
+13  Plot pi  learns      13 1.000000
+14  Plot pi  learns      14 1.000000
+15  Plot pi  learns      15 1.000000
+16  Plot pi  learns      16 1.000000
+17  Plot pi  learns      17 1.000000
+18  Plot pi  learns      18 1.000000
+19  Plot pi  learns      19 1.000000
+20  Plot pi  learns      20 1.000000
+21  Plot pi  learns      21 1.000000
+22  Plot pi  learns      22 1.000000
+23  Plot pi  learns      23 1.000000
+24  Plot pi  learns      24 1.000000
+25  Plot pi  learns      25 0.000000
+26  Plot pi  learns      26 1.000000
+27  Plot pi  learns      27 1.000000
+28  Plot pi  learns      28 1.000000
+29  Plot pi  learns      29 1.000000
+30  Plot pi  learns      30 1.000000
+31  Plot pi  learns      31 0.000000
+32  Plot pi  learns      32 1.000000
+33  Plot pi  learns      33 1.000000
+34  Plot pi  learns      34 1.000000
+35  Plot pi  learns      35 1.000000
+36  Plot pi  learns      36 1.000000
+37  Plot pi  learns      37 1.000000
+38  Plot pi  learns      38 1.000000
+39  Plot pi  learns      39 1.000000
+40  Plot pi  learns      40 1.000000
+41  Plot pi  learns      41 1.000000
+42  Plot pi  learns      42 1.000000
+43  Plot pi  learns      43 0.000053
+44  Plot pi  learns      44 1.000000
+45  Plot pi  learns      45 1.000000
+46  Plot pi  learns      46 1.000000
+47  Plot pi  learns      47 1.000000
+48  Plot pi  learns      48 1.000000
+49  Plot pi  learns      49 1.000000
+50  Plot pi  learns      50 1.000000
+51  Plot pi  learns      51 1.000000
+52  Plot pi  learns      52 1.000000
+53  Plot pi  learns      53 1.000000
+54  Plot pi  learns      54 1.000000
+55  Plot pi  learns      55 1.000000
+56  Plot pi  learns      56 1.000000
+57  Plot pi  learns      57 1.000000
+58  Plot pi  learns      58 1.000000
+59  Plot pi  learns      59 1.000000
+60  Plot pi  learns      60 1.000000
+61  Plot pi  learns      61 1.000000
+62  Plot pi  learns      62 1.000000
+63  Plot pi  learns      63 1.000000
+64  Plot pi  learns      64 1.000000
+65  Plot pi  learns      65 1.000000
+66  Plot pi  learns      66 1.000000
+67  Plot pi  learns      67 1.000000
+68  Plot pi  learns      68 1.000000
+69  Plot pi  learns      69 1.000000
+70  Plot pi  learns      70 1.000000
+71  Plot pi  learns      71 1.000000
+72  Plot pi  learns      72 1.000000
+73  Plot pi forgets       1 0.000000
+74  Plot pi forgets       2 0.000000
+75  Plot pi forgets       3 0.000000
+76  Plot pi forgets       4 0.000000
+77  Plot pi forgets       5 0.000000
+78  Plot pi forgets       6 0.000000
+79  Plot pi forgets       7 0.000000
+80  Plot pi forgets       8 0.000000
+81  Plot pi forgets       9 0.000000
+82  Plot pi forgets      10 0.000000
+83  Plot pi forgets      11 0.000000
+84  Plot pi forgets      12 0.000000
+85  Plot pi forgets      13 0.000000
+86  Plot pi forgets      14 0.000000
+87  Plot pi forgets      15 0.000000
+88  Plot pi forgets      16 0.000000
+89  Plot pi forgets      17 0.000000
+90  Plot pi forgets      18 0.000000
+91  Plot pi forgets      19 0.000000
+92  Plot pi forgets      20 0.000000
+93  Plot pi forgets      21 0.000000
+94  Plot pi forgets      22 0.000000
+95  Plot pi forgets      23 0.000000
+96  Plot pi forgets      24 0.000000
+97  Plot pi forgets      25 0.000000
+98  Plot pi forgets      26 0.000000
+99  Plot pi forgets      27 0.000000
+100 Plot pi forgets      28 0.000000
+101 Plot pi forgets      29 0.000000
+102 Plot pi forgets      30 0.000000
+103 Plot pi forgets      31 0.000000
+104 Plot pi forgets      32 0.000000
+105 Plot pi forgets      33 0.000000
+106 Plot pi forgets      34 0.000000
+107 Plot pi forgets      35 0.000000
+108 Plot pi forgets      36 0.000000
+109 Plot pi forgets      37 0.000000
+110 Plot pi forgets      38 0.000000
+111 Plot pi forgets      39 0.000000
+112 Plot pi forgets      40 0.000000
+113 Plot pi forgets      41 0.000000
+114 Plot pi forgets      42 0.000000
+115 Plot pi forgets      43 0.000000
+116 Plot pi forgets      44 0.000000
+117 Plot pi forgets      45 0.000000
+118 Plot pi forgets      46 0.000000
+119 Plot pi forgets      47 0.000000
+120 Plot pi forgets      48 0.000000
+121 Plot pi forgets      49 0.000000
+122 Plot pi forgets      50 0.000000
+123 Plot pi forgets      51 0.000000
+124 Plot pi forgets      52 0.000000
+125 Plot pi forgets      53 0.000000
+126 Plot pi forgets      54 0.000000
+127 Plot pi forgets      55 0.000000
+128 Plot pi forgets      56 0.000000
+129 Plot pi forgets      57 0.000000
+130 Plot pi forgets      58 0.000000
+131 Plot pi forgets      59 0.000000
+132 Plot pi forgets      60 0.000000
+133 Plot pi forgets      61 0.000000
+134 Plot pi forgets      62 0.000000
+135 Plot pi forgets      63 0.000000
+136 Plot pi forgets      64 0.000000
+137 Plot pi forgets      65 0.000000
+138 Plot pi forgets      66 0.000000
+139 Plot pi forgets      67 0.000000
+140 Plot pi forgets      68 0.000000
+141 Plot pi forgets      69 0.000000
+142 Plot pi forgets      70 0.000000
+143 Plot pi forgets      71 0.000000
+144 Plot pi forgets      72 0.000000
+145 Plot pi guesses default 0.000000
+146 Plot pi   slips default 0.378540
+147 Plot pi   prior default 0.980586
+```
+
+Note column `class` refers to different items orders.
+
+#### Multiple Prior (To Be Done)
+
+Train a multiple prior BKT model on multiple students in the CT dataset. Switch parameter `multiprior = TRUE` in fit function.
+
+Multiple Prior refers to Prior Per Student (PPS) Model.
+
+```r
+library(BKT)
+
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+
+result <- fit(model, data_path = "ct.csv", skills = c("Plot pi"), multiprior = TRUE)
+print(params(result))
+```
+
+
+
+
 ## Internal Data Format
 
 `BKT` models student mastery of a skill as they progress through a series of learning resources and checks for understanding. Mastery is modeled as a latent variable with two states: "knowing" and "not knowing." At each checkpoint, students may be given a learning resource (e.g., watch a video) and/or question(s) to check for understanding. The model finds the probability of learning, forgetting, slipping, and guessing that maximizes the likelihood of observed student responses to questions.

@@ -69,7 +69,7 @@ setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5
     correct = "correct",
     user_id = "user_id",
     multilearn = "template_id",
-    multiprior = "correct",
+    multiprior = "Anon Student Id",
     multipair = "problem_id",
     multigs = "template_id",
     folds = "template_id"
@@ -534,8 +534,8 @@ params <- function(object) {
 
   df <- as.data.frame(do.call(rbind, formatted_coefs), stringsAsFactors = FALSE)
   colnames(df) <- c("skill", "param", "class", "value")
-
-  df <- transform(df, value = sprintf("%.6f", as.numeric(df)))
+  df$value <- as.numeric(df$value)
+  df$value <- sprintf("%.6f", df$value)
 
   return(df)
 }
