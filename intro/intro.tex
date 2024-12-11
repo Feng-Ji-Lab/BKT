@@ -670,8 +670,83 @@ The mainflow of LFB is illustrated in Figure 12. Note there are forget parameter
         \node at (4,-5.5) {Figure 12: LFB Mainflow};
     \end{tikzpicture}
 \end{center}
-
 \section{Estimation}
+
+To estimate the global parameters of the BKT model (\(P_p, P_l, P_s, P_g\)) that maximize the likelihood \(Lik\), we employ the expectation-maximization (EM) algorithm. This algorithm is particularly well-suited for the BKT model as it addresses the latent nature of the learner's knowledge state (\(\theta_i\)), which cannot be directly observed but significantly influences the observed responses.
+
+The EM algorithm consists of two iterative steps: the Expectation (E-step) and the Maximization (M-step). These steps are repeated until convergence.
+
+\subsection{E-step}
+In the E-step, we calculate the expected values of the latent knowledge state (\(\theta_i\)) and the associated contributions to the likelihood based on the current estimates of the global parameters. Specifically, for each learner:
+
+1. \textbf{Initialization}:
+Set the initial knowledge state \(\theta_1 = P_p\).
+
+2. \textbf{Forward Computation}:
+For each activity \(i\) in the sequence, iteratively compute the known rate \(\theta_{i+1}\):
+
+- First, update the known rate \(\theta'\) based on the observed answer \(a_i\) using Bayes' rule:
+\[
+\theta' = 
+\begin{cases} 
+    \frac{\theta_i P_s}{\theta_i P_s + (1 - \theta_i)(1 - P_g)}, & \text{if } a_i = 0 \\
+    \frac{\theta_i (1 - P_s)}{\theta_i (1 - P_s) + (1 - \theta_i)P_g}, & \text{if } a_i = 1
+\end{cases}
+\]
+
+- Then incorporate the learning effect to compute \(\theta_{i+1}\):
+\[
+\theta_{i+1} = \theta' + (1 - \theta')P_l
+\]
+
+3. \textbf{Likelihood Contribution}:
+Compute the likelihood for each observed answer \(a_i\):
+\[
+Lik_i = 
+\begin{cases} 
+    P_s \theta_i + (1 - P_g)(1 - \theta_i), & \text{if } a_i = 0 \\
+    (1 - P_s)\theta_i + P_g(1 - \theta_i), & \text{if } a_i = 1
+\end{cases}
+\]
+Accumulate these likelihoods to update the total likelihood \(Lik\).
+
+\subsection{M-step}
+In the M-step, we maximize the expected likelihood with respect to the global parameters (\(P_p, P_l, P_s, P_g\)). This involves:
+
+1. \textbf{Updating Prior (\(P_p\))}:
+
+    The prior probability \(P_p\) is updated based on the expected initial knowledge state \(\theta_1\):
+    \[
+    P_p = \frac{1}{N} \sum_{j=1}^N \theta_1^{(j)},
+    \]
+    where \(N\) is the total number of learners, and \(\theta_1^{(j)}\) is the initial knowledge state of learner \(j\).
+
+2. \textbf{Updating Learning Rate (\(P_l\))}:
+
+    The learning rate \(P_l\) is updated based on the transitions from \(\theta'\) (updated state after observing \(a_i\)) to \(\theta_{i+1}\):
+    \[
+    P_l = \frac{\sum_{j=1}^N \sum_{i=1}^{T_j} \left( (1 - \theta_i^{(j)}) \cdot \theta_{i+1}^{(j)} \right)}{\sum_{j=1}^N \sum_{i=1}^{T_j} (1 - \theta_i^{(j)})},
+    \]
+    where \(T_j\) is the number of activities for learner \(j\).
+
+3. \textbf{Updating Slip Rate (\(P_s\))}:
+
+    The slip rate \(P_s\) is updated based on the proportion of incorrect answers when the learner is in the known state:
+    \[
+    P_s = \frac{\sum_{j=1}^N \sum_{i=1}^{T_j} \left( \theta_i^{(j)} \cdot (1 - a_i) \right)}{\sum_{j=1}^N \sum_{i=1}^{T_j} \theta_i^{(j)}},
+    \]
+
+4. \textbf{Updating Guess Rate (\(P_g\))}:
+
+    The guess rate \(P_g\) is updated based on the proportion of correct answers when the learner is in the unknown state:
+    \[
+    P_g = \frac{\sum_{j=1}^N \sum_{i=1}^{T_j} \left( (1 - \theta_i^{(j)}) \cdot a_i \right)}{\sum_{j=1}^N \sum_{i=1}^{T_j} (1 - \theta_i^{(j)})},
+    \]
+
+\subsection{Iteration and Convergence}
+The E-step and M-step are alternated until the likelihood \(Lik\) converges, i.e., when the change in \(\log Lik\) between iterations falls below a predefined threshold. At convergence, the global parameters (\(P_p, P_l, P_s, P_g\)) maximize the likelihood of the observed answer sequences under the BKT model.
+
+By iteratively refining the parameter estimates and leveraging the hidden knowledge state dynamics, the EM algorithm ensures an efficient and robust estimation process for the BKT model.   
 
 \section{Data example}
 
