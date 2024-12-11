@@ -15,7 +15,22 @@
 
 \maketitle
 
+% some notes
+\begin{itemize}
+    \item Target Journal: Journal of Statistical Software, Behavior Research Methods, Or Applied Psychological Measurement
+    \item \textbf{Storyline} Introduce BKT and its variant, showcase its usefulness in an empirical data and/or a simulated data $\rightarrow$ give a simple tutorial involving how to use it in R.
+\end{itemize}
 \section{Introduction}
+
+The advent of digital technologies has led to an unprecedented increase in the availability and granularity of educational assessment data. These data, collected from diverse learning environments such as online courses, intelligent tutoring systems, and classroom-based assessments, provide detailed insights into students' learning processes. With the growing emphasis on evidence-based approaches in education, this wealth of data has opened new avenues for research and practice, allowing educators and researchers to address fundamental questions about learning and knowledge acquisition.
+
+One critical application of educational assessment data lies in understanding how students learn over time and predicting their future performance. Traditional methods of assessment often provide only static snapshots of a learner's knowledge at specific points in time. However, as the demand for personalized and adaptive learning systems increases, there is a pressing need for dynamic models that can capture the evolving nature of student knowledge. This is where Bayesian Knowledge Tracing (BKT) and its variants play a pivotal role.
+
+BKT offers a probabilistic framework for modeling the progression of a learner's knowledge state. By leveraging sequential data on student performance, BKT enables the estimation of underlying knowledge states and provides predictions about future responses. These capabilities make it an essential tool for adaptive learning systems, as they can identify individual learning needs and recommend tailored interventions. Moreover, BKT's simplicity and interpretability have contributed to its widespread adoption in both research and practice.
+
+Despite its widespread utility, BKT is not without limitations. Researchers have proposed various extensions and modifications to address issues such as model flexibility, parameter estimation, and the integration of additional features like forgetting or partial knowledge. These advancements have further broadened the applicability of BKT to more complex and realistic educational scenarios.
+
+This paper aims to provide a comprehensive overview of BKT and its variants, showcasing their usefulness through empirical and simulated data analyses. Additionally, we offer a practical tutorial on implementing BKT in the R programming environment, enabling researchers and practitioners to leverage this powerful model in their own work. By bridging theoretical insights with practical applications, this paper seeks to contribute to the growing body of knowledge on dynamic learning models and their role in advancing educational research and practice.
 
 
 \section{Model description}
@@ -655,6 +670,14 @@ The mainflow of LFB is illustrated in Figure 12. Note there are forget parameter
         \node at (4,-5.5) {Figure 12: LFB Mainflow};
     \end{tikzpicture}
 \end{center}
+
+\section{Estimation}
+
+\section{Data example}
+
+
+\section{Discussion}
+\section{Conlusion}
 
 % Reference
 \printbibliography
