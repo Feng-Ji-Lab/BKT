@@ -223,7 +223,7 @@ So the total learn process's probability is
     Lik = \prod Lik_i
 \]
 
-We can utilize the standard expectation-maximization algorithm to determine the global parameters (\(P_p, P_l, P_s, P_g\))
+We can utilize the standard expectation-maximization (EM) algorithm to determine the global parameters (\(P_p, P_l, P_s, P_g\)). The EM algorithm is particularly well-suited for this task because the knowledge state of the learner is a latent variable—an unobservable factor that influences the observed performance. Directly maximizing $Lik$ is challenging due to the need to sum over all possible latent states. The EM algorithm simplifies this by iteratively estimating the expected contribution of latent states (E-step) and optimizing the parameters given these estimates (M-step), ensuring a systematic and efficient approach to converge to the optimal parameter estimates. The detailed computational steps of the EM algorithm are provided in Section Estimation.
 
 The basic Bayesian Knowledge Tracing (BKT) model is involved here. However, it should be noted that the basic BKT model has certain limitations. The most significant issue is that it presupposes a large number of global parameters. As a result of applying these global parameters to local scenarios, numerous variants of the BKT model have emerged. At the same time, by expanding the functionality of the BKT model, some variant BKT models have also been proposed.
 
@@ -603,7 +603,7 @@ $$
 \theta_{i+1} = \theta' \boldsymbol{P_f} + (1 - \theta') P_l    
 $$
 
-The mainflow of LFB is illustrated in Figure 10. Note there are forget parameters $P_f$ in use.
+The mainflow of LFB is illustrated in Figure 12. Note there are forget parameters $P_f$ in use.
 
 \begin{center}
     \begin{tikzpicture}
