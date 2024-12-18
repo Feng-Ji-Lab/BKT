@@ -5,7 +5,7 @@ devtools::load_all("./")
 model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
 # fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
 
-# # MARK: Fit
+# MARK: Fit
 # result <- fit(model, data_path = "ct.csv", skills = "Plot non-terminating improper fraction")
 # print(params(result))
 
@@ -96,7 +96,7 @@ model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
 # print(params(result))
 
 # MARK: multigs
-# result <- fit(model, data_path = "ct.csv", skills = c("Plot imperfect radical", "Plot pi"), multigs = TRUE)
+# result <- fit(model, data_path = "ct.csv", skills = c("Plot pi"), multigs = TRUE)
 # print(params(result))
 
 # MARK: multigs and multilearn
@@ -149,7 +149,23 @@ model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
 #     fixed = list("Plot non-terminating improper fraction" = list("learns" = TRUE, "forgets" = TRUE))
 # )
 # print(params(result))
-model <- bkt(seed = 42, num_fits = 1, parallel = TRUE)
+# model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+# fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+# result <- fit(model, data_path = "ct.csv", skills = "Plot non-terminating improper fraction")
+# print(params(result))
+
+
+# library(BKT)
+# model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+# fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+
+# result <- fit(model, data_path = "ct.csv", skills = c("Plot pi"), multipair = TRUE)
+# print(params(result))
+
+library(BKT)
+
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE, forgets = TRUE)
 fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
-result <- fit(model, data_path = "ct.csv", skills = "Plot non-terminating improper fraction")
-print(result)
+
+result <- fit(model, data_path = "ct.csv", skills = c("Plot terminating proper fraction"))
+print(params(result))

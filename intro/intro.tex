@@ -1,13 +1,30 @@
 \documentclass{article}
+\usepackage{listings}
+\usepackage{xcolor}
 \usepackage{graphicx} % Required for inserting images
 \usepackage{tikz} % Drawing
 \usepackage[backend=biber,style=apa]{biblatex}
 \usepackage{amsmath}
 
+\lstset{ 
+  language=R,
+  backgroundcolor=\color{white},   
+  basicstyle=\footnotesize\ttfamily,    
+  breaklines=true,                    
+  captionpos=b,                     
+  keepspaces=true,                   
+  numbers=left,                     
+  numberstyle=\tiny\color{gray},  
+  stringstyle=\color{purple},     
+  commentstyle=\color{gray},  
+  keywordstyle=\color{blue},  
+  showstringspaces=false
+}
+
 % load bib
 \addbibresource{reference.bib}
 
-\title{BKT}
+\title{BKT: A Bayesian Knowledge Tracing Package for the R Environment}
 \author{Yuhao Yuan, Biying Zhou, Feng Ji}
 \date{\today}
 
@@ -26,11 +43,13 @@ The advent of digital technologies has led to an unprecedented increase in the a
 
 One critical application of educational assessment data lies in understanding how students learn over time and predicting their future performance. Traditional methods of assessment often provide only static snapshots of a learner's knowledge at specific points in time. However, as the demand for personalized and adaptive learning systems increases, there is a pressing need for dynamic models that can capture the evolving nature of student knowledge. This is where Bayesian Knowledge Tracing (BKT) and its variants play a pivotal role.
 
-BKT offers a probabilistic framework for modeling the progression of a learner's knowledge state. By leveraging sequential data on student performance, BKT enables the estimation of underlying knowledge states and provides predictions about future responses. These capabilities make it an essential tool for adaptive learning systems, as they can identify individual learning needs and recommend tailored interventions. Moreover, BKT's simplicity and interpretability have contributed to its widespread adoption in both research and practice.
+BKT offers a probabilistic framework for modeling the progression of a learner's knowledge state (\cite{corbett1994knowledge}). By leveraging sequential data on student performance, BKT enables the estimation of underlying knowledge states and provides predictions about future responses. These capabilities make it an essential tool for adaptive learning systems, as they can identify individual learning needs and recommend tailored interventions. Moreover, BKT's simplicity and interpretability have contributed to its widespread adoption in both research and practice.
 
 Despite its widespread utility, BKT is not without limitations. Researchers have proposed various extensions and modifications to address issues such as model flexibility, parameter estimation, and the integration of additional features like forgetting or partial knowledge. These advancements have further broadened the applicability of BKT to more complex and realistic educational scenarios.
 
-This paper aims to provide a comprehensive overview of BKT and its variants, showcasing their usefulness through empirical and simulated data analyses. Additionally, we offer a practical tutorial on implementing BKT in the R programming environment, enabling researchers and practitioners to leverage this powerful model in their own work. By bridging theoretical insights with practical applications, this paper seeks to contribute to the growing body of knowledge on dynamic learning models and their role in advancing educational research and practice.
+To facilitate the use of BKT in educational research and practical applications, we have developed the BKT R package. This package provides an easy-to-use implementation of Bayesian Knowledge Tracing, allowing researchers and educators to easily apply BKT models to their own data. With functionalities for parameter estimation, model fitting, and evaluation, the BKT R package streamlines the process of using BKT in diverse educational settings. It is designed to integrate seamlessly with the R environment, offering flexibility for further customization and enhancement.
+
+This paper aims to provide a comprehensive overview of BKT and its variants, showcasing their usefulness through empirical and simulated data analyses. Additionally, we offer a practical tutorial on implementing BKT using the BKT R package, enabling researchers and practitioners to leverage this powerful model in their own work. By bridging theoretical insights with practical applications, this paper seeks to contribute to the growing body of knowledge on dynamic learning models and their role in advancing educational research and practice.
 
 
 \section{Model description}
@@ -748,8 +767,184 @@ The E-step and M-step are alternated until the likelihood \(Lik\) converges, i.e
 
 By iteratively refining the parameter estimates and leveraging the hidden knowledge state dynamics, the EM algorithm ensures an efficient and robust estimation process for the BKT model.   
 
-\section{Data example}
+\section{Data Example}
 
+The dataset comes from the Cognitive Tutor system (\cite{ritter2007cognitive}), an intelligent tutoring platform designed to improve students' mathematical abilities. 
+
+The dataset includes detailed logs of 587 unique students' interactions with the Cognitive Tutor, which tracks the students' responses to a series of math problems associated with various knowledge components (KCs). In total, the dataset contains 16,857 observation records, capturing each student's attempts and their correctness for various problem items across the 12 KCs.
+
+\subsection{Basic BKT Model Example with BKT R package}
+
+\begin{lstlisting}[caption={R code to train a simple BKT model}]
+library(BKT)
+
+# Initialize the model with an optional seed
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+
+# Fetch example data
+fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+
+# Train a simple BKT model on one skill in the CT dataset
+result <- fit(model, data_path = "ct.csv", skills = "Plot non-terminating improper fraction")
+
+# View the trained parameters
+print(params(result))
+\end{lstlisting}
+
+The result will be shown as below: 
+
+\begin{verbatim}
+> print(params(result))
+                                            skill   param   class    value
+1        Plot non-terminating improper fraction  learns default 0.222808
+2        Plot non-terminating improper fraction forgets default 0.000000
+3        Plot non-terminating improper fraction guesses default 0.003382
+4        Plot non-terminating improper fraction   slips default 0.322177
+5        Plot non-terminating improper fraction   prior default 0.737443
+\end{verbatim}
+
+In the result, the first column is the name of the skills, the second column indicates the type of parameters, including \texttt{learns}, \texttt{forgets}, \texttt{guesses}, \texttt{slips}, and \texttt{prior}. The last column shows the estimated parameter value.
+
+\subsection{IDE BKT Model Example with BKT R package}
+
+Train a multiple guess and slip BKT model on multiple skills in the CT dataset. Switch parameter \texttt{multigs = TRUE} in the \texttt{fit} function.
+
+Multiple Guess refers to the Item Difficulty Effect (IDE) Model.
+
+\begin{lstlisting}[caption={R code to train a IDE BKT model}]
+library(BKT)
+
+# Initialize the model with an optional seed
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+
+# Fetch example data
+fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+
+# Train a multiple guess BKT model on one skill in the CT dataset
+result <- fit(model, data_path = "ct.csv", skills = c("Plot pi"), multigs = TRUE)
+
+# View the trained parameters
+print(params(result))
+\end{lstlisting}
+
+The result will be shown as below:
+
+\begin{verbatim}
+        skill   param   class    value
+1  Plot pi  learns default 0.995657
+2  Plot pi forgets default 0.000000
+3  Plot pi guesses       1 0.000000
+4  Plot pi guesses       2 0.000000
+5  Plot pi guesses       3 0.000000
+6  Plot pi guesses       4 0.000000
+7  Plot pi guesses       5 0.000000
+8  Plot pi guesses       6 0.000000
+9  Plot pi guesses       7 0.000000
+10 Plot pi guesses       8 0.000000
+11 Plot pi guesses       9 0.000000
+12 Plot pi guesses      10 0.000000
+13 Plot pi   slips       1 0.577002
+14 Plot pi   slips       2 0.220335
+15 Plot pi   slips       3 0.246635
+16 Plot pi   slips       4 0.426740
+17 Plot pi   slips       5 0.238321
+18 Plot pi   slips       6 0.560898
+19 Plot pi   slips       7 0.381043
+20 Plot pi   slips       8 0.477167
+21 Plot pi   slips       9 0.235853
+22 Plot pi   slips      10 0.472197
+23 Plot pi   prior default 0.992952
+\end{verbatim}
+
+Note that the \texttt{class} column refers to different items.
+
+\subsection{ILE BKT Model Example with BKT R package}
+
+Train a multiple learn BKT model on multiple skills in the CT dataset. Switch parameter \texttt{multilearn = TRUE} in the \texttt{fit} function.
+
+Multiple Learn refers to the Item Learning Effect (ILE) Model.
+
+\begin{lstlisting}[caption={R code to train an ILE BKT model}]
+library(BKT)
+
+# Initialize the model with an optional seed
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+
+# Fetch example data
+fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+
+# Train a multiple learn BKT model on one skill in the CT dataset
+result <- fit(model, data_path = "ct.csv", skills = c("Plot pi"), multilearn = TRUE)
+
+# View the trained parameters
+print(params(result))
+\end{lstlisting}
+
+The result will be shown as below:
+
+\begin{verbatim}
+     skill   param   class    value
+1  Plot pi  learns       1 0.968846
+2  Plot pi  learns       2 1.000000
+3  Plot pi  learns       3 1.000000
+4  Plot pi  learns       4 1.000000
+5  Plot pi  learns       5 1.000000
+6  Plot pi  learns       6 0.334115
+7  Plot pi  learns       7 0.775121
+8  Plot pi  learns       8 0.742444
+9  Plot pi  learns       9 0.000000
+10 Plot pi  learns      10 0.000372
+11 Plot pi forgets       1 0.000000
+12 Plot pi forgets       2 0.000000
+13 Plot pi forgets       3 0.000000
+14 Plot pi forgets       4 0.000000
+15 Plot pi forgets       5 0.000000
+16 Plot pi forgets       6 0.000000
+17 Plot pi forgets       7 0.000000
+18 Plot pi forgets       8 0.000000
+19 Plot pi forgets       9 0.000000
+20 Plot pi forgets      10 0.000000
+21 Plot pi guesses default 0.000000
+22 Plot pi   slips default 0.352701
+23 Plot pi   prior default 0.936924
+\end{verbatim}
+
+Note that the \texttt{class} column refers to different items.
+
+
+\subsection{LFB BKT Model Example with BKT R package}
+
+Train a forget BKT model on the CT dataset. Switch parameter \texttt{forgets = TRUE} in the \texttt{fit} function. 
+
+Forget refers to the Learning and Forgetting Behavior (LFB) Model.
+
+\begin{lstlisting}[caption={R code to train a LFB BKT model}]
+library(BKT)
+
+# Initialize the model with an optional seed
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+
+# Fetch example data
+fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+
+# Train a forget BKT model on one skill in the CT dataset
+model = Model(seed = 42, num_fits = 1, parallel = FALSE)
+model.fit(data_path = 'ct.csv', forgets = TRUE, skills = 'Plot terminating proper fraction')
+
+# View the trained parameters
+print(model.params())
+\end{lstlisting}
+
+The result will be shown as below:
+
+\begin{verbatim}
+                             skill   param   class    value
+1 Plot terminating proper fraction  learns default 0.087497
+2 Plot terminating proper fraction forgets default 0.054892
+3 Plot terminating proper fraction guesses default 0.285785
+4 Plot terminating proper fraction   slips default 0.329848
+5 Plot terminating proper fraction   prior default 0.622707
+\end{verbatim}
 
 \section{Discussion}
 \section{Conlusion}

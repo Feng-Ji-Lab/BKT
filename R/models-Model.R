@@ -30,7 +30,7 @@ setClass(
 )
 
 # MARK: Init Functions
-setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5, folds = 5, seed = sample(1:1e8, 1), defaults = NULL, model_type = rep(FALSE, 4), ...) {
+setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5, folds = 5, seed = sample(1:1e8, 1), defaults = NULL, model_type = rep(FALSE, 4), forgets = FALSE, ...) {
   object <- .Object
   object@parallel <- parallel
   object@num_fits <- num_fits
@@ -41,7 +41,7 @@ setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5
   object@manual_param_init <- FALSE
   object@skills <- ".*"
   object@folds <- folds
-  object@forgets <- FALSE
+  object@forgets <- forgets
 
   set.seed(object@seed)
 
@@ -118,12 +118,12 @@ setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5
 #' )
 #' }
 #' @export
-fit <- function(object, data_path = NULL, data = NULL, parallel = FALSE, seed = NULL, num_fits = 1, forgets = FALSE, fixed = NULL, model_type = NULL, ...) {
+fit <- function(object, data_path = NULL, data = NULL, parallel = FALSE, seed = NULL, num_fits = 1, forgets = NULL, fixed = NULL, model_type = NULL, ...) {
   if (!object@manual_param_init) {
     object@fit_model <- list()
   }
 
-  object <- partial_fit(object, data_path = data_path, data = data, ...)
+  object <- partial_fit(object, data_path = data_path, data = data, forgets = forgets, ...)
 
   return(object)
 }
@@ -190,7 +190,7 @@ partial_fit <- function(object, data_path = NULL, data = NULL, ...) {
         if (is.null(slot(object, param))) {
           slot(object, param) <- default_arg
         }
-      } else if (param %in% names(args)) {
+      } else if (param %in% names(args) && !is.null(args[[param]])) {
         slot(object, param) <- args[[param]]
       }
       object@keep[[param]] <- keep

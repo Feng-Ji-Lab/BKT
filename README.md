@@ -29,7 +29,7 @@ library(BKT)
 # Initialize the model with an optional seed
 model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
 
-# Fetch ASSISTments and Cognitive Tutor data (optional - if you have your own dataset, that's fine too!)
+# Fetch example data
 fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/as.csv", ".")
 fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
 
@@ -37,7 +37,6 @@ fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/mas
 result_all <- fit(model, data_path = "ct.csv")
 
 # Train a simple BKT model on one skill in the CT dataset
-# Note that calling fit overwrites any previously trained BKT model!
 result_single <- fit(model, data_path = "ct.csv", skills = "Plot imperfect radical")
 
 # Train a simple BKT model on multiple skills in the CT dataset
@@ -340,6 +339,35 @@ The result are shown below:
 In this example, the learns and forgets parameters were manually fixed at 0.25 using the `set_coef` function, meaning the model was not allowed to adjust these values during training. The model then estimated the other parameters (guesses, slips, and prior) based on the data. The fixed learns and forgets parameters indicate a constant 25% chance of learning or forgetting the skill, while the model predicted an 18.3% chance of guessing correctly and an 11.3% chance of slipping. The prior probability indicates that, initially, there was a 48.3% chance the student already knew the skill.
 
 ### BKT Variants
+
+
+### Forget
+
+Train a forget BKT model in the CT dataset. Switch parameter `forgets = TRUE` in the fit function.
+
+Forgets refers to learning and forgetting behavior (LFB) Model.
+
+```r
+
+library(BKT)
+
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+
+model = Model(seed = 42, num_fits = 1, parallel = False)
+model.fit(data_path = 'ct.csv', forgets = True, skills = 'Plot terminating proper fraction')
+print(model.params())
+
+```
+The result are shown below:
+```
+                             skill   param   class    value
+1 Plot terminating proper fraction  learns default 0.087497
+2 Plot terminating proper fraction forgets default 0.054892
+3 Plot terminating proper fraction guesses default 0.285785
+4 Plot terminating proper fraction   slips default 0.329848
+5 Plot terminating proper fraction   prior default 0.622707
+```
 
 
 #### Multiple Guess
