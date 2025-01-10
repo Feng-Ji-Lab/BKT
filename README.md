@@ -369,6 +369,106 @@ The result are shown below:
 5 Plot terminating proper fraction   prior default 0.622707
 ```
 
+#### Multiple Priors
+
+
+Train a multiple prior BKT model on multiple students in the CT dataset. Switch parameter `multiprior = TRUE` in fit function.
+
+Multiple Prior refers to the Prior Per Student (PPS) Model.
+
+```r
+library(BKT)
+model <- bkt(seed = 42, num_fits = 10, parallel = FALSE)
+
+fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+result <- fit(model, data_path = "ct.csv", skills = c("Finding the intersection, Mixed"), multiprior = TRUE)
+
+print(params(result))
+```
+
+The result are shown below:
+
+```
+                             skill   param        class    value
+1  Finding the intersection, Mixed  learns      default 0.016332
+2  Finding the intersection, Mixed guesses      default 0.292058
+3  Finding the intersection, Mixed   slips      default 0.240662
+4  Finding the intersection, Mixed   prior     171eKI1Z 1.000000
+5  Finding the intersection, Mixed   prior     171nKnHW 1.000000
+6  Finding the intersection, Mixed   prior     171RUh1Q 1.000000
+7  Finding the intersection, Mixed   prior      1T4w47X 0.000000
+8  Finding the intersection, Mixed   prior 2302sApyRu_a 1.000000
+9  Finding the intersection, Mixed   prior 2304U8pLyy_a 0.000000
+10 Finding the intersection, Mixed   prior 2304YbHCok_a 1.000000
+11 Finding the intersection, Mixed   prior 2304YbHCok_b 0.000000
+12 Finding the intersection, Mixed   prior 2305Ra0wn7_a 0.000000
+13 Finding the intersection, Mixed   prior 2309tLkCW6_a 0.000000
+14 Finding the intersection, Mixed   prior 230amNTt8e_a 0.001792
+15 Finding the intersection, Mixed   prior 230amNTt8e_b 0.000000
+16 Finding the intersection, Mixed   prior 230cbpmx2H_a 0.000000
+17 Finding the intersection, Mixed   prior 230cQtHpL1_a 0.000000
+18 Finding the intersection, Mixed   prior 230duwYN4p_a 0.000000
+19 Finding the intersection, Mixed   prior 230EGiaN2S_a 0.000099
+20 Finding the intersection, Mixed   prior 230HLorplQ_a 0.000000
+21 Finding the intersection, Mixed   prior 230hzMTB8t_a 0.000000
+22 Finding the intersection, Mixed   prior 230hzMTB8t_c 1.000000
+23 Finding the intersection, Mixed   prior 230J1b5ZjX_a 0.000000
+24 Finding the intersection, Mixed   prior 230jc0wqMP_a 0.000000
+25 Finding the intersection, Mixed   prior 230JX4ja8w_a 1.000000
+26 Finding the intersection, Mixed   prior 230JX4ja8w_b 0.000000
+27 Finding the intersection, Mixed   prior 230kbSDgQ3_a 0.000000
+28 Finding the intersection, Mixed   prior 230KZfQk0y_a 0.000000
+29 Finding the intersection, Mixed   prior 230NIBA0Dq_a 0.000000
+30 Finding the intersection, Mixed   prior 230NIBA0Dq_b 1.000000
+31 Finding the intersection, Mixed   prior 230P2rW3yn_a 0.000000
+32 Finding the intersection, Mixed   prior 230rlAi5Zw_a 0.000000
+33 Finding the intersection, Mixed   prior 230tBgtvsW_a 0.000000
+34 Finding the intersection, Mixed   prior 230tBgtvsW_b 0.000000
+35 Finding the intersection, Mixed   prior 230XGzqSto_a 0.001056
+36 Finding the intersection, Mixed   prior 230XGzqSto_b 1.000000
+37 Finding the intersection, Mixed   prior 230Y6CWb3d_a 0.000000
+38 Finding the intersection, Mixed   prior    236wm0wnm 1.000000
+39 Finding the intersection, Mixed   prior    236z60ytg 1.000000
+40 Finding the intersection, Mixed   prior    2480hxxcx 1.000000
+41 Finding the intersection, Mixed   prior    2480wql4f 1.000000
+42 Finding the intersection, Mixed   prior    2483hkq13 0.018457
+43 Finding the intersection, Mixed   prior    2483mf0as 1.000000
+44 Finding the intersection, Mixed   prior    2484vyh4g 1.000000
+45 Finding the intersection, Mixed   prior    24864dslr 0.000000
+46 Finding the intersection, Mixed   prior    2487lpei2 1.000000
+47 Finding the intersection, Mixed   prior    2487o1gku 0.000016
+48 Finding the intersection, Mixed   prior    2487p61kc 0.000000
+49 Finding the intersection, Mixed   prior    2488721d5 1.000000
+50 Finding the intersection, Mixed   prior    2488t72oe 1.000000
+51 Finding the intersection, Mixed   prior    24899b8f6 1.000000
+52 Finding the intersection, Mixed   prior    2489c9lbg 1.000000
+53 Finding the intersection, Mixed   prior    248abpghv 1.000000
+54 Finding the intersection, Mixed   prior    248agzhky 1.000000
+55 Finding the intersection, Mixed   prior    248clu9mj 1.000000
+56 Finding the intersection, Mixed   prior    248g1paph 0.000000
+57 Finding the intersection, Mixed   prior    248g1wh6o 0.000000
+58 Finding the intersection, Mixed   prior    248hh7azg 1.000000
+59 Finding the intersection, Mixed   prior    248iwnoa3 1.000000
+60 Finding the intersection, Mixed   prior    248jqsua5 0.000000
+61 Finding the intersection, Mixed   prior    248k03ldd 1.000000
+62 Finding the intersection, Mixed   prior    248llcp7q 0.000000
+63 Finding the intersection, Mixed   prior    248m27z11 1.000000
+64 Finding the intersection, Mixed   prior    248mbp1cf 1.000000
+65 Finding the intersection, Mixed   prior    248oylglm 0.000000
+66 Finding the intersection, Mixed   prior    248pthl4g 0.000000
+67 Finding the intersection, Mixed   prior    248qhy2yo 0.031083
+68 Finding the intersection, Mixed   prior    248s9v653 1.000000
+69 Finding the intersection, Mixed   prior    248t7n0my 1.000000
+70 Finding the intersection, Mixed   prior    248tviw5h 0.000000
+71 Finding the intersection, Mixed   prior    248vthf5i 0.000000
+72 Finding the intersection, Mixed   prior    248zczb3i 0.000000
+73 Finding the intersection, Mixed   prior 271g7beuc4s1 0.000000
+74 Finding the intersection, Mixed   prior 271k966j74lv 0.000000
+75 Finding the intersection, Mixed   prior 271np4zc8vd1 1.000000
+76 Finding the intersection, Mixed   prior      3cjD21W 1.000000
+77 Finding the intersection, Mixed   prior      Vd9xmeb 1.000000
+```
+Note column `class` refers to different students.
 
 #### Multiple Guess
 
@@ -388,30 +488,29 @@ print(params(result))
 
 The result are shown below:
 ```
-     skill   param   class    value
-1  Plot pi  learns default 0.995657
-2  Plot pi forgets default 0.000000
-3  Plot pi guesses       1 0.000000
-4  Plot pi guesses       2 0.000000
-5  Plot pi guesses       3 0.000000
-6  Plot pi guesses       4 0.000000
-7  Plot pi guesses       5 0.000000
-8  Plot pi guesses       6 0.000000
-9  Plot pi guesses       7 0.000000
-10 Plot pi guesses       8 0.000000
-11 Plot pi guesses       9 0.000000
-12 Plot pi guesses      10 0.000000
-13 Plot pi   slips       1 0.577002
-14 Plot pi   slips       2 0.220335
-15 Plot pi   slips       3 0.246635
-16 Plot pi   slips       4 0.426740
-17 Plot pi   slips       5 0.238321
-18 Plot pi   slips       6 0.560898
-19 Plot pi   slips       7 0.381043
-20 Plot pi   slips       8 0.477167
-21 Plot pi   slips       9 0.235853
-22 Plot pi   slips      10 0.472197
-23 Plot pi   prior default 0.992952
+     skill   param         class    value
+1  Plot pi  learns       default 0.986592
+2  Plot pi guesses RATIONAL1-045 0.000000
+3  Plot pi guesses RATIONAL1-063 0.000000
+4  Plot pi guesses RATIONAL1-122 0.000000
+5  Plot pi guesses RATIONAL1-156 0.000000
+6  Plot pi guesses RATIONAL1-190 0.000000
+7  Plot pi guesses RATIONAL1-207 0.000000
+8  Plot pi guesses RATIONAL1-237 0.000000
+9  Plot pi guesses RATIONAL1-242 0.000000
+10 Plot pi guesses RATIONAL1-254 0.000000
+11 Plot pi guesses RATIONAL1-284 0.000000
+12 Plot pi   slips RATIONAL1-045 0.575424
+13 Plot pi   slips RATIONAL1-063 0.218712
+14 Plot pi   slips RATIONAL1-122 0.243997
+15 Plot pi   slips RATIONAL1-156 0.425278
+16 Plot pi   slips RATIONAL1-190 0.235049
+17 Plot pi   slips RATIONAL1-207 0.559538
+18 Plot pi   slips RATIONAL1-237 0.378160
+19 Plot pi   slips RATIONAL1-242 0.474867
+20 Plot pi   slips RATIONAL1-254 0.231365
+21 Plot pi   slips RATIONAL1-284 0.469949
+22 Plot pi   prior       default 0.987410
 ```
 Note column `class` refers to different items.
 
@@ -434,30 +533,20 @@ print(params(result))
 The result are shown below:
 
 ```
-     skill   param   class    value
-1  Plot pi  learns       1 0.968846
-2  Plot pi  learns       2 1.000000
-3  Plot pi  learns       3 1.000000
-4  Plot pi  learns       4 1.000000
-5  Plot pi  learns       5 1.000000
-6  Plot pi  learns       6 0.334115
-7  Plot pi  learns       7 0.775121
-8  Plot pi  learns       8 0.742444
-9  Plot pi  learns       9 0.000000
-10 Plot pi  learns      10 0.000372
-11 Plot pi forgets       1 0.000000
-12 Plot pi forgets       2 0.000000
-13 Plot pi forgets       3 0.000000
-14 Plot pi forgets       4 0.000000
-15 Plot pi forgets       5 0.000000
-16 Plot pi forgets       6 0.000000
-17 Plot pi forgets       7 0.000000
-18 Plot pi forgets       8 0.000000
-19 Plot pi forgets       9 0.000000
-20 Plot pi forgets      10 0.000000
-21 Plot pi guesses default 0.000000
-22 Plot pi   slips default 0.352701
-23 Plot pi   prior default 0.936924
+     skill   param         class    value
+1  Plot pi  learns RATIONAL1-045 0.968846
+2  Plot pi  learns RATIONAL1-063 1.000000
+3  Plot pi  learns RATIONAL1-122 1.000000
+4  Plot pi  learns RATIONAL1-156 1.000000
+5  Plot pi  learns RATIONAL1-190 1.000000
+6  Plot pi  learns RATIONAL1-207 0.334115
+7  Plot pi  learns RATIONAL1-237 0.775121
+8  Plot pi  learns RATIONAL1-242 0.742444
+9  Plot pi  learns RATIONAL1-254 0.000000
+10 Plot pi  learns RATIONAL1-284 0.000372
+11 Plot pi guesses       default 0.000000
+12 Plot pi   slips       default 0.352701
+13 Plot pi   prior       default 0.936924
 ```
 
 Note column `class` refers to different items.
@@ -482,175 +571,85 @@ print(params(result))
 The result are shown below:
 
 ```
-      skill   param   class    value
-1   Plot pi  learns       1 0.363054
-2   Plot pi  learns       2 1.000000
-3   Plot pi  learns       3 1.000000
-4   Plot pi  learns       4 1.000000
-5   Plot pi  learns       5 1.000000
-6   Plot pi  learns       6 1.000000
-7   Plot pi  learns       7 1.000000
-8   Plot pi  learns       8 1.000000
-9   Plot pi  learns       9 1.000000
-10  Plot pi  learns      10 1.000000
-11  Plot pi  learns      11 0.000000
-12  Plot pi  learns      12 1.000000
-13  Plot pi  learns      13 1.000000
-14  Plot pi  learns      14 1.000000
-15  Plot pi  learns      15 1.000000
-16  Plot pi  learns      16 1.000000
-17  Plot pi  learns      17 1.000000
-18  Plot pi  learns      18 1.000000
-19  Plot pi  learns      19 1.000000
-20  Plot pi  learns      20 1.000000
-21  Plot pi  learns      21 1.000000
-22  Plot pi  learns      22 1.000000
-23  Plot pi  learns      23 1.000000
-24  Plot pi  learns      24 1.000000
-25  Plot pi  learns      25 0.000000
-26  Plot pi  learns      26 1.000000
-27  Plot pi  learns      27 1.000000
-28  Plot pi  learns      28 1.000000
-29  Plot pi  learns      29 1.000000
-30  Plot pi  learns      30 1.000000
-31  Plot pi  learns      31 0.000000
-32  Plot pi  learns      32 1.000000
-33  Plot pi  learns      33 1.000000
-34  Plot pi  learns      34 1.000000
-35  Plot pi  learns      35 1.000000
-36  Plot pi  learns      36 1.000000
-37  Plot pi  learns      37 1.000000
-38  Plot pi  learns      38 1.000000
-39  Plot pi  learns      39 1.000000
-40  Plot pi  learns      40 1.000000
-41  Plot pi  learns      41 1.000000
-42  Plot pi  learns      42 1.000000
-43  Plot pi  learns      43 0.000053
-44  Plot pi  learns      44 1.000000
-45  Plot pi  learns      45 1.000000
-46  Plot pi  learns      46 1.000000
-47  Plot pi  learns      47 1.000000
-48  Plot pi  learns      48 1.000000
-49  Plot pi  learns      49 1.000000
-50  Plot pi  learns      50 1.000000
-51  Plot pi  learns      51 1.000000
-52  Plot pi  learns      52 1.000000
-53  Plot pi  learns      53 1.000000
-54  Plot pi  learns      54 1.000000
-55  Plot pi  learns      55 1.000000
-56  Plot pi  learns      56 1.000000
-57  Plot pi  learns      57 1.000000
-58  Plot pi  learns      58 1.000000
-59  Plot pi  learns      59 1.000000
-60  Plot pi  learns      60 1.000000
-61  Plot pi  learns      61 1.000000
-62  Plot pi  learns      62 1.000000
-63  Plot pi  learns      63 1.000000
-64  Plot pi  learns      64 1.000000
-65  Plot pi  learns      65 1.000000
-66  Plot pi  learns      66 1.000000
-67  Plot pi  learns      67 1.000000
-68  Plot pi  learns      68 1.000000
-69  Plot pi  learns      69 1.000000
-70  Plot pi  learns      70 1.000000
-71  Plot pi  learns      71 1.000000
-72  Plot pi  learns      72 1.000000
-73  Plot pi forgets       1 0.000000
-74  Plot pi forgets       2 0.000000
-75  Plot pi forgets       3 0.000000
-76  Plot pi forgets       4 0.000000
-77  Plot pi forgets       5 0.000000
-78  Plot pi forgets       6 0.000000
-79  Plot pi forgets       7 0.000000
-80  Plot pi forgets       8 0.000000
-81  Plot pi forgets       9 0.000000
-82  Plot pi forgets      10 0.000000
-83  Plot pi forgets      11 0.000000
-84  Plot pi forgets      12 0.000000
-85  Plot pi forgets      13 0.000000
-86  Plot pi forgets      14 0.000000
-87  Plot pi forgets      15 0.000000
-88  Plot pi forgets      16 0.000000
-89  Plot pi forgets      17 0.000000
-90  Plot pi forgets      18 0.000000
-91  Plot pi forgets      19 0.000000
-92  Plot pi forgets      20 0.000000
-93  Plot pi forgets      21 0.000000
-94  Plot pi forgets      22 0.000000
-95  Plot pi forgets      23 0.000000
-96  Plot pi forgets      24 0.000000
-97  Plot pi forgets      25 0.000000
-98  Plot pi forgets      26 0.000000
-99  Plot pi forgets      27 0.000000
-100 Plot pi forgets      28 0.000000
-101 Plot pi forgets      29 0.000000
-102 Plot pi forgets      30 0.000000
-103 Plot pi forgets      31 0.000000
-104 Plot pi forgets      32 0.000000
-105 Plot pi forgets      33 0.000000
-106 Plot pi forgets      34 0.000000
-107 Plot pi forgets      35 0.000000
-108 Plot pi forgets      36 0.000000
-109 Plot pi forgets      37 0.000000
-110 Plot pi forgets      38 0.000000
-111 Plot pi forgets      39 0.000000
-112 Plot pi forgets      40 0.000000
-113 Plot pi forgets      41 0.000000
-114 Plot pi forgets      42 0.000000
-115 Plot pi forgets      43 0.000000
-116 Plot pi forgets      44 0.000000
-117 Plot pi forgets      45 0.000000
-118 Plot pi forgets      46 0.000000
-119 Plot pi forgets      47 0.000000
-120 Plot pi forgets      48 0.000000
-121 Plot pi forgets      49 0.000000
-122 Plot pi forgets      50 0.000000
-123 Plot pi forgets      51 0.000000
-124 Plot pi forgets      52 0.000000
-125 Plot pi forgets      53 0.000000
-126 Plot pi forgets      54 0.000000
-127 Plot pi forgets      55 0.000000
-128 Plot pi forgets      56 0.000000
-129 Plot pi forgets      57 0.000000
-130 Plot pi forgets      58 0.000000
-131 Plot pi forgets      59 0.000000
-132 Plot pi forgets      60 0.000000
-133 Plot pi forgets      61 0.000000
-134 Plot pi forgets      62 0.000000
-135 Plot pi forgets      63 0.000000
-136 Plot pi forgets      64 0.000000
-137 Plot pi forgets      65 0.000000
-138 Plot pi forgets      66 0.000000
-139 Plot pi forgets      67 0.000000
-140 Plot pi forgets      68 0.000000
-141 Plot pi forgets      69 0.000000
-142 Plot pi forgets      70 0.000000
-143 Plot pi forgets      71 0.000000
-144 Plot pi forgets      72 0.000000
-145 Plot pi guesses default 0.000000
-146 Plot pi   slips default 0.378540
-147 Plot pi   prior default 0.980586
+     skill   param                       class    value
+1  Plot pi  learns                     Default 0.363054
+2  Plot pi  learns RATIONAL1-063 RATIONAL1-237 1.000000
+3  Plot pi  learns RATIONAL1-254 RATIONAL1-063 1.000000
+4  Plot pi  learns RATIONAL1-284 RATIONAL1-254 1.000000
+5  Plot pi  learns RATIONAL1-063 RATIONAL1-122 1.000000
+6  Plot pi  learns RATIONAL1-122 RATIONAL1-284 1.000000
+7  Plot pi  learns RATIONAL1-237 RATIONAL1-254 1.000000
+8  Plot pi  learns RATIONAL1-284 RATIONAL1-045 1.000000
+9  Plot pi  learns RATIONAL1-284 RATIONAL1-190 1.000000
+10 Plot pi  learns RATIONAL1-122 RATIONAL1-045 1.000000
+11 Plot pi  learns RATIONAL1-045 RATIONAL1-254 0.000000
+12 Plot pi  learns RATIONAL1-242 RATIONAL1-045 1.000000
+13 Plot pi  learns RATIONAL1-122 RATIONAL1-237 1.000000
+14 Plot pi  learns RATIONAL1-237 RATIONAL1-122 1.000000
+15 Plot pi  learns RATIONAL1-254 RATIONAL1-190 1.000000
+16 Plot pi  learns RATIONAL1-254 RATIONAL1-284 1.000000
+17 Plot pi  learns RATIONAL1-242 RATIONAL1-156 1.000000
+18 Plot pi  learns RATIONAL1-156 RATIONAL1-242 1.000000
+19 Plot pi  learns RATIONAL1-122 RATIONAL1-242 1.000000
+20 Plot pi  learns RATIONAL1-207 RATIONAL1-190 1.000000
+21 Plot pi  learns RATIONAL1-190 RATIONAL1-045 1.000000
+22 Plot pi  learns RATIONAL1-045 RATIONAL1-063 1.000000
+23 Plot pi  learns RATIONAL1-254 RATIONAL1-207 1.000000
+24 Plot pi  learns RATIONAL1-063 RATIONAL1-156 1.000000
+25 Plot pi  learns RATIONAL1-045 RATIONAL1-284 0.000000
+26 Plot pi  learns RATIONAL1-156 RATIONAL1-045 1.000000
+27 Plot pi  learns RATIONAL1-063 RATIONAL1-284 1.000000
+28 Plot pi  learns RATIONAL1-122 RATIONAL1-156 1.000000
+29 Plot pi  learns RATIONAL1-207 RATIONAL1-242 1.000000
+30 Plot pi  learns RATIONAL1-237 RATIONAL1-242 1.000000
+31 Plot pi  learns RATIONAL1-207 RATIONAL1-254 0.000000
+32 Plot pi  learns RATIONAL1-242 RATIONAL1-207 1.000000
+33 Plot pi  learns RATIONAL1-063 RATIONAL1-242 1.000000
+34 Plot pi  learns RATIONAL1-156 RATIONAL1-284 1.000000
+35 Plot pi  learns RATIONAL1-045 RATIONAL1-156 1.000000
+36 Plot pi  learns RATIONAL1-190 RATIONAL1-242 1.000000
+37 Plot pi  learns RATIONAL1-207 RATIONAL1-156 1.000000
+38 Plot pi  learns RATIONAL1-242 RATIONAL1-237 1.000000
+39 Plot pi  learns RATIONAL1-063 RATIONAL1-190 1.000000
+40 Plot pi  learns RATIONAL1-190 RATIONAL1-237 1.000000
+41 Plot pi  learns RATIONAL1-242 RATIONAL1-190 1.000000
+42 Plot pi  learns RATIONAL1-237 RATIONAL1-063 1.000000
+43 Plot pi  learns RATIONAL1-207 RATIONAL1-045 0.000053
+44 Plot pi  learns RATIONAL1-284 RATIONAL1-207 1.000000
+45 Plot pi  learns RATIONAL1-190 RATIONAL1-156 1.000000
+46 Plot pi  learns RATIONAL1-190 RATIONAL1-207 1.000000
+47 Plot pi  learns RATIONAL1-237 RATIONAL1-190 1.000000
+48 Plot pi  learns RATIONAL1-156 RATIONAL1-122 1.000000
+49 Plot pi  learns RATIONAL1-237 RATIONAL1-284 1.000000
+50 Plot pi  learns RATIONAL1-190 RATIONAL1-122 1.000000
+51 Plot pi  learns RATIONAL1-063 RATIONAL1-045 1.000000
+52 Plot pi  learns RATIONAL1-237 RATIONAL1-207 1.000000
+53 Plot pi  learns RATIONAL1-207 RATIONAL1-063 1.000000
+54 Plot pi  learns RATIONAL1-063 RATIONAL1-207 1.000000
+55 Plot pi  learns RATIONAL1-122 RATIONAL1-190 1.000000
+56 Plot pi  learns RATIONAL1-284 RATIONAL1-122 1.000000
+57 Plot pi  learns RATIONAL1-242 RATIONAL1-284 1.000000
+58 Plot pi  learns RATIONAL1-045 RATIONAL1-190 1.000000
+59 Plot pi  learns RATIONAL1-190 RATIONAL1-284 1.000000
+60 Plot pi  learns RATIONAL1-063 RATIONAL1-254 1.000000
+61 Plot pi  learns RATIONAL1-207 RATIONAL1-237 1.000000
+62 Plot pi  learns RATIONAL1-237 RATIONAL1-045 1.000000
+63 Plot pi  learns RATIONAL1-122 RATIONAL1-207 1.000000
+64 Plot pi  learns RATIONAL1-207 RATIONAL1-284 1.000000
+65 Plot pi  learns RATIONAL1-284 RATIONAL1-156 1.000000
+66 Plot pi  learns RATIONAL1-254 RATIONAL1-156 1.000000
+67 Plot pi  learns RATIONAL1-122 RATIONAL1-063 1.000000
+68 Plot pi  learns RATIONAL1-254 RATIONAL1-237 1.000000
+69 Plot pi  learns RATIONAL1-242 RATIONAL1-254 1.000000
+70 Plot pi  learns RATIONAL1-254 RATIONAL1-242 1.000000
+71 Plot pi  learns RATIONAL1-207 RATIONAL1-122 1.000000
+72 Plot pi  learns RATIONAL1-242 RATIONAL1-122 1.000000
+73 Plot pi guesses                     default 0.000000
+74 Plot pi   slips                     default 0.378540
+75 Plot pi   prior                     default 0.980586
 ```
 
 Note column `class` refers to different items orders.
-
-#### Multiple Prior (To Be Done)
-
-Train a multiple prior BKT model on multiple students in the CT dataset. Switch parameter `multiprior = TRUE` in fit function.
-
-Multiple Prior refers to Prior Per Student (PPS) Model.
-
-```r
-library(BKT)
-
-model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
-fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
-
-result <- fit(model, data_path = "ct.csv", skills = c("Plot pi"), multiprior = TRUE)
-print(params(result))
-```
-
-
 
 
 ## Internal Data Format
