@@ -51,7 +51,6 @@ To facilitate the use of BKT in educational research and practical applications,
 
 This paper aims to provide a comprehensive overview of BKT and its variants, showcasing their usefulness through empirical and simulated data analyses. Additionally, we offer a practical tutorial on implementing BKT using the BKT R package, enabling researchers and practitioners to leverage this powerful model in their own work. By bridging theoretical insights with practical applications, this paper seeks to contribute to the growing body of knowledge on dynamic learning models and their role in advancing educational research and practice.
 
-
 \section{Model description}
 
 \subsection{Bayesian Knowledge Tracing}
@@ -767,11 +766,88 @@ The E-step and M-step are alternated until the likelihood \(Lik\) converges, i.e
 
 By iteratively refining the parameter estimates and leveraging the hidden knowledge state dynamics, the EM algorithm ensures an efficient and robust estimation process for the BKT model.   
 
+
+In the Item Learning Effect (ILE) model, the primary modification to the standard BKT model is the individualization of the learning rate for each activity. Instead of a global learning rate \( P_l \), the ILE model assigns a unique learning rate \( P_{l_j} \) for each item \( j \). To estimate the global parameters (\( P_p, P_{l_j}, P_s, P_g \)) that maximize the likelihood of the observed responses, we extend the Expectation-Maximization (EM) algorithm to handle the item-specific learning rates.
+
+The estimation procedure for the ILE model follows similar steps as the standard BKT model but includes modifications for handling the different learning rates for each item.
+
+\subsubsection{E-step}
+
+\begin{enumerate}
+    \item \textbf{Initialization}:
+    Set the initial knowledge state \(\theta_1 = P_p\), as in the basic BKT model.
+    
+    \item \textbf{Forward Computation}:
+    For each activity \(i\) in the sequence, compute the updated knowledge state \(\theta'\) using Bayes' rule, with the learning rate \(P_{l_i}\) specific to activity \(i\):
+    \[
+    \theta' = 
+    \begin{cases} 
+        \frac{\theta_i P_s}{\theta_i P_s + (1 - \theta_i)(1 - P_g)}, & \text{if } a_i = 0 \\
+        \frac{\theta_i (1 - P_s)}{\theta_i (1 - P_s) + (1 - \theta_i)P_g}, & \text{if } a_i = 1
+    \end{cases}
+    \]
+    
+    Then, update the knowledge state \(\theta_{i+1}\) for each learner based on the individual learning rate \(P_{l_i}\) for activity \(i\):
+    \[
+    \theta_{i+1} = \theta' + (1 - \theta') P_{l_i}
+    \]
+    
+    \item \textbf{Likelihood Contribution}:
+    For each observed answer \(a_i\) at activity \(i\), the likelihood contribution is computed as:
+    \[
+    Lik_i = 
+    \begin{cases} 
+        P_s \theta_i + (1 - P_g)(1 - \theta_i), & \text{if } a_i = 0 \\
+        (1 - P_s)\theta_i + P_g(1 - \theta_i), & \text{if } a_i = 1
+    \end{cases}
+    \]
+    The likelihoods are accumulated to update the total likelihood \(Lik\).
+\end{enumerate}
+
+\subsubsection{M-step}
+In the M-step, we maximize the expected likelihood computed during the E-step with respect to the global parameters (\(P_p, P_{l_j}, P_s, P_g\)).
+
+\begin{enumerate}
+    \item \textbf{Updating Prior (\(P_p\))}:
+    The prior probability \(P_p\) is updated based on the expected initial knowledge state \(\theta_1\), as in the basic BKT model:
+    \[
+    P_p = \frac{1}{N} \sum_{j=1}^N \theta_1^{(j)}
+    \]
+
+    \item \textbf{Updating Item-Specific Learning Rate (\(P_{l_j}\))}:
+    The learning rate for each item \(j\), \(P_{l_j}\), is updated based on the transitions from the knowledge state after observing the learner's answers for that activity:
+    \[
+    P_{l_j} = \frac{\sum_{j=1}^N \sum_{i=1}^{T_j} \left( (1 - \theta_i^{(j)}) \cdot \theta_{i+1}^{(j)} \right)}{\sum_{j=1}^N \sum_{i=1}^{T_j} (1 - \theta_i^{(j)})}
+    \]
+    Here, \(T_j\) refers to the number of activities for learner \(j\), and each item-specific learning rate \(P_{l_j}\) is calculated independently for each activity.
+
+    \item \textbf{Updating Slip Rate (\(P_s\))}:
+    The slip rate \(P_s\) is updated based on the proportion of incorrect answers when the learner is in the known state across all items:
+    \[
+    P_s = \frac{\sum_{j=1}^N \sum_{i=1}^{T_j} \left( \theta_i^{(j)} \cdot (1 - a_i) \right)}{\sum_{j=1}^N \sum_{i=1}^{T_j} \theta_i^{(j)}}
+    \]
+
+    \item \textbf{Updating Guess Rate (\(P_g\))}:
+    The guess rate \(P_g\) is updated based on the proportion of correct answers when the learner is in the unknown state across all items:
+    \[
+    P_g = \frac{\sum_{j=1}^N \sum_{i=1}^{T_j} \left( (1 - \theta_i^{(j)}) \cdot a_i \right)}{\sum_{j=1}^N \sum_{i=1}^{T_j} (1 - \theta_i^{(j)})}
+    \]
+\end{enumerate}
+
+\subsubsection{Iteration and Convergence}
+The E-step and M-step are alternated until convergence, similar to the basic BKT model. The algorithm converges when the change in the log-likelihood between iterations is below a predefined threshold. At this point, the estimated parameters (\(P_p, P_{l_j}, P_s, P_g\)) maximize the likelihood of the observed sequences of answers under the ILE model.
+
+\subsubsection{Summary}
+In the ILE model, the primary difference from the standard BKT model is the individualization of the learning rate for each activity. The EM algorithm is extended to estimate the item-specific learning rates \(P_{l_j}\) along with the other parameters. This allows for a more fine-grained representation of how learners progress through different items, making the model more flexible in capturing variations in learning behaviors across items.
 \section{Data Example}
 
-The dataset comes from the Cognitive Tutor system (\cite{ritter2007cognitive}), an intelligent tutoring platform designed to improve students' mathematical abilities. 
+The dataset originates from the Cognitive Tutor system (\cite{ritter2007cognitive}), an intelligent tutoring platform designed to enhance students' mathematical abilities. This platform has been utilized extensively to capture detailed logs of student interactions during math problem-solving activities.
 
-The dataset includes detailed logs of 587 unique students' interactions with the Cognitive Tutor, which tracks the students' responses to a series of math problems associated with various knowledge components (KCs). In total, the dataset contains 16,857 observation records, capturing each student's attempts and their correctness for various problem items across the 12 KCs.
+The dataset comprises detailed logs of 587 unique students' interactions with Cognitive Tutor, tracking their responses to a series of mathematical problems related to various Knowledge Components (KCs). Overall, the dataset contains 16,857 observation records that detail each student's attempts and the correctness of their responses across these 12 KCs.
+
+The primary goal of this dataset is to facilitate a deeper understanding of the processes through which students learn mathematics and to enhance their learning outcomes based on this understanding. Furthermore, this data allows researchers to explore and quantify patterns in student learning behaviors and how these are influenced by tasks, hints, and feedback patterns integrated within the Cognitive Tutor system.
+
+In addition to the descriptive analysis of the dataset, this paper also involves preprocessing the data to meet the input requirements of the Bayesian Knowledge Tracing (BKT) model. Specifically, the preprocessing step will transform the data by sequencing each student's responses to the math problems. This will be structured as a chronological sequence of attempts for each student, where each attempt is marked by their response correctness. This sequence forms a crucial input for the BKT model, enabling it to trace and predict the evolution of each student's knowledge state over time.
 
 \subsection{Basic BKT Model Example with BKT R package}
 
@@ -805,23 +881,31 @@ The result will be shown as below:
 
 In the result, the first column is the name of the skills, the second column indicates the type of parameters, including \texttt{learns}, \texttt{forgets}, \texttt{guesses}, \texttt{slips}, and \texttt{prior}. The last column shows the estimated parameter value.
 
+Learns (0.222808): This parameter indicates the probability that a student will transition from the "not learned" state to the "learned" state after completing an attempt. In this example, the probability of learning from an attempt is approximately 22.3\%, suggesting moderate learning potential.
+
+Guesses (0.003382): This parameter estimates the likelihood that a student who has not mastered the skill can guess the correct answer. A very low value (0.3\%) here indicates that guessing correctly is highly unlikely for this skill.
+
+Slips (0.322177): This parameter represents the probability that a student who has already mastered the skill will provide an incorrect answer. The value of 32.2\% suggests a relatively high chance of error due to slips, which may occur due to distractions, miscalculations, or other external factors.
+
+Prior (0.737443): The prior parameter indicates the initial probability of a student knowing the skill before interacting with the tutor. Here, approximately 73.7\% of students are estimated to already possess this knowledge, reflecting a relatively high prior knowledge for this specific skill.
+
 \subsection{IDE BKT Model Example with BKT R package}
 
 Train a multiple guess and slip BKT model on multiple skills in the CT dataset. Switch parameter \texttt{multigs = TRUE} in the \texttt{fit} function.
 
 Multiple Guess refers to the Item Difficulty Effect (IDE) Model.
 
-\begin{lstlisting}[caption={R code to train a IDE BKT model}]
+\begin{lstlisting}[caption={R code to train an ILE BKT model}]
 library(BKT)
 
 # Initialize the model with an optional seed
-model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+model <- bkt(seed = 42, num_fits = 10, parallel = FALSE)
 
 # Fetch example data
 fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
 
 # Train a multiple guess BKT model on one skill in the CT dataset
-result <- fit(model, data_path = "ct.csv", skills = c("Plot pi"), multigs = TRUE)
+result <- fit(model, data_path = "ct.csv", skills = c("Finding the intersection, Mixed"), multigs = TRUE)
 
 # View the trained parameters
 print(params(result))
@@ -830,33 +914,53 @@ print(params(result))
 The result will be shown as below:
 
 \begin{verbatim}
-        skill   param   class    value
-1  Plot pi  learns default 0.995657
-2  Plot pi forgets default 0.000000
-3  Plot pi guesses       1 0.000000
-4  Plot pi guesses       2 0.000000
-5  Plot pi guesses       3 0.000000
-6  Plot pi guesses       4 0.000000
-7  Plot pi guesses       5 0.000000
-8  Plot pi guesses       6 0.000000
-9  Plot pi guesses       7 0.000000
-10 Plot pi guesses       8 0.000000
-11 Plot pi guesses       9 0.000000
-12 Plot pi guesses      10 0.000000
-13 Plot pi   slips       1 0.577002
-14 Plot pi   slips       2 0.220335
-15 Plot pi   slips       3 0.246635
-16 Plot pi   slips       4 0.426740
-17 Plot pi   slips       5 0.238321
-18 Plot pi   slips       6 0.560898
-19 Plot pi   slips       7 0.381043
-20 Plot pi   slips       8 0.477167
-21 Plot pi   slips       9 0.235853
-22 Plot pi   slips      10 0.472197
-23 Plot pi   prior default 0.992952
+    skill                           param  class   value
+1  Finding the intersection, Mixed learns  default 0.004373
+2  Finding the intersection, Mixed forgets default 0.000000
+3  Finding the intersection, Mixed guesses       1 0.331227
+4  Finding the intersection, Mixed guesses       2 1.000000
+5  Finding the intersection, Mixed guesses       3 0.500000
+6  Finding the intersection, Mixed guesses       4 0.000000
+7  Finding the intersection, Mixed guesses       5 0.990665
+8  Finding the intersection, Mixed guesses       6 0.000000
+9  Finding the intersection, Mixed guesses       7 0.388853
+10 Finding the intersection, Mixed guesses       8 0.352391
+11 Finding the intersection, Mixed guesses       9 0.000000
+12 Finding the intersection, Mixed guesses      10 0.654125
+13 Finding the intersection, Mixed guesses      11 0.639013
+14 Finding the intersection, Mixed guesses      12 0.001277
+15 Finding the intersection, Mixed guesses      13 0.257380
+16 Finding the intersection, Mixed guesses      14 0.000000
+17 Finding the intersection, Mixed guesses      15 0.000000
+18 Finding the intersection, Mixed guesses      16 0.000000
+19 Finding the intersection, Mixed   slips       1 0.000000
+20 Finding the intersection, Mixed   slips       2 0.000000
+21 Finding the intersection, Mixed   slips       3 0.500000
+22 Finding the intersection, Mixed   slips       4 0.000000
+23 Finding the intersection, Mixed   slips       5 0.385030
+24 Finding the intersection, Mixed   slips       6 0.000000
+25 Finding the intersection, Mixed   slips       7 0.311333
+26 Finding the intersection, Mixed   slips       8 0.793576
+27 Finding the intersection, Mixed   slips       9 0.707934
+28 Finding the intersection, Mixed   slips      10 0.000000
+29 Finding the intersection, Mixed   slips      11 0.293232
+30 Finding the intersection, Mixed   slips      12 0.073257
+31 Finding the intersection, Mixed   slips      13 1.000000
+32 Finding the intersection, Mixed   slips      14 0.769552
+33 Finding the intersection, Mixed   slips      15 1.000000
+34 Finding the intersection, Mixed   slips      16 0.058531
+35 Finding the intersection, Mixed   prior default 0.851380
 \end{verbatim}
-
+    
 Note that the \texttt{class} column refers to different items.
+
+Learns (0.004373): This parameter represents the probability of a student transitioning from the "not learned" to the "learned" state after an attempt. A very low value of 0.004373 indicates that the skill "Finding the intersection, Mixed" is challenging to learn, requiring multiple attempts for students to acquire proficiency.
+
+Guesses (varies by class): The guesses parameter varies significantly across the 16 item difficulty classes, highlighting how the probability of correctly guessing depends on the difficulty level of the question.
+
+Slips (varies by class): The slips parameter also varies across classes, representing the likelihood of a student making an error despite mastering the skill.
+
+Prior (0.851380): The prior probability of 0.851 indicates that 85.13\% of students are estimated to have already mastered the "Finding the intersection, Mixed" skill before interacting with the tutor. This reflects a high level of initial knowledge among the students for this specific skill.
 
 \subsection{ILE BKT Model Example with BKT R package}
 
@@ -868,13 +972,13 @@ Multiple Learn refers to the Item Learning Effect (ILE) Model.
 library(BKT)
 
 # Initialize the model with an optional seed
-model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+model <- bkt(seed = 42, num_fits = 10, parallel = FALSE)
 
 # Fetch example data
 fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
 
-# Train a multiple learn BKT model on one skill in the CT dataset
-result <- fit(model, data_path = "ct.csv", skills = c("Plot pi"), multilearn = TRUE)
+# Train a multiple guess BKT model on one skill in the CT dataset
+result <- fit(model, data_path = "ct.csv", skills = c("Finding the intersection, Mixed"), multilearn = TRUE)
 
 # View the trained parameters
 print(params(result))
@@ -883,34 +987,52 @@ print(params(result))
 The result will be shown as below:
 
 \begin{verbatim}
-     skill   param   class    value
-1  Plot pi  learns       1 0.968846
-2  Plot pi  learns       2 1.000000
-3  Plot pi  learns       3 1.000000
-4  Plot pi  learns       4 1.000000
-5  Plot pi  learns       5 1.000000
-6  Plot pi  learns       6 0.334115
-7  Plot pi  learns       7 0.775121
-8  Plot pi  learns       8 0.742444
-9  Plot pi  learns       9 0.000000
-10 Plot pi  learns      10 0.000372
-11 Plot pi forgets       1 0.000000
-12 Plot pi forgets       2 0.000000
-13 Plot pi forgets       3 0.000000
-14 Plot pi forgets       4 0.000000
-15 Plot pi forgets       5 0.000000
-16 Plot pi forgets       6 0.000000
-17 Plot pi forgets       7 0.000000
-18 Plot pi forgets       8 0.000000
-19 Plot pi forgets       9 0.000000
-20 Plot pi forgets      10 0.000000
-21 Plot pi guesses default 0.000000
-22 Plot pi   slips default 0.352701
-23 Plot pi   prior default 0.936924
+   skill                            param  class   value
+1  Finding the intersection, Mixed  learns       1 0.000000
+2  Finding the intersection, Mixed  learns       2 1.000000
+3  Finding the intersection, Mixed  learns       3 0.000005
+4  Finding the intersection, Mixed  learns       4 0.000000
+5  Finding the intersection, Mixed  learns       5 0.000002
+6  Finding the intersection, Mixed  learns       6 0.000000
+7  Finding the intersection, Mixed  learns       7 0.000090
+8  Finding the intersection, Mixed  learns       8 0.492797
+9  Finding the intersection, Mixed  learns       9 0.000003
+10 Finding the intersection, Mixed  learns      10 0.000000
+11 Finding the intersection, Mixed  learns      11 0.999966
+12 Finding the intersection, Mixed  learns      12 0.000003
+13 Finding the intersection, Mixed  learns      13 0.000127
+14 Finding the intersection, Mixed  learns      14 0.176157
+15 Finding the intersection, Mixed  learns      15 0.000000
+16 Finding the intersection, Mixed  learns      16 0.000000
+17 Finding the intersection, Mixed forgets       1 0.000000
+18 Finding the intersection, Mixed forgets       2 0.000000
+19 Finding the intersection, Mixed forgets       3 0.000000
+20 Finding the intersection, Mixed forgets       4 0.000000
+21 Finding the intersection, Mixed forgets       5 0.000000
+22 Finding the intersection, Mixed forgets       6 0.000000
+23 Finding the intersection, Mixed forgets       7 0.000000
+24 Finding the intersection, Mixed forgets       8 0.000000
+25 Finding the intersection, Mixed forgets       9 0.000000
+26 Finding the intersection, Mixed forgets      10 0.000000
+27 Finding the intersection, Mixed forgets      11 0.000000
+28 Finding the intersection, Mixed forgets      12 0.000000
+29 Finding the intersection, Mixed forgets      13 0.000000
+30 Finding the intersection, Mixed forgets      14 0.000000
+31 Finding the intersection, Mixed forgets      15 0.000000
+32 Finding the intersection, Mixed forgets      16 0.000000
+33 Finding the intersection, Mixed guesses default 0.353624
+34 Finding the intersection, Mixed   slips default 0.141999
+35 Finding the intersection, Mixed   prior default 0.133601
 \end{verbatim}
+Note that the \texttt{class} column refers to different items (problems).
 
-Note that the \texttt{class} column refers to different items.
+Learns (varies by class): The "learns" parameter represents the probability of a student transitioning from the "not learned" to the "learned" state after interacting with a specific item (problem).
 
+Guesses (0.353624): The default guessing probability represents the likelihood that a student who has not mastered the skill will guess the correct answer. A value of 35.36\% suggests that students have a moderate chance of guessing correctly.
+
+Slips (0.141999): The default slips probability represents the likelihood that a student who has mastered the skill will still make an error. A value of 14.20\% indicates a relatively low chance of mistakes among proficient students.
+
+Prior (0.133601): The prior probability represents the likelihood that a student has already mastered the skill "Finding the intersection, Mixed" before interacting with the system. A value of 13.36\% suggests that most students start without having mastered this skill.
 
 \subsection{LFB BKT Model Example with BKT R package}
 
@@ -945,6 +1067,15 @@ The result will be shown as below:
 4 Plot terminating proper fraction   slips default 0.329848
 5 Plot terminating proper fraction   prior default 0.622707
 \end{verbatim}
+
+Learns (0.087497): The learns parameter indicates the probability of transitioning from the "not learned" to the "learned" state after an attempt. A value of 8.75\% suggests that students have a moderate but not highly effective chance of learning this skill from each interaction.
+Forgets (0.054892): The forgets parameter represents the probability of transitioning from the "learned" state back to the "not learned" state. A value of 5.49\% indicates that forgetting does occur but at a relatively low rate.
+
+Guesses (0.285785): This parameter reflects the likelihood of a student who has not mastered the skill guessing the correct answer. A value of 28.58\% shows a moderate chance of guessing correctly, indicating that the item may not be overly challenging to intuit or estimate.
+
+Slips (0.329848): The slips parameter represents the probability of a student making an error despite having mastered the skill. A value of 32.98\% suggests a moderate likelihood of slips, which may be due to distractions, calculation errors, or misreading the problem.
+
+Prior (0.622707): The prior parameter reflects the initial probability that a student has already mastered the skill "Plot terminating proper fraction" before interacting with the system. A value of 62.27\% indicates that more than half of the students start with this skill already mastered.
 
 \section{Discussion}
 \section{Conlusion}
