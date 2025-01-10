@@ -870,13 +870,11 @@ print(params(result))
 The result will be shown as below: 
 
 \begin{verbatim}
-> print(params(result))
-                                            skill   param   class    value
-1        Plot non-terminating improper fraction  learns default 0.222808
-2        Plot non-terminating improper fraction forgets default 0.000000
-3        Plot non-terminating improper fraction guesses default 0.003382
-4        Plot non-terminating improper fraction   slips default 0.322177
-5        Plot non-terminating improper fraction   prior default 0.737443
+    skill                                 param  class   value
+1 Plot non-terminating improper fraction  learns default 0.222837
+2 Plot non-terminating improper fraction guesses default 0.002951
+3 Plot non-terminating improper fraction   slips default 0.322440
+4 Plot non-terminating improper fraction   prior default 0.737934
 \end{verbatim}
 
 In the result, the first column is the name of the skills, the second column indicates the type of parameters, including \texttt{learns}, \texttt{forgets}, \texttt{guesses}, \texttt{slips}, and \texttt{prior}. The last column shows the estimated parameter value.
@@ -888,6 +886,121 @@ Guesses (0.003382): This parameter estimates the likelihood that a student who h
 Slips (0.322177): This parameter represents the probability that a student who has already mastered the skill will provide an incorrect answer. The value of 32.2\% suggests a relatively high chance of error due to slips, which may occur due to distractions, miscalculations, or other external factors.
 
 Prior (0.737443): The prior parameter indicates the initial probability of a student knowing the skill before interacting with the tutor. Here, approximately 73.7\% of students are estimated to already possess this knowledge, reflecting a relatively high prior knowledge for this specific skill.
+
+\subsection{PPS BKT Model Example with BKT R package}
+
+Train a multiple prior BKT model for multiple students in the CT dataset. Switch parameter \texttt{multiprior = TRUE} in the \texttt{fit} function.
+
+Multiple Prior refers to the Prior Per Student (PPS) Model.
+
+\begin{lstlisting}[caption={R code to train a PPS BKT model}]
+library(BKT)
+
+# Initialize the model with an optional seed
+model <- bkt(seed = 42, num_fits = 10, parallel = FALSE)
+
+# Fetch example data
+fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+
+# Train a multiple guess BKT model on one skill in the CT dataset
+result <- fit(model, data_path = "ct.csv", skills = c("Finding the intersection, Mixed"), multiprior = TRUE)
+
+# View the trained parameters
+print(params(result))
+\end{lstlisting}
+
+The result will be shown as below:
+
+\begin{verbatim}
+    skill                           param        class    value
+1  Finding the intersection, Mixed  learns      default 0.016332
+2  Finding the intersection, Mixed guesses      default 0.292058
+3  Finding the intersection, Mixed   slips      default 0.240662
+4  Finding the intersection, Mixed   prior     171eKI1Z 1.000000
+5  Finding the intersection, Mixed   prior     171nKnHW 1.000000
+6  Finding the intersection, Mixed   prior     171RUh1Q 1.000000
+7  Finding the intersection, Mixed   prior      1T4w47X 0.000000
+8  Finding the intersection, Mixed   prior 2302sApyRu_a 1.000000
+9  Finding the intersection, Mixed   prior 2304U8pLyy_a 0.000000
+10 Finding the intersection, Mixed   prior 2304YbHCok_a 1.000000
+11 Finding the intersection, Mixed   prior 2304YbHCok_b 0.000000
+12 Finding the intersection, Mixed   prior 2305Ra0wn7_a 0.000000
+13 Finding the intersection, Mixed   prior 2309tLkCW6_a 0.000000
+14 Finding the intersection, Mixed   prior 230amNTt8e_a 0.001792
+15 Finding the intersection, Mixed   prior 230amNTt8e_b 0.000000
+16 Finding the intersection, Mixed   prior 230cbpmx2H_a 0.000000
+17 Finding the intersection, Mixed   prior 230cQtHpL1_a 0.000000
+18 Finding the intersection, Mixed   prior 230duwYN4p_a 0.000000
+19 Finding the intersection, Mixed   prior 230EGiaN2S_a 0.000099
+20 Finding the intersection, Mixed   prior 230HLorplQ_a 0.000000
+21 Finding the intersection, Mixed   prior 230hzMTB8t_a 0.000000
+22 Finding the intersection, Mixed   prior 230hzMTB8t_c 1.000000
+23 Finding the intersection, Mixed   prior 230J1b5ZjX_a 0.000000
+24 Finding the intersection, Mixed   prior 230jc0wqMP_a 0.000000
+25 Finding the intersection, Mixed   prior 230JX4ja8w_a 1.000000
+26 Finding the intersection, Mixed   prior 230JX4ja8w_b 0.000000
+27 Finding the intersection, Mixed   prior 230kbSDgQ3_a 0.000000
+28 Finding the intersection, Mixed   prior 230KZfQk0y_a 0.000000
+29 Finding the intersection, Mixed   prior 230NIBA0Dq_a 0.000000
+30 Finding the intersection, Mixed   prior 230NIBA0Dq_b 1.000000
+31 Finding the intersection, Mixed   prior 230P2rW3yn_a 0.000000
+32 Finding the intersection, Mixed   prior 230rlAi5Zw_a 0.000000
+33 Finding the intersection, Mixed   prior 230tBgtvsW_a 0.000000
+34 Finding the intersection, Mixed   prior 230tBgtvsW_b 0.000000
+35 Finding the intersection, Mixed   prior 230XGzqSto_a 0.001056
+36 Finding the intersection, Mixed   prior 230XGzqSto_b 1.000000
+37 Finding the intersection, Mixed   prior 230Y6CWb3d_a 0.000000
+38 Finding the intersection, Mixed   prior    236wm0wnm 1.000000
+39 Finding the intersection, Mixed   prior    236z60ytg 1.000000
+40 Finding the intersection, Mixed   prior    2480hxxcx 1.000000
+41 Finding the intersection, Mixed   prior    2480wql4f 1.000000
+42 Finding the intersection, Mixed   prior    2483hkq13 0.018457
+43 Finding the intersection, Mixed   prior    2483mf0as 1.000000
+44 Finding the intersection, Mixed   prior    2484vyh4g 1.000000
+45 Finding the intersection, Mixed   prior    24864dslr 0.000000
+46 Finding the intersection, Mixed   prior    2487lpei2 1.000000
+47 Finding the intersection, Mixed   prior    2487o1gku 0.000016
+48 Finding the intersection, Mixed   prior    2487p61kc 0.000000
+49 Finding the intersection, Mixed   prior    2488721d5 1.000000
+50 Finding the intersection, Mixed   prior    2488t72oe 1.000000
+51 Finding the intersection, Mixed   prior    24899b8f6 1.000000
+52 Finding the intersection, Mixed   prior    2489c9lbg 1.000000
+53 Finding the intersection, Mixed   prior    248abpghv 1.000000
+54 Finding the intersection, Mixed   prior    248agzhky 1.000000
+55 Finding the intersection, Mixed   prior    248clu9mj 1.000000
+56 Finding the intersection, Mixed   prior    248g1paph 0.000000
+57 Finding the intersection, Mixed   prior    248g1wh6o 0.000000
+58 Finding the intersection, Mixed   prior    248hh7azg 1.000000
+59 Finding the intersection, Mixed   prior    248iwnoa3 1.000000
+60 Finding the intersection, Mixed   prior    248jqsua5 0.000000
+61 Finding the intersection, Mixed   prior    248k03ldd 1.000000
+62 Finding the intersection, Mixed   prior    248llcp7q 0.000000
+63 Finding the intersection, Mixed   prior    248m27z11 1.000000
+64 Finding the intersection, Mixed   prior    248mbp1cf 1.000000
+65 Finding the intersection, Mixed   prior    248oylglm 0.000000
+66 Finding the intersection, Mixed   prior    248pthl4g 0.000000
+67 Finding the intersection, Mixed   prior    248qhy2yo 0.031083
+68 Finding the intersection, Mixed   prior    248s9v653 1.000000
+69 Finding the intersection, Mixed   prior    248t7n0my 1.000000
+70 Finding the intersection, Mixed   prior    248tviw5h 0.000000
+71 Finding the intersection, Mixed   prior    248vthf5i 0.000000
+72 Finding the intersection, Mixed   prior    248zczb3i 0.000000
+73 Finding the intersection, Mixed   prior 271g7beuc4s1 0.000000
+74 Finding the intersection, Mixed   prior 271k966j74lv 0.000000
+75 Finding the intersection, Mixed   prior 271np4zc8vd1 1.000000
+76 Finding the intersection, Mixed   prior      3cjD21W 1.000000
+77 Finding the intersection, Mixed   prior      Vd9xmeb 1.000000
+\end{verbatim}
+    
+Note that the \texttt{class} column refers to different students.
+
+Learns (0.016332): This parameter represents the probability that a student transitions from the "not learned" to the "learned" state after an attempt. In this case, the value of 0.016332 is relatively low, which suggests that the skill "Finding the intersection, Mixed" is not easily learned after just a single attempt, requiring more practice and interaction for the student to gain mastery.
+
+Guesses (0.292058) The guesses parameter indicates the likelihood that a student, despite not mastering the skill, can guess the correct answer. With a value of 0.292058, this suggests a moderate probability of correct guesses for this skill. This implies that students have a reasonable chance of answering the question correctly even without mastering the skill, possibly due to the nature of the task or its clues.
+
+Slips (0.240662): The slips parameter shows the probability that a student who has already mastered the skill will provide an incorrect answer. The value of 0.240662 suggests that there is a moderate likelihood of errors (or slips) occurring despite mastery. This could be attributed to factors such as fatigue, distractions, or misinterpretation of the question.
+
+Prior (varied for individual students): The prior parameters are individualized for each student in the PPS model, as seen in the dataset. The prior values for different students range from 0 to 1, indicating the estimated prior knowledge each student possesses before interacting with the tutor. The prior for each student is labeled uniquely (e.g., 171eKI1Z, 171nKnHW, etc.), representing the varying degrees of prior knowledge across the student population. A majority of the priors are close to 1, meaning that many students are estimated to have a high level of prior knowledge for the skill before they start interacting with the tutor. However, some students (e.g., 1T4w47X) have a prior value closer to 0, indicating that they have little to no prior knowledge of the skill at the beginning of the tutoring process.
 
 \subsection{IDE BKT Model Example with BKT R package}
 
@@ -914,42 +1027,41 @@ print(params(result))
 The result will be shown as below:
 
 \begin{verbatim}
-    skill                           param  class   value
-1  Finding the intersection, Mixed learns  default 0.004373
-2  Finding the intersection, Mixed forgets default 0.000000
-3  Finding the intersection, Mixed guesses       1 0.331227
-4  Finding the intersection, Mixed guesses       2 1.000000
-5  Finding the intersection, Mixed guesses       3 0.500000
-6  Finding the intersection, Mixed guesses       4 0.000000
-7  Finding the intersection, Mixed guesses       5 0.990665
-8  Finding the intersection, Mixed guesses       6 0.000000
-9  Finding the intersection, Mixed guesses       7 0.388853
-10 Finding the intersection, Mixed guesses       8 0.352391
-11 Finding the intersection, Mixed guesses       9 0.000000
-12 Finding the intersection, Mixed guesses      10 0.654125
-13 Finding the intersection, Mixed guesses      11 0.639013
-14 Finding the intersection, Mixed guesses      12 0.001277
-15 Finding the intersection, Mixed guesses      13 0.257380
-16 Finding the intersection, Mixed guesses      14 0.000000
-17 Finding the intersection, Mixed guesses      15 0.000000
-18 Finding the intersection, Mixed guesses      16 0.000000
-19 Finding the intersection, Mixed   slips       1 0.000000
-20 Finding the intersection, Mixed   slips       2 0.000000
-21 Finding the intersection, Mixed   slips       3 0.500000
-22 Finding the intersection, Mixed   slips       4 0.000000
-23 Finding the intersection, Mixed   slips       5 0.385030
-24 Finding the intersection, Mixed   slips       6 0.000000
-25 Finding the intersection, Mixed   slips       7 0.311333
-26 Finding the intersection, Mixed   slips       8 0.793576
-27 Finding the intersection, Mixed   slips       9 0.707934
-28 Finding the intersection, Mixed   slips      10 0.000000
-29 Finding the intersection, Mixed   slips      11 0.293232
-30 Finding the intersection, Mixed   slips      12 0.073257
-31 Finding the intersection, Mixed   slips      13 1.000000
-32 Finding the intersection, Mixed   slips      14 0.769552
-33 Finding the intersection, Mixed   slips      15 1.000000
-34 Finding the intersection, Mixed   slips      16 0.058531
-35 Finding the intersection, Mixed   prior default 0.851380
+                             skill   param                class    value
+1  Finding the intersection, Mixed  learns              default 0.004373
+2  Finding the intersection, Mixed guesses   M2X-4Y=18&Y=-3X+13 0.331227
+3  Finding the intersection, Mixed guesses M2X-4YGT18&YLE-3X+13 1.000000
+4  Finding the intersection, Mixed guesses    M2X-9Y=14&Y=6X-42 0.500000
+5  Finding the intersection, Mixed guesses      M2X-Y=-3&Y=-X+9 0.000000
+6  Finding the intersection, Mixed guesses    M2X-YLE-3&YGT-X+9 0.990665
+7  Finding the intersection, Mixed guesses      M2X+3Y=6&Y=-X+2 0.000000
+8  Finding the intersection, Mixed guesses       M3X+Y=16&Y=X+4 0.388853
+9  Finding the intersection, Mixed guesses     M4X-2Y=8&Y=-2X+5 0.352391
+10 Finding the intersection, Mixed guesses   M4X-2YLT8&YLE-2X+5 0.000000
+11 Finding the intersection, Mixed guesses     M4X+3Y=31&Y=2X+7 0.654125
+12 Finding the intersection, Mixed guesses   M4X+3YLT31&YLT2X+7 0.639013
+13 Finding the intersection, Mixed guesses     M4X+5Y=48&Y=3X+2 0.001277
+14 Finding the intersection, Mixed guesses   M8X-5Y=-40&Y=-2X-6 0.257380
+15 Finding the intersection, Mixed guesses M8X-5YGE-40&YLE-2X-6 0.000000
+16 Finding the intersection, Mixed guesses    M9X-8Y=27&Y=-X+23 0.000000
+17 Finding the intersection, Mixed guesses            SY=-X&Y=7 0.000000
+18 Finding the intersection, Mixed   slips   M2X-4Y=18&Y=-3X+13 0.000000
+19 Finding the intersection, Mixed   slips M2X-4YGT18&YLE-3X+13 0.000000
+20 Finding the intersection, Mixed   slips    M2X-9Y=14&Y=6X-42 0.500000
+21 Finding the intersection, Mixed   slips      M2X-Y=-3&Y=-X+9 0.000000
+22 Finding the intersection, Mixed   slips    M2X-YLE-3&YGT-X+9 0.385030
+23 Finding the intersection, Mixed   slips      M2X+3Y=6&Y=-X+2 0.000000
+24 Finding the intersection, Mixed   slips       M3X+Y=16&Y=X+4 0.311333
+25 Finding the intersection, Mixed   slips     M4X-2Y=8&Y=-2X+5 0.793576
+26 Finding the intersection, Mixed   slips   M4X-2YLT8&YLE-2X+5 0.707934
+27 Finding the intersection, Mixed   slips     M4X+3Y=31&Y=2X+7 0.000000
+28 Finding the intersection, Mixed   slips   M4X+3YLT31&YLT2X+7 0.293232
+29 Finding the intersection, Mixed   slips     M4X+5Y=48&Y=3X+2 0.073257
+30 Finding the intersection, Mixed   slips   M8X-5Y=-40&Y=-2X-6 1.000000
+31 Finding the intersection, Mixed   slips M8X-5YGE-40&YLE-2X-6 0.769552
+32 Finding the intersection, Mixed   slips    M9X-8Y=27&Y=-X+23 1.000000
+33 Finding the intersection, Mixed   slips            SY=-X&Y=7 0.058531
+34 Finding the intersection, Mixed   prior              default 0.851380
 \end{verbatim}
     
 Note that the \texttt{class} column refers to different items.
@@ -987,44 +1099,28 @@ print(params(result))
 The result will be shown as below:
 
 \begin{verbatim}
-   skill                            param  class   value
-1  Finding the intersection, Mixed  learns       1 0.000000
-2  Finding the intersection, Mixed  learns       2 1.000000
-3  Finding the intersection, Mixed  learns       3 0.000005
-4  Finding the intersection, Mixed  learns       4 0.000000
-5  Finding the intersection, Mixed  learns       5 0.000002
-6  Finding the intersection, Mixed  learns       6 0.000000
-7  Finding the intersection, Mixed  learns       7 0.000090
-8  Finding the intersection, Mixed  learns       8 0.492797
-9  Finding the intersection, Mixed  learns       9 0.000003
-10 Finding the intersection, Mixed  learns      10 0.000000
-11 Finding the intersection, Mixed  learns      11 0.999966
-12 Finding the intersection, Mixed  learns      12 0.000003
-13 Finding the intersection, Mixed  learns      13 0.000127
-14 Finding the intersection, Mixed  learns      14 0.176157
-15 Finding the intersection, Mixed  learns      15 0.000000
-16 Finding the intersection, Mixed  learns      16 0.000000
-17 Finding the intersection, Mixed forgets       1 0.000000
-18 Finding the intersection, Mixed forgets       2 0.000000
-19 Finding the intersection, Mixed forgets       3 0.000000
-20 Finding the intersection, Mixed forgets       4 0.000000
-21 Finding the intersection, Mixed forgets       5 0.000000
-22 Finding the intersection, Mixed forgets       6 0.000000
-23 Finding the intersection, Mixed forgets       7 0.000000
-24 Finding the intersection, Mixed forgets       8 0.000000
-25 Finding the intersection, Mixed forgets       9 0.000000
-26 Finding the intersection, Mixed forgets      10 0.000000
-27 Finding the intersection, Mixed forgets      11 0.000000
-28 Finding the intersection, Mixed forgets      12 0.000000
-29 Finding the intersection, Mixed forgets      13 0.000000
-30 Finding the intersection, Mixed forgets      14 0.000000
-31 Finding the intersection, Mixed forgets      15 0.000000
-32 Finding the intersection, Mixed forgets      16 0.000000
-33 Finding the intersection, Mixed guesses default 0.353624
-34 Finding the intersection, Mixed   slips default 0.141999
-35 Finding the intersection, Mixed   prior default 0.133601
+    skill                           param              class    value
+1  Finding the intersection, Mixed  learns   M2X-4Y=18&Y=-3X+13 0.000000
+2  Finding the intersection, Mixed  learns M2X-4YGT18&YLE-3X+13 1.000000
+3  Finding the intersection, Mixed  learns    M2X-9Y=14&Y=6X-42 0.000005
+4  Finding the intersection, Mixed  learns      M2X-Y=-3&Y=-X+9 0.000000
+5  Finding the intersection, Mixed  learns    M2X-YLE-3&YGT-X+9 0.000002
+6  Finding the intersection, Mixed  learns      M2X+3Y=6&Y=-X+2 0.000000
+7  Finding the intersection, Mixed  learns       M3X+Y=16&Y=X+4 0.000090
+8  Finding the intersection, Mixed  learns     M4X-2Y=8&Y=-2X+5 0.492797
+9  Finding the intersection, Mixed  learns   M4X-2YLT8&YLE-2X+5 0.000003
+10 Finding the intersection, Mixed  learns     M4X+3Y=31&Y=2X+7 0.000000
+11 Finding the intersection, Mixed  learns   M4X+3YLT31&YLT2X+7 0.999966
+12 Finding the intersection, Mixed  learns     M4X+5Y=48&Y=3X+2 0.000003
+13 Finding the intersection, Mixed  learns   M8X-5Y=-40&Y=-2X-6 0.000127
+14 Finding the intersection, Mixed  learns M8X-5YGE-40&YLE-2X-6 0.176157
+15 Finding the intersection, Mixed  learns    M9X-8Y=27&Y=-X+23 0.000000
+16 Finding the intersection, Mixed  learns            SY=-X&Y=7 0.000000
+17 Finding the intersection, Mixed guesses              default 0.353624
+18 Finding the intersection, Mixed   slips              default 0.141999
+19 Finding the intersection, Mixed   prior              default 0.133601
 \end{verbatim}
-Note that the \texttt{class} column refers to different items (problems).
+Note that the \texttt{class} column refers to different items.
 
 Learns (varies by class): The "learns" parameter represents the probability of a student transitioning from the "not learned" to the "learned" state after interacting with a specific item (problem).
 
