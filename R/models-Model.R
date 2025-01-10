@@ -548,6 +548,10 @@ coef_ <- function(object) {
 
   initializable_params <- c("learns", "forgets", "guesses", "slips", "prior") # Equivalent to Model.INITIALIZABLE_PARAMS
 
+  if (object@forgets == FALSE) {
+    initializable_params <- initializable_params[initializable_params != "forgets"]
+  }
+
   coefs <- list()
 
   for (skill in names(object@fit_model)) {
@@ -556,6 +560,10 @@ coef_ <- function(object) {
       if (!is.null(object@fit_model[[skill]][[param]])) {
         params[[param]] <- object@fit_model[[skill]][[param]]
       }
+    }
+    if (object@model_type[2] == TRUE) { # handle multiprior params order
+      params[["prior"]] <- params[["learns"]][2:length(params[["learns"]])]
+      params[["learns"]] <- params[["learns"]][1]
     }
     coefs[[skill]] <- params
   }
@@ -566,10 +574,12 @@ coef_ <- function(object) {
 # MARK: format_param
 format_param <- function(object, skill, param, value) {
   if (is.numeric(value) && length(value) > 1) {
-    ptype <- if (param %in% c("learns", "forgets")) "resource_names" else "gs_names"
-
+    ptype <- if (param %in% c("learns", "forgets", "prior")) "resource_names" else "gs_names"
     if (!is.null(object@fit_model[[skill]][[ptype]])) {
-      names <- as.character(object@fit_model[[skill]][[ptype]])
+      names <- names(object@fit_model[[skill]][[ptype]])
+      if (param == "prior" && object@model_type[2] == TRUE) { # handle multiprior
+        names <- names[2:length(names)]
+      }
       return(setNames(as.list(value), names))
     } else {
       stop(paste("Parameter type", ptype, "not found for skill", skill))
