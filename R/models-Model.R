@@ -118,7 +118,7 @@ setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5
 #' )
 #' }
 #' @export
-fit <- function(object, data_path = NULL, data = NULL, parallel = FALSE, seed = NULL, num_fits = 1, forgets = NULL, fixed = NULL, model_type = NULL, ...) {
+fit <- function(object, data_path = NULL, data = NULL, parallel = FALSE, seed = NULL, num_fits = 1, forgets = FALSE, fixed = NULL, model_type = NULL, ...) {
   if (!object@manual_param_init) {
     object@fit_model <- list()
   }
