@@ -22,6 +22,9 @@
 #' @param model_type Logical vector. Specifies model variants to use. There are four possible
 #'   variants: 'multilearn', 'multiprior', 'multipair', and 'multigs'. Each corresponds to
 #'   a different modeling strategy.
+#' @param defaults List. The defaults parameter is a list that functions as a query dictionary.
+#'   It is used to map column names in the data to the expected variables in the model.
+#'   This helps ensure that the model can work with different datasets that may have varying column names.
 #' @param ... Other parameters.
 #' @return A BKT model object, which can be used by other functions such as fitting
 #'   the model, cross-validation, or making predictions.

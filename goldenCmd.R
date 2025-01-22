@@ -41,4 +41,4 @@ devtools::check()
 # 1. build
 devtools::build()
 # 2. bash run
-R CMD check --as-cran BKT_0.0.1.tar.gz
+R CMD check --as-cran "C:/Users/zby15/Desktop/ss/BKT_0.0.1.tar.gz"
