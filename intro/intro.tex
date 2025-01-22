@@ -5,6 +5,8 @@
 \usepackage{tikz} % Drawing
 \usepackage[backend=biber,style=apa]{biblatex}
 \usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmic}
 
 \lstset{ 
   language=R,
@@ -39,11 +41,9 @@
 \end{itemize}
 \section{Introduction}
 
-The advent of digital technologies has led to an unprecedented increase in the availability and granularity of educational assessment data. These data, collected from diverse learning environments such as online courses, intelligent tutoring systems, and classroom-based assessments, provide detailed insights into students' learning processes. With the growing emphasis on evidence-based approaches in education, this wealth of data has opened new avenues for research and practice, allowing educators and researchers to address fundamental questions about learning and knowledge acquisition.
+The advent of digital technologies has led to an unprecedented increase in the availability and granularity of educational assessment data (\cite{chrysafiadi2013student}). One critical application of educational assessment data lies in understanding how students learn over time and predicting their future performance. This is where Bayesian Knowledge Tracing (BKT) and its variants play a pivotal role.
 
-One critical application of educational assessment data lies in understanding how students learn over time and predicting their future performance. Traditional methods of assessment often provide only static snapshots of a learner's knowledge at specific points in time. However, as the demand for personalized and adaptive learning systems increases, there is a pressing need for dynamic models that can capture the evolving nature of student knowledge. This is where Bayesian Knowledge Tracing (BKT) and its variants play a pivotal role.
-
-BKT offers a probabilistic framework for modeling the progression of a learner's knowledge state (\cite{corbett1994knowledge}). By leveraging sequential data on student performance, BKT enables the estimation of underlying knowledge states and provides predictions about future responses. These capabilities make it an essential tool for adaptive learning systems, as they can identify individual learning needs and recommend tailored interventions. Moreover, BKT's simplicity and interpretability have contributed to its widespread adoption in both research and practice.
+BKT offers a probabilistic framework for modeling the progression of a learner's knowledge state (\cite{corbett1994knowledge}). By leveraging sequential data on student performance, BKT enables the estimation of underlying knowledge states and provides predictions about future responses. These capabilities make it an essential tool for adaptive learning systems (\cite{nkambou2010advances}), as they can identify individual learning needs and recommend tailored interventions. Moreover, BKT's simplicity and interpretability have contributed to its widespread adoption in both research and practice (\cite{am2021literature}).
 
 Despite its widespread utility, BKT is not without limitations. Researchers have proposed various extensions and modifications to address issues such as model flexibility, parameter estimation, and the integration of additional features like forgetting or partial knowledge. These advancements have further broadened the applicability of BKT to more complex and realistic educational scenarios.
 
@@ -191,7 +191,7 @@ These four variables (\textbf{Prior} \textbf{Learn} \textbf{Slip} \textbf{Guess}
 6. \textbf{Know}  
 The known rate, \( \theta \), reflects the probability that a learner is in the known state. Unlike the other parameters, \textbf{Know} is dynamic and updates iteratively as the model progresses.
 
-For a learning process with an answer vector \( (a_1, a_2, \dots, a_s) \), the likelihood of the sequence in the BKT model is calculated as follows:
+For a learning process with an answer vector \( (a_1, a_2, \dots, a_i, \dots, a_S) \), where $S$ is the total number of items and the likelihood of the sequence in the BKT model is calculated as follows:
 
 For each answer \( a_i \), let \(\theta_{i}\) denote the known rate before the \(i\)-th activity, and \(\theta_{i+1}\) the known rate after the \(i\)-th activity. Note \(\theta_1 = P_p\). The iteration of \(\theta_{i+1}\) is as follows:
 
@@ -320,7 +320,7 @@ In general, BKT calculate each student learning process likelihood individually 
         \draw[arrow] (activity_node_3) -- (performance_node_3);
 
         % Footnote
-        \node at (4,-5.5) {Figure 5: BKT Mainflow};
+        \node at (4,-5.5) {Figure 5: BKT Workflow};
     \end{tikzpicture}
 \end{center}
 
@@ -332,7 +332,7 @@ The main difference in the model description lies in the initial known rate.
 For each student \( j \), let \( P_{p_j} \) denote their individual prior rate. Let \(\theta_{i_j}\) denote the known rate before the \(i\)-th activity of student \(j\).
 Note \(\theta_{1_j} = P_{p_j} \).
 
-The mainflow of PPS is illustrated in Figure 6. Note different student uses different initial known rate \(\theta_1\).
+The workflow of PPS is illustrated in Figure 6. Note different student uses different initial known rate \(\theta_1\).
 
 \begin{center}
     \begin{tikzpicture}
@@ -381,7 +381,7 @@ The mainflow of PPS is illustrated in Figure 6. Note different student uses diff
         \draw[arrow] (activity_node_3) -- (performance_node_3);
 
         % Footnote
-        \node at (4,-5.5) {Figure 6: PPS Mainflow};
+        \node at (4,-5.5) {Figure 6: PPS Workflow};
     \end{tikzpicture}
 \end{center}
 
@@ -393,7 +393,7 @@ The main difference in the model description lies in the learning rate.
 
 For each activity \( j \), let \( P_{l_j} \) denotes the learning rate.
 
-The mainflow of ILE is illustrated in Figure 7. Note there are three different activities, 1, 2 and 3.
+The workflow of ILE is illustrated in Figure 7. Note there are three different activities, 1, 2 and 3.
 
 \begin{center}
     \begin{tikzpicture}
@@ -442,7 +442,7 @@ The mainflow of ILE is illustrated in Figure 7. Note there are three different a
         \draw[arrow] (activity_node_3) -- (performance_node_3);
 
         % Footnote
-        \node at (4,-5.5) {Figure 8: IDE Mainflow};
+        \node at (4,-5.5) {Figure 8: IDE Workflow};
     \end{tikzpicture}
 \end{center}
 
@@ -455,7 +455,7 @@ The main difference in the model description lies in the learning rate.
 
 For each activity \( i \) and activity \( j \), let \( P_{l_{ij}} \) denotes the learning rate from activity \( i \) to activity \( j \). Note \( P_{l_{0j}} \) refers initial activity learn rate.
 
-The mainflow of ILE is illustrated in Figure 9. Note there are three different activities, 1, 2 and 3 with most 6 pairs.
+The workflow of ILE is illustrated in Figure 9. Note there are three different activities, 1, 2 and 3 with most 6 pairs.
 
 \begin{center}
     \begin{tikzpicture}
@@ -504,7 +504,7 @@ The mainflow of ILE is illustrated in Figure 9. Note there are three different a
         \draw[arrow] (activity_node_3) -- (performance_node_3);
 
         % Footnote
-        \node at (4,-5.5) {Figure 9: IOE Mainflow};
+        \node at (4,-5.5) {Figure 9: IOE Workflow};
     \end{tikzpicture}
 \end{center}
 
@@ -517,7 +517,7 @@ The main difference in the model description lies in the guess and slip rate.
 
 For each activity \( j \), let \( P_{g_j} \) denotes the guess rate and \( P_{s_j} \) denotes the slip rate.
 
-The mainflow of PPS is illustrated in Figure 10. Note there are three different activities, 1, 2 and 3.
+The workflow of PPS is illustrated in Figure 10. Note there are three different activities, 1, 2 and 3.
 
 \begin{center}
     \begin{tikzpicture}
@@ -566,7 +566,7 @@ The mainflow of PPS is illustrated in Figure 10. Note there are three different 
         \draw[arrow] (activity_node_3) -- (performance_node_3);
 
         % Footnote
-        \node at (4,-5.5) {Figure 10: IDE Mainflow};
+        \node at (4,-5.5) {Figure 10: IDE Workflow};
     \end{tikzpicture}
 \end{center}
 
@@ -636,7 +636,7 @@ $$
 \theta_{i+1} = \theta' \boldsymbol{P_f} + (1 - \theta') P_l    
 $$
 
-The mainflow of LFB is illustrated in Figure 12. Note there are forget parameters $P_f$ in use.
+The workflow of LFB is illustrated in Figure 12. Note there are forget parameters $P_f$ in use.
 
 \begin{center}
     \begin{tikzpicture}
@@ -685,14 +685,34 @@ The mainflow of LFB is illustrated in Figure 12. Note there are forget parameter
         \draw[arrow] (activity_node_3) -- (performance_node_3);
 
         % Footnote
-        \node at (4,-5.5) {Figure 12: LFB Mainflow};
+        \node at (4,-5.5) {Figure 12: LFB Workflow};
     \end{tikzpicture}
 \end{center}
 \section{Estimation}
 
 To estimate the global parameters of the BKT model (\(P_p, P_l, P_s, P_g\)) that maximize the likelihood \(Lik\), we employ the expectation-maximization (EM) algorithm. This algorithm is particularly well-suited for the BKT model as it addresses the latent nature of the learner's knowledge state (\(\theta_i\)), which cannot be directly observed but significantly influences the observed responses.
 
-The EM algorithm consists of two iterative steps: the Expectation (E-step) and the Maximization (M-step). These steps are repeated until convergence.
+The EM algorithm consists of two iterative steps: the Expectation (E-step) and the Maximization (M-step). These steps are repeated until convergence. An overview of the algorithm is in Algorithm \ref{al:1}.
+
+\begin{algorithm}
+
+\caption{EM Algorithm for BKT Parameter Estimation}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} Observed answers \(a_i\) for each learner
+\STATE \textbf{Output:} Estimated parameters \(P_p, P_l, P_s, P_g\)
+\STATE Initialize parameters \(P_p, P_l, P_s, P_g\)
+\STATE \textbf{Repeat until convergence:}
+    \STATE \quad \textbf{E-step:}
+    \STATE \quad \quad For each learner \(j\):
+    \STATE \quad \quad \quad Update \(\theta_i\) using Bayes' rule and incorporate learning
+    \STATE \quad \quad \quad Compute likelihood \(Lik_i\) for each answer \(a_i\)
+    \STATE \quad \quad \quad Accumulate likelihood to total \(Lik\)
+    \STATE \quad \textbf{M-step:}
+    \STATE \quad \quad Update \(P_p, P_l, P_s, P_g\) based on expectations from E-step
+\STATE \textbf{Until convergence (change in \(\log Lik\) below threshold)}
+\end{algorithmic}
+\label{al:1}
+\end{algorithm}
 
 \subsection{E-step}
 In the E-step, we calculate the expected values of the latent knowledge state (\(\theta_i\)) and the associated contributions to the likelihood based on the current estimates of the global parameters. Specifically, for each learner:
@@ -767,7 +787,11 @@ The E-step and M-step are alternated until the likelihood \(Lik\) converges, i.e
 By iteratively refining the parameter estimates and leveraging the hidden knowledge state dynamics, the EM algorithm ensures an efficient and robust estimation process for the BKT model.   
 
 
+\subsection{ILE Estimation}
+
 In the Item Learning Effect (ILE) model, the primary modification to the standard BKT model is the individualization of the learning rate for each activity. Instead of a global learning rate \( P_l \), the ILE model assigns a unique learning rate \( P_{l_j} \) for each item \( j \). To estimate the global parameters (\( P_p, P_{l_j}, P_s, P_g \)) that maximize the likelihood of the observed responses, we extend the Expectation-Maximization (EM) algorithm to handle the item-specific learning rates.
+
+
 
 The estimation procedure for the ILE model follows similar steps as the standard BKT model but includes modifications for handling the different learning rates for each item.
 
@@ -838,7 +862,12 @@ In the M-step, we maximize the expected likelihood computed during the E-step wi
 The E-step and M-step are alternated until convergence, similar to the basic BKT model. The algorithm converges when the change in the log-likelihood between iterations is below a predefined threshold. At this point, the estimated parameters (\(P_p, P_{l_j}, P_s, P_g\)) maximize the likelihood of the observed sequences of answers under the ILE model.
 
 \subsubsection{Summary}
-In the ILE model, the primary difference from the standard BKT model is the individualization of the learning rate for each activity. The EM algorithm is extended to estimate the item-specific learning rates \(P_{l_j}\) along with the other parameters. This allows for a more fine-grained representation of how learners progress through different items, making the model more flexible in capturing variations in learning behaviors across items.
+In the ILE model, the primary difference from the standard BKT model is the individualization of the learning rate for each activity. The EM algorithm is extended to estimate the item-specific learning rates \(P_{l_j}\) along with the other parameters. This allows for a more fine-grained representation of how learners progress through different items.
+
+\section{Simulation}
+
+% 
+
 \section{Data Example}
 
 The dataset originates from the Cognitive Tutor system (\cite{ritter2007cognitive}), an intelligent tutoring platform designed to enhance students' mathematical abilities. This platform has been utilized extensively to capture detailed logs of student interactions during math problem-solving activities.
@@ -920,74 +949,7 @@ The result will be shown as below:
 5  Finding the intersection, Mixed   prior     171nKnHW 1.000000
 6  Finding the intersection, Mixed   prior     171RUh1Q 1.000000
 7  Finding the intersection, Mixed   prior      1T4w47X 0.000000
-8  Finding the intersection, Mixed   prior 2302sApyRu_a 1.000000
-9  Finding the intersection, Mixed   prior 2304U8pLyy_a 0.000000
-10 Finding the intersection, Mixed   prior 2304YbHCok_a 1.000000
-11 Finding the intersection, Mixed   prior 2304YbHCok_b 0.000000
-12 Finding the intersection, Mixed   prior 2305Ra0wn7_a 0.000000
-13 Finding the intersection, Mixed   prior 2309tLkCW6_a 0.000000
-14 Finding the intersection, Mixed   prior 230amNTt8e_a 0.001792
-15 Finding the intersection, Mixed   prior 230amNTt8e_b 0.000000
-16 Finding the intersection, Mixed   prior 230cbpmx2H_a 0.000000
-17 Finding the intersection, Mixed   prior 230cQtHpL1_a 0.000000
-18 Finding the intersection, Mixed   prior 230duwYN4p_a 0.000000
-19 Finding the intersection, Mixed   prior 230EGiaN2S_a 0.000099
-20 Finding the intersection, Mixed   prior 230HLorplQ_a 0.000000
-21 Finding the intersection, Mixed   prior 230hzMTB8t_a 0.000000
-22 Finding the intersection, Mixed   prior 230hzMTB8t_c 1.000000
-23 Finding the intersection, Mixed   prior 230J1b5ZjX_a 0.000000
-24 Finding the intersection, Mixed   prior 230jc0wqMP_a 0.000000
-25 Finding the intersection, Mixed   prior 230JX4ja8w_a 1.000000
-26 Finding the intersection, Mixed   prior 230JX4ja8w_b 0.000000
-27 Finding the intersection, Mixed   prior 230kbSDgQ3_a 0.000000
-28 Finding the intersection, Mixed   prior 230KZfQk0y_a 0.000000
-29 Finding the intersection, Mixed   prior 230NIBA0Dq_a 0.000000
-30 Finding the intersection, Mixed   prior 230NIBA0Dq_b 1.000000
-31 Finding the intersection, Mixed   prior 230P2rW3yn_a 0.000000
-32 Finding the intersection, Mixed   prior 230rlAi5Zw_a 0.000000
-33 Finding the intersection, Mixed   prior 230tBgtvsW_a 0.000000
-34 Finding the intersection, Mixed   prior 230tBgtvsW_b 0.000000
-35 Finding the intersection, Mixed   prior 230XGzqSto_a 0.001056
-36 Finding the intersection, Mixed   prior 230XGzqSto_b 1.000000
-37 Finding the intersection, Mixed   prior 230Y6CWb3d_a 0.000000
-38 Finding the intersection, Mixed   prior    236wm0wnm 1.000000
-39 Finding the intersection, Mixed   prior    236z60ytg 1.000000
-40 Finding the intersection, Mixed   prior    2480hxxcx 1.000000
-41 Finding the intersection, Mixed   prior    2480wql4f 1.000000
-42 Finding the intersection, Mixed   prior    2483hkq13 0.018457
-43 Finding the intersection, Mixed   prior    2483mf0as 1.000000
-44 Finding the intersection, Mixed   prior    2484vyh4g 1.000000
-45 Finding the intersection, Mixed   prior    24864dslr 0.000000
-46 Finding the intersection, Mixed   prior    2487lpei2 1.000000
-47 Finding the intersection, Mixed   prior    2487o1gku 0.000016
-48 Finding the intersection, Mixed   prior    2487p61kc 0.000000
-49 Finding the intersection, Mixed   prior    2488721d5 1.000000
-50 Finding the intersection, Mixed   prior    2488t72oe 1.000000
-51 Finding the intersection, Mixed   prior    24899b8f6 1.000000
-52 Finding the intersection, Mixed   prior    2489c9lbg 1.000000
-53 Finding the intersection, Mixed   prior    248abpghv 1.000000
-54 Finding the intersection, Mixed   prior    248agzhky 1.000000
-55 Finding the intersection, Mixed   prior    248clu9mj 1.000000
-56 Finding the intersection, Mixed   prior    248g1paph 0.000000
-57 Finding the intersection, Mixed   prior    248g1wh6o 0.000000
-58 Finding the intersection, Mixed   prior    248hh7azg 1.000000
-59 Finding the intersection, Mixed   prior    248iwnoa3 1.000000
-60 Finding the intersection, Mixed   prior    248jqsua5 0.000000
-61 Finding the intersection, Mixed   prior    248k03ldd 1.000000
-62 Finding the intersection, Mixed   prior    248llcp7q 0.000000
-63 Finding the intersection, Mixed   prior    248m27z11 1.000000
-64 Finding the intersection, Mixed   prior    248mbp1cf 1.000000
-65 Finding the intersection, Mixed   prior    248oylglm 0.000000
-66 Finding the intersection, Mixed   prior    248pthl4g 0.000000
-67 Finding the intersection, Mixed   prior    248qhy2yo 0.031083
-68 Finding the intersection, Mixed   prior    248s9v653 1.000000
-69 Finding the intersection, Mixed   prior    248t7n0my 1.000000
-70 Finding the intersection, Mixed   prior    248tviw5h 0.000000
-71 Finding the intersection, Mixed   prior    248vthf5i 0.000000
-72 Finding the intersection, Mixed   prior    248zczb3i 0.000000
-73 Finding the intersection, Mixed   prior 271g7beuc4s1 0.000000
-74 Finding the intersection, Mixed   prior 271k966j74lv 0.000000
-75 Finding the intersection, Mixed   prior 271np4zc8vd1 1.000000
+...
 76 Finding the intersection, Mixed   prior      3cjD21W 1.000000
 77 Finding the intersection, Mixed   prior      Vd9xmeb 1.000000
 \end{verbatim}
@@ -1031,35 +993,11 @@ The result will be shown as below:
 1  Finding the intersection, Mixed  learns              default 0.004373
 2  Finding the intersection, Mixed guesses   M2X-4Y=18&Y=-3X+13 0.331227
 3  Finding the intersection, Mixed guesses M2X-4YGT18&YLE-3X+13 1.000000
-4  Finding the intersection, Mixed guesses    M2X-9Y=14&Y=6X-42 0.500000
-5  Finding the intersection, Mixed guesses      M2X-Y=-3&Y=-X+9 0.000000
-6  Finding the intersection, Mixed guesses    M2X-YLE-3&YGT-X+9 0.990665
-7  Finding the intersection, Mixed guesses      M2X+3Y=6&Y=-X+2 0.000000
-8  Finding the intersection, Mixed guesses       M3X+Y=16&Y=X+4 0.388853
-9  Finding the intersection, Mixed guesses     M4X-2Y=8&Y=-2X+5 0.352391
-10 Finding the intersection, Mixed guesses   M4X-2YLT8&YLE-2X+5 0.000000
-11 Finding the intersection, Mixed guesses     M4X+3Y=31&Y=2X+7 0.654125
-12 Finding the intersection, Mixed guesses   M4X+3YLT31&YLT2X+7 0.639013
-13 Finding the intersection, Mixed guesses     M4X+5Y=48&Y=3X+2 0.001277
-14 Finding the intersection, Mixed guesses   M8X-5Y=-40&Y=-2X-6 0.257380
-15 Finding the intersection, Mixed guesses M8X-5YGE-40&YLE-2X-6 0.000000
-16 Finding the intersection, Mixed guesses    M9X-8Y=27&Y=-X+23 0.000000
+...
 17 Finding the intersection, Mixed guesses            SY=-X&Y=7 0.000000
 18 Finding the intersection, Mixed   slips   M2X-4Y=18&Y=-3X+13 0.000000
-19 Finding the intersection, Mixed   slips M2X-4YGT18&YLE-3X+13 0.000000
-20 Finding the intersection, Mixed   slips    M2X-9Y=14&Y=6X-42 0.500000
-21 Finding the intersection, Mixed   slips      M2X-Y=-3&Y=-X+9 0.000000
-22 Finding the intersection, Mixed   slips    M2X-YLE-3&YGT-X+9 0.385030
-23 Finding the intersection, Mixed   slips      M2X+3Y=6&Y=-X+2 0.000000
-24 Finding the intersection, Mixed   slips       M3X+Y=16&Y=X+4 0.311333
-25 Finding the intersection, Mixed   slips     M4X-2Y=8&Y=-2X+5 0.793576
-26 Finding the intersection, Mixed   slips   M4X-2YLT8&YLE-2X+5 0.707934
-27 Finding the intersection, Mixed   slips     M4X+3Y=31&Y=2X+7 0.000000
-28 Finding the intersection, Mixed   slips   M4X+3YLT31&YLT2X+7 0.293232
-29 Finding the intersection, Mixed   slips     M4X+5Y=48&Y=3X+2 0.073257
-30 Finding the intersection, Mixed   slips   M8X-5Y=-40&Y=-2X-6 1.000000
-31 Finding the intersection, Mixed   slips M8X-5YGE-40&YLE-2X-6 0.769552
-32 Finding the intersection, Mixed   slips    M9X-8Y=27&Y=-X+23 1.000000
+19 Finding the intersection, Mixed   slips M2X-4YGT18&YLE-3X+13 0.00000
+...
 33 Finding the intersection, Mixed   slips            SY=-X&Y=7 0.058531
 34 Finding the intersection, Mixed   prior              default 0.851380
 \end{verbatim}
@@ -1102,19 +1040,7 @@ The result will be shown as below:
     skill                           param              class    value
 1  Finding the intersection, Mixed  learns   M2X-4Y=18&Y=-3X+13 0.000000
 2  Finding the intersection, Mixed  learns M2X-4YGT18&YLE-3X+13 1.000000
-3  Finding the intersection, Mixed  learns    M2X-9Y=14&Y=6X-42 0.000005
-4  Finding the intersection, Mixed  learns      M2X-Y=-3&Y=-X+9 0.000000
-5  Finding the intersection, Mixed  learns    M2X-YLE-3&YGT-X+9 0.000002
-6  Finding the intersection, Mixed  learns      M2X+3Y=6&Y=-X+2 0.000000
-7  Finding the intersection, Mixed  learns       M3X+Y=16&Y=X+4 0.000090
-8  Finding the intersection, Mixed  learns     M4X-2Y=8&Y=-2X+5 0.492797
-9  Finding the intersection, Mixed  learns   M4X-2YLT8&YLE-2X+5 0.000003
-10 Finding the intersection, Mixed  learns     M4X+3Y=31&Y=2X+7 0.000000
-11 Finding the intersection, Mixed  learns   M4X+3YLT31&YLT2X+7 0.999966
-12 Finding the intersection, Mixed  learns     M4X+5Y=48&Y=3X+2 0.000003
-13 Finding the intersection, Mixed  learns   M8X-5Y=-40&Y=-2X-6 0.000127
-14 Finding the intersection, Mixed  learns M8X-5YGE-40&YLE-2X-6 0.176157
-15 Finding the intersection, Mixed  learns    M9X-8Y=27&Y=-X+23 0.000000
+...
 16 Finding the intersection, Mixed  learns            SY=-X&Y=7 0.000000
 17 Finding the intersection, Mixed guesses              default 0.353624
 18 Finding the intersection, Mixed   slips              default 0.141999
@@ -1178,13 +1104,14 @@ The rBKT package builds upon the full functionality of pyBKT (\cite{psych5030050
 
 The rBKT package represents a significant advancement for researchers and practitioners interested in dynamic learning models, offering improvements in usability, flexibility, and computational efficiency. Moreover, the package is actively being developed, and several future enhancements are anticipated, including:
 
-
 \begin{itemize}
 \item Incorporating advanced Bayesian hierarchical modeling techniques to account for individual differences in learning rates and initial knowledge states.
 \item Adding functionality to estimate and interpret non-binary states, such as partial mastery or varying levels of skill proficiency.
 \item Expanding support for multi-group analyses, enabling comparative studies across different learner populations or instructional conditions.
 \item Developing dashboards to dynamically monitor student progress and support real-time instructional decisions, such as adjusting difficulty levels or recommending specific learning activities.
 \end{itemize}
+
+Despite the functions offered by the rBKT package, there are some limitations to consider. One such limitation is that the computational speed, while faster than the Python implementation, is still slower than the C++ mode of pyBKT. 
 
 % Reference
 \printbibliography
