@@ -164,7 +164,8 @@ model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
 
 library(BKT)
 
-model <- bkt(seed = 42, num_fits = 1, parallel = FALSE, forgets = TRUE)
+# defaults
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE, forgets = TRUE, defaults = list( order_id = "Row"))
 fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
 
 result <- fit(model, data_path = "ct.csv", skills = c("Plot terminating proper fraction"))

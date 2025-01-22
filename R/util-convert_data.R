@@ -34,7 +34,8 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
     if (is.null(defaults)) {
         defaults <- list()
     } else {
-        stop("not implemented")
+        # stop("not implemented")
+        # TBD: check defaults's key
     }
 
     df_columns <- colnames(df)

@@ -28,6 +28,6 @@
 #' @examples
 #' model <- bkt(seed = 42, parallel = FALSE, num_fits = 1)
 #' @export
-bkt <- function(parallel = TRUE, num_fits = 5, folds = 5, seed = sample(1:1e8, 1), model_type = rep(FALSE, 4), forgets = FALSE, fixed = NULL, ...) {
-  new("Model", parallel = parallel, num_fits = num_fits, folds = folds, seed = seed, model_type = model_type, forgets = forgets, fixed = fixed, ...)
+bkt <- function(parallel = TRUE, num_fits = 5, folds = 5, seed = sample(1:1e8, 1), model_type = rep(FALSE, 4), forgets = FALSE, fixed = NULL, defaults = NULL, ...) {
+  new("Model", parallel = parallel, num_fits = num_fits, folds = folds, seed = seed, model_type = model_type, forgets = forgets, fixed = fixed, defaults = defaults, ...)
 }
