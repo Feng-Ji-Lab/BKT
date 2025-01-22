@@ -1,5 +1,5 @@
 # MARK: convert_data
-convert_data <- function(data_path, skill_name, defaults = defaults, model_type = model_type,
+convert_data <- function(data, skill_name, defaults = defaults, model_type = model_type,
                          gs_refs = gs_ref, resource_refs = resource_ref, return_df = return_df, folds = folds) {
     if (is.null(model_type)) {
         multilearn <- multiprior <- multipair <- multigs <- FALSE
@@ -14,10 +14,7 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
             skill_name <- paste(skill_name, collapse = "|")
         }
     }
-    df <- read.csv(data_path, header = TRUE, sep = ",", stringsAsFactors = FALSE, check.names = FALSE)
-    if (is.null(df)) {
-        stop("Failed to load the CSV file.")
-    }
+    df <- data
     # default column names for cognitive tutors
     ct_default <- list(
         order_id = "Row",
@@ -288,6 +285,15 @@ convert_data <- function(data_path, skill_name, defaults = defaults, model_type 
         return(list(datas = datas, df = df))
     }
     return(datas)
+}
+
+convert_data_path <- function(data_path, skill_name, defaults = defaults, model_type = model_type,
+                              gs_refs = gs_ref, resource_refs = resource_ref, return_df = return_df, folds = folds) {
+    data <- read.csv(data_path, header = TRUE, sep = ",", stringsAsFactors = FALSE, check.names = FALSE)
+    if (is.null(data)) {
+        stop("Failed to load the CSV file.")
+    }
+    return(convert_data(data, skill_name, defaults, model_type, gs_refs, resource_refs, return_df, folds))
 }
 
 # const require to sort string by ascii

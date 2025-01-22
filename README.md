@@ -341,7 +341,7 @@ In this example, the learns and forgets parameters were manually fixed at 0.25 u
 ### BKT Variants
 
 
-### Forget
+#### Forget
 
 Train a forget BKT model in the CT dataset. Switch parameter `forgets = TRUE` in the fit function.
 
@@ -651,6 +651,13 @@ The result are shown below:
 
 Note column `class` refers to different items orders.
 
+### Simulation
+
+In the `simulation` directory, there are several files used for data simulation.
+
+Specifically:
+- The function `simulate_bkt_data` in `generator.R` is used to generate data for the basic BKT model.
+- `run.R` is used to perform a simple data simulation and testing.
 
 ## Internal Data Format
 

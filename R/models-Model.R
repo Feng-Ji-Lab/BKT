@@ -270,8 +270,13 @@ fetch_dataset <- function(object, link, loc) {
 ._data_helper <- function(object, data_path, data, defaults, skills, model_type, gs_ref = NULL, resource_ref = NULL, return_df = FALSE, folds = FALSE) {
   data_p <- NULL
 
-  if (!is.null(data_path) && is.character(data_path)) {
-    data_p <- convert_data(data_path, skills,
+  if (!is.null(data)) {
+    data_p <- convert_data(data, skills,
+      defaults = defaults, model_type = model_type,
+      gs_refs = gs_ref, resource_refs = resource_ref, return_df = return_df, folds = folds
+    )
+  } else if (!is.null(data_path) && is.character(data_path)) {
+    data_p <- convert_data_path(data_path, skills,
       defaults = defaults, model_type = model_type,
       gs_refs = gs_ref, resource_refs = resource_ref, return_df = return_df, folds = folds
     )
