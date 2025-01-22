@@ -9,7 +9,7 @@ devtools::install_github("Feng-Ji-Lab/bkt")
 library(BKT)
 ```
 
-This package is based on the work of pyBKT in Python [pyBKT](https://github.com/CAHLR/pyBKT) developed by CAHLR lab at UC Berkeley.
+This package is based on the work of pyBKT in Python [pyBKT](https://github.com/CAHLR/pyBKT) developed by [CAHLR](https://github.com/CAHLR) lab at UC Berkeley.
 
 ## Preparing Data and Running the Model
 
