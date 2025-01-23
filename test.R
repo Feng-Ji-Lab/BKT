@@ -165,8 +165,13 @@ model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
 library(BKT)
 
 # defaults
-model <- bkt(seed = 42, num_fits = 1, parallel = FALSE, forgets = TRUE, defaults = list( order_id = "Row"))
-fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+# model <- bkt(seed = 42, num_fits = 1, parallel = FALSE, forgets = TRUE, defaults = list( order_id = "Row"))
+# fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
 
-result <- fit(model, data_path = "ct.csv", skills = c("Plot terminating proper fraction"))
+# result <- fit(model, data_path = "ct.csv", skills = c("Plot terminating proper fraction"))
+# print(params(result))
+
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+result = fit(model, data_path = "ct.csv", skills = "Plot non-terminating improper fraction")
 print(params(result))

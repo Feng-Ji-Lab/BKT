@@ -2,7 +2,7 @@ Package: BKT
 Title: Bayesian Knowledge Tracing Model
 Version: 0.0.1
 Authors@R: c(
-    person("Yuhao", "Yuan", email = "325063151@qq.com", role = c("aut", "cre")),
+    person("Yuhao", "Yuan", email = "yuanyuhaoapply@163.com", role = c("aut", "cre")),
     person("Biying", "Zhou", email = "zby.zhou@mail.utoronto.ca", role = "aut"),
     person("Feng", "Ji", email = "f.ji@utoronto.ca", role = "aut"))
 Description: Provides tools for fitting, cross-validating, and predicting with Bayesian Knowledge Tracing (BKT) models. It is designed for analyzing educational datasets to trace student knowledge over time. The package includes functions for fitting BKT models, evaluating their performance using various metrics, and making predictions on new data.

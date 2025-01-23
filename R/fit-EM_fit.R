@@ -120,22 +120,33 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
     )
   }
 
-  x <- list()
-  if (parallel) {
-    tryCatch(
-      {
-        cl <- makeCluster(num_threads)
-        x <- parLapply(cl, thread_counts, inner)
-        stopCluster(cl)
-      },
-      error = function(e) {
-        message(paste("Parallel computing error occurred:", conditionMessage(e), ". Automatically switching to serial computing."))
-        x <- lapply(thread_counts, inner)
-      }
-    )
-  } else {
-    x <- lapply(thread_counts, inner)
+  get_x <- function(parallel, thread_counts, num_threads, inner) {
+    x <- list()  # Define x locally
+    success_flag = FALSE
+    if (parallel) {
+      tryCatch(
+        {
+          # Parallel block
+          cl <- makeCluster(num_threads)
+          x <- parLapply(cl, thread_counts, inner)  # Assign to x locally
+          stopCluster(cl)
+
+          success_flag = TRUE
+        },
+        error = function(e) {
+          # Error handling block
+          message(paste("Parallel computing error occurred:", conditionMessage(e), ". Automatically switching to serial computing."))
+        }
+      )
+    } 
+    
+    if(!parallel || !success_flag) {
+      x <- lapply(thread_counts, inner)  # If no parallel, just serial
+    }
+
+    return(x)  # Return x after computation
   }
+  x <- get_x(parallel, thread_counts, num_threads, inner)
 
   for (i in x) {
     total_loglike <- total_loglike + i[[4]]
