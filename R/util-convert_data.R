@@ -1,6 +1,6 @@
 # MARK: convert_data
-convert_data <- function(data, skill_name, defaults = defaults, model_type = model_type,
-                         gs_refs = gs_ref, resource_refs = resource_ref, return_df = return_df, folds = folds) {
+convert_data <- function(data, skill_name, defaults, model_type,
+                         gs_refs, resource_refs, return_df, folds) {
     if (is.null(model_type)) {
         multilearn <- multiprior <- multipair <- multigs <- FALSE
     } else {
@@ -287,8 +287,8 @@ convert_data <- function(data, skill_name, defaults = defaults, model_type = mod
     return(datas)
 }
 
-convert_data_path <- function(data_path, skill_name, defaults = defaults, model_type = model_type,
-                              gs_refs = gs_ref, resource_refs = resource_ref, return_df = return_df, folds = folds) {
+convert_data_path <- function(data_path, skill_name, defaults, model_type,
+                              gs_refs, resource_refs, return_df, folds) {
     data <- read.csv(data_path, header = TRUE, sep = ",", stringsAsFactors = FALSE, check.names = FALSE)
     if (is.null(data)) {
         stop("Failed to load the CSV file.")

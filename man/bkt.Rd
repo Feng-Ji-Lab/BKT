@@ -12,6 +12,7 @@ bkt(
   model_type = rep(FALSE, 4),
   forgets = FALSE,
   fixed = NULL,
+  defaults = NULL,
   ...
 )
 }
@@ -39,6 +40,10 @@ If set to \code{TRUE}, the model will account for the possibility that learners 
 model fitting. Each skill can have certain parameters, such as "guesses" and "slips", set to
 \code{TRUE} (to fix) or \code{FALSE} (to let them vary). For example:
 \code{list("skill_name" = list("guesses" = TRUE, "slips" = TRUE))}.}
+
+\item{defaults}{List. The defaults parameter is a list that functions as a query dictionary.
+It is used to map column names in the data to the expected variables in the model.
+This helps ensure that the model can work with different datasets that may have varying column names.}
 
 \item{...}{Other parameters.}
 }
