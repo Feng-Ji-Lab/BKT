@@ -107,18 +107,6 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
     alpha_out = alpha_out
   )
   # parallel = FALSE
-  num_threads <- if (parallel) parallel::detectCores() else 1
-  thread_counts <- vector("list", num_threads)
-
-  for (thread_num in seq_len(num_threads)) {
-    blocklen <- 1 + ((num_sequences - 1) %/% num_threads)
-    sequence_idx_start <- blocklen * (thread_num - 1)
-    sequence_idx_end <- min(sequence_idx_start + blocklen, num_sequences)
-    thread_counts[[thread_num]] <- c(
-      list(sequence_idx_start = sequence_idx_start, sequence_idx_end = sequence_idx_end),
-      input
-    )
-  }
 
   get_x <- function(parallel, thread_counts, num_threads, inner) {
     x <- list()  # Define x locally
@@ -126,6 +114,19 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
     if (parallel) {
       tryCatch(
         {
+          num_threads <- if (parallel) parallel::detectCores() else 1
+          thread_counts <- vector("list", num_threads)
+
+          for (thread_num in seq_len(num_threads)) {
+            blocklen <- 1 + ((num_sequences - 1) %/% num_threads)
+            sequence_idx_start <- blocklen * (thread_num - 1)
+            sequence_idx_end <- min(sequence_idx_start + blocklen, num_sequences)
+            thread_counts[[thread_num]] <- c(
+              list(sequence_idx_start = sequence_idx_start, sequence_idx_end = sequence_idx_end),
+              input
+            )
+          }
+
           # Parallel block
           cl <- makeCluster(num_threads)
           x <- parLapply(cl, thread_counts, inner)  # Assign to x locally
@@ -141,6 +142,18 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
     } 
     
     if(!parallel || !success_flag) {
+      num_threads <- if (parallel) parallel::detectCores() else 1
+      thread_counts <- vector("list", num_threads)
+
+      for (thread_num in seq_len(num_threads)) {
+        blocklen <- 1 + ((num_sequences - 1) %/% num_threads)
+        sequence_idx_start <- blocklen * (thread_num - 1)
+        sequence_idx_end <- min(sequence_idx_start + blocklen, num_sequences)
+        thread_counts[[thread_num]] <- c(
+          list(sequence_idx_start = sequence_idx_start, sequence_idx_end = sequence_idx_end),
+          input
+        )
+      }
       x <- lapply(thread_counts, inner)  # If no parallel, just serial
     }
 
