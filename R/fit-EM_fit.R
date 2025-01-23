@@ -108,7 +108,7 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
   )
   # parallel = FALSE
 
-  get_x <- function(parallel, thread_counts, num_threads, inner) {
+  get_x <- function(parallel, inner) {
     x <- list()  # Define x locally
     success_flag = FALSE
     if (parallel) {
@@ -159,7 +159,7 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
 
     return(x)  # Return x after computation
   }
-  x <- get_x(parallel, thread_counts, num_threads, inner)
+  x <- get_x(parallel, inner)
 
   for (i in x) {
     total_loglike <- total_loglike + i[[4]]
