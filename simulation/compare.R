@@ -6,9 +6,9 @@ devtools::load_all("./")
 
 # Define parameters
 prior <- 0.2
-guess <- 0.03
-slip <- 0.01
-learn <- 0.2
+guess <- 0.1
+slip <- 0.1
+learn <- 0.3
 max_questions <- 10
 
 # Call simulate_bkt_data with different values of num_students
