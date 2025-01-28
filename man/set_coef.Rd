@@ -27,7 +27,7 @@ The values should be provided as a named list, with each skill having its own su
 The function performs checks to ensure that the provided parameters are valid in terms of type, length, and existence.
 }
 \examples{
-\dontrun{
+\donttest{
 # Initialize a BKT model
 model <- bkt(seed = 42)
 

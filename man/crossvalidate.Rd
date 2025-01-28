@@ -66,7 +66,7 @@ the dataset into training and validation sets, trains the model on the training 
 and evaluates it on the validation data according to a specified metric.
 }
 \examples{
-\dontrun{
+\donttest{
 model <- bkt(seed = 42, parallel = TRUE, num_fits = 5)
 cv_results <- crossvalidate(model, data_path = "ct.csv", folds = 5)
 print(cv_results)

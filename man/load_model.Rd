@@ -20,7 +20,7 @@ This function loads a previously saved BKT model from an RDS file. The model att
 are restored into the provided model object, allowing it to be used for further analysis or predictions.
 }
 \examples{
-\dontrun{
+\donttest{
 model <- bkt(seed = 42)
 loaded_model <- load_model(model, "bkt_model.rds")
 }

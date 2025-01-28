@@ -14,6 +14,9 @@ fetch_dataset(object, link, loc)
 \item{loc}{Character. The local file path where the dataset will be saved. The dataset will
 be stored at this location after download.}
 }
+\value{
+None. The function downloads the data file to the specified location.
+}
 \description{
 Fetch a dataset from an online source.
 This function downloads a dataset from a provided URL and saves it to a specified location
@@ -21,7 +24,7 @@ on the local system. The dataset must be publicly accessible, without requiring 
 password or authentication. It can then be used for further analysis or modeling.
 }
 \examples{
-\dontrun{
+\donttest{
 model <- bkt()
 fetch_dataset(model, "http://example.com/dataset.csv", "data.csv")
 }
