@@ -8,7 +8,7 @@
 #' @param loc Character. The file path where the model will be saved, typically with an `.rds` extension.
 #' @return None. The function saves the model to the specified location.
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' model <- bkt(seed = 42)
 #' fit_model <- fit(model, data_path = "ct.csv")
 #' save_model(fit_model, "bkt_model.rds")
@@ -28,7 +28,7 @@ save_model <- function(model, loc) {
 #' @param loc Character. The file path from which the model will be loaded, typically an `.rds` file.
 #' @return The updated BKT model object with the restored attributes from the saved model.
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' model <- bkt(seed = 42)
 #' loaded_model <- load_model(model, "bkt_model.rds")
 #' }

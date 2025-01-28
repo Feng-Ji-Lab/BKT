@@ -110,7 +110,7 @@ setMethod("initialize", "Model", function(.Object, parallel = TRUE, num_fits = 5
 #' @return A fitted BKT model object, which can be used for predictions, cross-validation,
 #'   or parameter analysis.
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' model <- bkt(seed = 42, parallel = FALSE, num_fits = 1)
 #' result <- fit(
 #'   model,
@@ -248,8 +248,9 @@ partial_fit <- function(object, data_path = NULL, data = NULL, ...) {
 #' @param link Character. The URL where the dataset is located. This must be a publicly accessible URL.
 #' @param loc Character. The local file path where the dataset will be saved. The dataset will
 #'   be stored at this location after download.
+#' @return None. The function downloads the data file to the specified location.
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' model <- bkt()
 #' fetch_dataset(model, "http://example.com/dataset.csv", "data.csv")
 #' }
@@ -412,7 +413,7 @@ rmse <- function(true_vals, pred_vals) {
 #' @return Numeric or List. The result of the evaluation based on the specified metric(s). For example, if `rmse` is used,
 #'   the function will return the root mean square error for the model on the dataset.
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' model <- bkt(seed = 42, parallel = TRUE, num_fits = 5)
 #' result <- fit(model, data_path = "ct.csv", skills = "Plot non-terminating improper fraction")
 #' eval_result <- evaluate(result, data_path = "ct_test.csv", metric = rmse)
@@ -516,7 +517,7 @@ check_manual_param_init <- function(object, num_learns, num_gs, skill) {
 #' @return A data frame containing the fitted model parameters. The data frame will typically include
 #'   columns such as 'learns', 'guesses', 'slips', and other model-specific values.
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' model <- bkt(seed = 42, parallel = TRUE, num_fits = 5)
 #' result <- fit(model, data_path = "data.csv", skills = "skill name")
 #' params_df <- params(result)
@@ -631,7 +632,7 @@ crossvalidate_single_skill <- function(data, skill, metrics) {
 #' @return A list containing the cross-validation results, including the average performance metric
 #'   and any other relevant details from the validation process.
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' model <- bkt(seed = 42, parallel = TRUE, num_fits = 5)
 #' cv_results <- crossvalidate(model, data_path = "ct.csv", folds = 5)
 #' print(cv_results)
@@ -718,7 +719,7 @@ crossvalidate <- function(object, data = NULL, data_path = NULL, metric = rmse, 
 #' @return A data frame containing the original data with two additional columns:
 #'   `correct_predictions` and `state_predictions`.
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' model <- bkt(seed = 42)
 #' fit_model <- fit(model, data_path = "ct.csv")
 #' predictions <- predict_bkt(fit_model, data_path = "ct_test.csv")
@@ -782,7 +783,7 @@ predict_bkt <- function(model, data_path = NULL, data = NULL) {
 #' The function performs checks to ensure that the provided parameters are valid in terms of type, length, and existence.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Initialize a BKT model
 #' model <- bkt(seed = 42)
 #'

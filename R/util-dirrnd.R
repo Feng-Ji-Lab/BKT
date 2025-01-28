@@ -1,8 +1,3 @@
-#' dirrnd
-#'
-#' Generate random samples from a Dirichlet distribution.
-#'
-#' @keywords internal
 dirrnd <- function(alphavec) {
   rr <- rgamma(n = length(alphavec), shape = alphavec, scale = 1)
   a <- array(rr, dim(alphavec))

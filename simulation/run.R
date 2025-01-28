@@ -5,8 +5,8 @@ source("simulation/generator.R")
 devtools::load_all("./")
 
 prior <- 0.2
-guess <- 0.05
-slip <- 0.05
+guess <- 0.1
+slip <- 0.1
 learn <- 0.3
 num_students <- 500
 max_questions <- 10
