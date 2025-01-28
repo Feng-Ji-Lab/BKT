@@ -7,6 +7,8 @@
 \usepackage{amsmath}
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\usepackage{booktabs}
+\usepackage{multirow}
 
 \lstset{ 
   language=R,
@@ -866,56 +868,113 @@ In the ILE model, the primary difference from the standard BKT model is the indi
 
 \section{Simulation}
 
-[1] 50
-       skill   param   class    value
-1 mathematic  learns default 0.222524
-2 mathematic guesses default 0.071437
-3 mathematic   slips default 0.016919
-4 mathematic   prior default 0.169668
-[1] 500
-       skill   param   class    value
-1 mathematic  learns default 0.203992
-2 mathematic guesses default 0.020139
-3 mathematic   slips default 0.015019
-4 mathematic   prior default 0.201612
-[1] 2000
-       skill   param   class    value
-1 mathematic  learns default 0.197938
-2 mathematic guesses default 0.031748
-3 mathematic   slips default 0.008385
-4 mathematic   prior default 0.202703
+This section describes the synthetic dataset generation process following the basic BKT model.
 
-Processing C:\Users\zby15\Desktop\ss\rbkt\simulation_data_50.csv
-Results for simulation_data_50.csv:
-                             value
-skill      param   class
-mathematic prior   default 0.16993
-           learns  default 0.22272
-           guesses default 0.07103
-           slips   default 0.01715
-           forgets default 0.00000
+\subsection{Data Generation Workflow}
+The data generation follows these key steps, corresponding to the abstraction of the learning process described in the \textbf{Model Description} part.
 
 
-Processing C:\Users\zby15\Desktop\ss\rbkt\simulation_data_500.csv
-Results for simulation_data_500.csv:
-                             value
-skill      param   class
-mathematic prior   default 0.20152
-           learns  default 0.20394
-           guesses default 0.02026
-           slips   default 0.01497
-           forgets default 0.00000
+\begin{enumerate}
+    \item \textbf{Student Initialization}: Each student begins with:
+    \begin{itemize}
+        \item Initial know state $k_1 \sim \text{Bernoulli}(P_p)$
+        \item Initialize the number of activities for the student, $T_{max} \sim \text{Uniform}(1, 10)$, where $T_{max}$ is an integer uniformly sampled from 1 to 10.
+    \end{itemize}
+    
+    \item \textbf{Activity-Performing Process}:
+    \begin{itemize}
+        \item For each activity $t \in [1, T_{\text{max}}]$:
+        \begin{itemize}
+            \item If unmastered ($k_t=0$): $p_{\text{correct}} = guess$
+            \item If mastered ($k_t=1$): $p_{\text{correct}} = 1-slip$
+            \item Generate response $correct_t \sim \text{Bernoulli}(p_{\text{correct}})$
+        \end{itemize}
+    \end{itemize}
+    
+    \item \textbf{Knowledge State Update}:
+    \begin{itemize}
+        \item After each attempt: $k_{t+1} \sim \text{Bernoulli}(learn)$ if $k_t=0$
+        \item Persistent mastery once $k_t=1$
+    \end{itemize}
+    
+    \item \textbf{Dataset Assembly}:
+    \begin{itemize}
+        \item Collect records with columns: 
+        \begin{itemize}
+            \item \texttt{order\_id}, \texttt{correct}, \texttt{student\_id}, \texttt{skill\_name}
+        \end{itemize}
+    \end{itemize}
+\end{enumerate}
 
+\subsection{Example of Generated Data}
 
-Processing C:\Users\zby15\Desktop\ss\rbkt\simulation_data_2000.csv
-Results for simulation_data_2000.csv:
-                             value
-skill      param   class
-mathematic prior   default 0.20278
-           learns  default 0.19796
-           guesses default 0.03168
-           slips   default 0.00842
-           forgets default 0.00000
+The following is a preview of the structure of the generated dataset:
+
+\begin{table}[ht]
+\centering
+\caption{Example of Simulated Data}
+\label{tab:example-data}
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{order\_id} & \textbf{correct} & \textbf{student\_id} & \textbf{skill\_name} \\ \hline
+1 & 0 & 1 & mathematics \\ \hline
+2 & 0 & 1 & mathematics \\ \hline
+3 & 1 & 1 & mathematics \\ \hline
+... & ... & ... & ... \\ \hline
+11 & 0 & 2 & mathematics \\ \hline
+12 & 0 & 2 & mathematics \\ \hline
+13 & 0 & 2 & mathematics \\ \hline
+... & ... & ... & ... \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Simulation Parameters}
+Three datasets were generated using the parameters in Table~\ref{tab:sim_params} to evaluate scalability.
+
+\begin{table}[H]
+\centering
+\caption{BKT Simulation Parameters and Values}
+\label{tab:sim_params}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Value(s)} & \textbf{Description} \\
+\midrule
+\texttt{prior} & 0.2 & Initial mastery probability \\
+\texttt{guess} & 0.1 & Guess probability \\
+\texttt{slip} & 0.1 & Slip probability \\
+\texttt{learn} & 0.3 & Learning probability \\
+\texttt{num\_students} & 50, 500, 2000 & Dataset sizes \\
+\texttt{max\_questions} & 10 & Maximum questions per student \\
+\texttt{skill\_name} & ``mathematic'' & Fixed skill label \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Simulation Result}
+
+The generated simulation data was used to fit the basic BKT model in both the \texttt{BKT} and \texttt{pyBKT} packages. The results of the fitting process are shown in Table \ref{tab:bkt-comparison}.
+
+\begin{table}[H]
+\centering
+\caption{Comparison of BKT and pyBKT Results}
+\label{tab:bkt-comparison}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Data Size} & \textbf{Parameter} & \textbf{Origin Value} & \textbf{BKT Value} & \textbf{pyBKT Value} \\ \hline
+\multirow{4}{*}{50} & Prior   & 0.2      & 0.261569 & 0.25647 \\ \cline{2-5}
+                    & Learns  & 0.3      & 0.374822 & 0.32318 \\ \cline{2-5}
+                    & Guesses & 0.1      & 0.093822 & 0.08976 \\ \cline{2-5}
+                    & Slips   & 0.1      & 0.111001 & 0.12422 \\ \hline
+\multirow{4}{*}{500} & Prior   & 0.2      & 0.232586 & 0.22841 \\ \cline{2-5}
+                     & Learns  & 0.3      & 0.296199 & 0.28833 \\ \cline{2-5}
+                     & Guesses & 0.1      & 0.092990 & 0.09644 \\ \cline{2-5}
+                     & Slips   & 0.1      & 0.088352 & 0.08931 \\ \hline
+\multirow{4}{*}{2000} & Prior   & 0.2      & 0.196425 & 0.19982 \\ \cline{2-5}
+                      & Learns  & 0.3      & 0.304423 & 0.29789 \\ \cline{2-5}
+                      & Guesses & 0.1      & 0.103813 & 0.10712 \\ \cline{2-5}
+                      & Slips   & 0.1      & 0.102593 & 0.09861 \\ \hline
+\end{tabular}
+\end{table}
 
 \section{Data Example}
 
