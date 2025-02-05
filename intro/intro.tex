@@ -47,16 +47,16 @@ Bayesian Knowledge Tracing (BKT) is a widely used model for understanding studen
 
 BKT has evolved into various models, each addressing different aspects of student learning and behavior. The Prior Per Student (PPS) Model (\cite{multiprior}) builds upon BKT by individualizing the prior rate for each student, diverging from the traditional BKT assumption of a shared global prior rate. The Item Order Effect (IOE) Model (\cite{multipair}) extends BKT by localizing the learning rate to each pair of items, allowing for a more nuanced representation of learning progression across different items. The Item Difficulty Effect (IDE) Model (\cite{multiguess}) enhances BKT by personalizing the guess and slip rates for each item, instead of assuming a uniform global rate. Lastly, the Learning and Forgetting Behavior (LFB) Model (\cite{forget}) introduces the concept of forgetting into the learning process, acknowledging that forgetting is an integral part of how students retain and lose knowledge over time.
 
-However, despite the availability of multiple BKT variants, only one fully implemented software package, pyBKT, exists for Python (\cite{psych5030050}). This package serves as the primary tool for applying BKT models in the Python environment. In addition to pyBKT, there is also the standard-BKT command-line tool implemented in C++ (\cite{standardBKT}). This tool focuses on parameter estimation for basic BKT models.
+However, despite the availability of multiple BKT variants, only one fully implemented software package, pyBKT, exists for Python (\cite{badrinath2021pybkt}). This package serves as the primary tool for applying BKT models in the Python environment. In addition to pyBKT, there is also the standard-BKT command-line tool implemented in C++ (\cite{standardBKT}). This tool focuses on parameter estimation for basic BKT models.
 
 To extend the accessibility and functionality of BKT, this R package has been developed, replicating the core features of pyBKT and making them available for R users. With this implementation, users can now seamlessly apply Bayesian Knowledge Tracing models in R, thus broadening the accessibility of this important educational tool.
 
 \section{Model description}
 
 \subsection{Bayesian Knowledge Tracing}
-BKT (Bayesian Knowledge Tracing) is a probabilistic model designed to track a learner’s state of knowledge over time, specifically focusing on transitions between 'unknown' and 'known' states for a particular skill or concept. BKT assumes that a learner has a probability of transitioning from an unknown state to a known state based on the correctness of their responses during learning activities. Here, we provide detailed explanations of the learning process as abstracted by the BKT model.
+Bayesian Knowledge Tracing is a probabilistic model designed to track a learner’s state of knowledge over time, specifically focusing on transitions between "unknown" and "known" states for a particular skill or concept. BKT assumes that a learner has a probability of transitioning from an unknown state to a known state based on the correctness of their responses during learning activities. Here, we provide detailed explanations of the learning process as abstracted by the BKT model.
 
-In general, people acquire knowledge by engaging in learning activities. Learner's knowledge state can be observed by changes in their performance on these activities. This learning process is illustrated in Figure 1.
+In general, people acquire knowledge by engaging in learning activities. Learner's knowledge state can be observed by changes in their performance in these activities. This learning process is illustrated in Figure 1.
 
 \begin{center}
     \begin{tikzpicture}
@@ -864,6 +864,7 @@ The E-step and M-step are alternated until convergence, similar to the basic BKT
 \subsubsection{Summary}
 In the ILE model, the primary difference from the standard BKT model is the individualization of the learning rate for each activity. The EM algorithm is extended to estimate the item-specific learning rates \(P_{l_j}\) along with the other parameters. This allows for a more fine-grained representation of how learners progress through different items.
 
+
 \section{Simulation}
 
 This section describes the synthetic dataset generation process following the basic BKT model.
@@ -950,6 +951,32 @@ Three datasets were generated using the parameters in Table~\ref{tab:sim_params}
 
 \subsection{Simulation Result}
 
+
+
+Table~\ref{tab:mse-bias-comparison} presents the Mean Squared Error (MSE) and Bias for different dataset sizes (50, 500, and 2000 students) in the estimation of the four parameters: \textit{Learns}, \textit{Guesses}, \textit{Slips}, and \textit{Prior}. The MSE values quantify the average squared differences between the estimated and true values, while Bias indicates the systematic deviation of the estimates.
+
+From the table, we observe that as the dataset size increases, the MSE values consistently decrease across all parameters, demonstrating improved estimation accuracy with larger sample sizes. Similarly, the absolute Bias values tend to shrink, indicating a reduction in systematic errors in parameter estimation. This trend aligns with the expectation that larger datasets provide more reliable and stable parameter estimates. 
+
+The \textit{Learns} parameter exhibits the highest MSE among all parameters, particularly when the dataset size is small (50 students), suggesting greater variability in its estimation. Conversely, the \textit{Guesses} and \textit{Slips} parameters show relatively lower MSE and Bias values, implying more stable estimations.
+
+
+\begin{table}[H]
+\centering
+\caption{MSE and Bias Comparison for Different Data Sizes}
+\label{tab:mse-bias-comparison}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\textbf{Data Size} & \textbf{Metric} & \textbf{Learns} & \textbf{Guesses} & \textbf{Slips} & \textbf{Prior} \\ \hline
+\multirow{2}{*}{50}   & MSE  & 0.002073 & 0.000393 & 0.000104 & 0.003834 \\ \cline{2-6}
+                      & Bias & 0.006589 & -0.000646 & -0.000269 & 0.000453 \\ \hline
+\multirow{2}{*}{500}  & MSE  & 0.000168 & 0.000043 & 0.000013 & 0.000311 \\ \cline{2-6}
+                      & Bias & -0.000109 & 0.000527 & 0.000636 & -0.000490 \\ \hline
+\multirow{2}{*}{2000} & MSE  & 0.000037 & 0.000008 & 0.000003 & 0.000080 \\ \cline{2-6}
+                      & Bias & 0.001181 & -0.000250 & -0.000160 & -0.000114 \\ \hline
+\end{tabular}
+\end{table}
+
+
 The generated simulation data was used to fit the basic BKT model in both the \texttt{BKT} and \texttt{pyBKT} packages. The results of the fitting process are shown in Table \ref{tab:bkt-comparison}.
 
 \begin{table}[H]
@@ -973,6 +1000,7 @@ The generated simulation data was used to fit the basic BKT model in both the \t
                       & Slips   & 0.1      & 0.102593 & 0.09861 \\ \hline
 \end{tabular}
 \end{table}
+
 
 \section{Data Example}
 
@@ -1206,7 +1234,7 @@ Slips (0.329848): The slips parameter represents the probability of a student ma
 Prior (0.622707): The prior parameter reflects the initial probability that a student has already mastered the skill "Plot terminating proper fraction" before interacting with the system. A value of 62.27\% indicates that more than half of the students start with this skill already mastered.
 
 \section{Discussion}
-The rBKT package builds upon the full functionality of pyBKT (\cite{psych5030050}), offering additional enhancements tailored for educational research and practical applications. These include streamlined integration with R's statistical ecosystem and features for modeling nuanced learning behaviors such as forgetting and partial knowledge acquisition.
+The rBKT package builds upon the full functionality of pyBKT (\cite{badrinath2021pybkt}), offering additional enhancements tailored for educational research and practical applications. These include streamlined integration with R's statistical ecosystem and features for modeling nuanced learning behaviors such as forgetting and partial knowledge acquisition.
 
 The rBKT package represents a significant advancement for researchers and practitioners interested in dynamic learning models, offering improvements in usability, flexibility, and computational efficiency. Moreover, the package is actively being developed, and several future enhancements are anticipated, including:
 
