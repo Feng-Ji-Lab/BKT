@@ -113,6 +113,12 @@ print(results_list)
 # #  0.00118115 -0.00024965 -0.00016040 -0.00011429
 
 
+# prior <- 0
+# guess <- 0.5
+# slip <- 0.05
+# learn <- 0.3
+# max_questions <- 10
+
 # $`50`
 # $`50`$MSE
 #      learns     guesses       slips       prior
