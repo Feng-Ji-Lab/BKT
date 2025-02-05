@@ -71,12 +71,6 @@ for (num_students in num_students_values) {
 # Print final results
 print(results_list)
 
-# # Define parameters
-# prior <- 0
-# guess <- 0.5
-# slip <- 0.05
-# learn <- 0.3
-# max_questions <- 10
 # # # Define parameters
 # # prior <- 0.2
 # # guess <- 0.03
@@ -112,7 +106,7 @@ print(results_list)
 # #      learns     guesses       slips       prior
 # #  0.00118115 -0.00024965 -0.00016040 -0.00011429
 
-
+# # Define parameters
 # prior <- 0
 # guess <- 0.5
 # slip <- 0.05

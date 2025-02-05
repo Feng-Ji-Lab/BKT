@@ -953,30 +953,6 @@ Three datasets were generated using the parameters in Table~\ref{tab:sim_params}
 
 
 
-Table~\ref{tab:mse-bias-comparison} presents the Mean Squared Error (MSE) and Bias for different dataset sizes (50, 500, and 2000 students) in the estimation of the four parameters: \textit{Learns}, \textit{Guesses}, \textit{Slips}, and \textit{Prior}. The MSE values quantify the average squared differences between the estimated and true values, while Bias indicates the systematic deviation of the estimates.
-
-From the table, we observe that as the dataset size increases, the MSE values consistently decrease across all parameters, demonstrating improved estimation accuracy with larger sample sizes. Similarly, the absolute Bias values tend to shrink, indicating a reduction in systematic errors in parameter estimation. This trend aligns with the expectation that larger datasets provide more reliable and stable parameter estimates. 
-
-The \textit{Learns} parameter exhibits the highest MSE among all parameters, particularly when the dataset size is small (50 students), suggesting greater variability in its estimation. Conversely, the \textit{Guesses} and \textit{Slips} parameters show relatively lower MSE and Bias values, implying more stable estimations.
-
-
-\begin{table}[H]
-\centering
-\caption{MSE and Bias Comparison for Different Data Sizes}
-\label{tab:mse-bias-comparison}
-\begin{tabular}{|c|c|c|c|c|c|}
-\hline
-\textbf{Data Size} & \textbf{Metric} & \textbf{Learns} & \textbf{Guesses} & \textbf{Slips} & \textbf{Prior} \\ \hline
-\multirow{2}{*}{50}   & MSE  & 0.002073 & 0.000393 & 0.000104 & 0.003834 \\ \cline{2-6}
-                      & Bias & 0.006589 & -0.000646 & -0.000269 & 0.000453 \\ \hline
-\multirow{2}{*}{500}  & MSE  & 0.000168 & 0.000043 & 0.000013 & 0.000311 \\ \cline{2-6}
-                      & Bias & -0.000109 & 0.000527 & 0.000636 & -0.000490 \\ \hline
-\multirow{2}{*}{2000} & MSE  & 0.000037 & 0.000008 & 0.000003 & 0.000080 \\ \cline{2-6}
-                      & Bias & 0.001181 & -0.000250 & -0.000160 & -0.000114 \\ \hline
-\end{tabular}
-\end{table}
-
-
 The generated simulation data was used to fit the basic BKT model in both the \texttt{BKT} and \texttt{pyBKT} packages. The results of the fitting process are shown in Table \ref{tab:bkt-comparison}.
 
 \begin{table}[H]
@@ -1001,6 +977,60 @@ The generated simulation data was used to fit the basic BKT model in both the \t
 \end{tabular}
 \end{table}
 
+\subsection{MSE and Bias}
+
+Table~\ref{tab:sim_params_3} presents the Mean Squared Error (MSE) and Bias for different dataset sizes (50, 500, and 2000 students) in the estimation of the four parameters: \textit{Learns}, \textit{Guesses}, \textit{Slips}, and \textit{Prior}.
+
+\begin{table}[H]
+\centering
+\caption{BKT Simulation Parameters for Different Settings}
+\label{tab:sim_params_3}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Parameter} & \textbf{Setting A} & \textbf{Setting B} \\ 
+\midrule
+\texttt{prior} & 0.2 & 0.0 \\ 
+\texttt{guess} & 0.03 & 0.5 \\ 
+\texttt{slip} & 0.01 & 0.05 \\ 
+\texttt{learn} & 0.2 & 0.3 \\ 
+\texttt{num\_students} & 50, 500, 2000 & 50, 500, 2000 \\ 
+\texttt{max\_questions} & 10 & 10 \\ 
+\texttt{skill\_name} & ``mathematic'' & ``Vocabulary'' \\ 
+\bottomrule
+\end{tabular}
+\end{table}
+    
+The MSE values quantify the average squared differences between the estimated and origin values, while Bias indicates the systematic deviation of the estimates. Here, the origin values refer to the parameters used to generate the simulated data, rather than the true values of the generated data. Due to the stochastic nature of the data generation process, the parameters of the generated data are not guaranteed to be exactly equal to the specified origin values.
+
+To account for this variability, we conducted 100 simulation runs and computed the average MSE and Bias values. The results are presented in Table~\ref{tab:mse-bias-comparison}.
+\begin{table}[H]
+\centering
+\caption{MSE and Bias Comparison for Different Data Sizes (Setting A vs. Setting B)}
+\label{tab:mse-bias-comparison}
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Data Size} & \textbf{Setting} & \textbf{Learns} & \textbf{Guesses} & \textbf{Slips} & \textbf{Prior} \\ \hline
+\multirow{2}{*}{50}  
+                        & A & MSE & 0.002073 & 0.000393 & 0.000104 & 0.003834 \\ \cline{2-6}
+                        & B & MSE & 0.010618 & 0.009161 & 0.001365 & 0.020640 \\ \hline
+\multirow{2}{*}{50}  
+                        & A & Bias & 0.006589 & -0.000646 & -0.000269 & 0.000453 \\ \cline{2-6}
+                        & B & Bias  & 0.035441 & -0.054509 & 0.012494 & 0.091014 \\ \hline
+\multirow{2}{*}{500}  
+                        & A & MSE & 0.000168 & 0.000043 & 0.000013 & 0.000311 \\ \cline{2-6}
+                        & B & MSE & 0.000711 & 0.000743 & 0.000119 & 0.001798 \\ \hline
+\multirow{2}{*}{500}  
+                        & A & Bias  & -0.000109 & 0.000527 & 0.000636 & -0.000490 \\ \cline{2-6}
+                        & B & Bias  & 0.005335 & -0.012432 & 0.002067 & 0.029230 \\ \hline
+\multirow{2}{*}{2000}  
+                        & A & MSE & 0.000037 & 0.000008 & 0.000003 & 0.000080 \\ \cline{2-6}
+                        & B & MSE & 0.000174 & 0.000195 & 0.000036 & 0.000676 \\ \hline
+\multirow{2}{*}{2000}  
+                        & A & Bias  & 0.001181 & -0.000250 & -0.000160 & -0.000114 \\ \cline{2-6}
+                        & B & Bias  & -0.000320 & -0.008643 & 0.001474 & 0.020545 \\ \hline
+\end{tabular}
+\end{table}
+    
 
 \section{Data Example}
 
