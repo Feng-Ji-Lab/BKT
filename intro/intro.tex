@@ -949,10 +949,7 @@ Three datasets were generated using the parameters in Table~\ref{tab:sim_params}
 \end{tabular}
 \end{table}
 
-\subsection{Simulation Result}
-
-
-
+\subsection{Comparison Result}
 The generated simulation data was used to fit the basic BKT model in both the \texttt{BKT} and \texttt{pyBKT} packages. The results of the fitting process are shown in Table \ref{tab:bkt-comparison}.
 
 \begin{table}[H]
@@ -977,6 +974,7 @@ The generated simulation data was used to fit the basic BKT model in both the \t
 \end{tabular}
 \end{table}
 
+
 \subsection{MSE and Bias}
 
 Table~\ref{tab:sim_params_3} presents the Mean Squared Error (MSE) and Bias for different dataset sizes (50, 500, and 2000 students) in the estimation of the four parameters: \textit{Learns}, \textit{Guesses}, \textit{Slips}, and \textit{Prior}.
@@ -995,7 +993,6 @@ Table~\ref{tab:sim_params_3} presents the Mean Squared Error (MSE) and Bias for 
 \texttt{learn} & 0.2 & 0.3 \\ 
 \texttt{num\_students} & 50, 500, 2000 & 50, 500, 2000 \\ 
 \texttt{max\_questions} & 10 & 10 \\ 
-\texttt{skill\_name} & ``mathematic'' & ``Vocabulary'' \\ 
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1005,11 +1002,11 @@ The MSE values quantify the average squared differences between the estimated an
 To account for this variability, we conducted 100 simulation runs and computed the average MSE and Bias values. The results are presented in Table~\ref{tab:mse-bias-comparison}.
 \begin{table}[H]
 \centering
-\caption{MSE and Bias Comparison for Different Data Sizes (Setting A vs. Setting B)}
+\caption{MSE and Bias}
 \label{tab:mse-bias-comparison}
 \begin{tabular}{|c|c|c|c|c|c|c|c|}
 \hline
-\textbf{Data Size} & \textbf{Setting} & \textbf{Learns} & \textbf{Guesses} & \textbf{Slips} & \textbf{Prior} \\ \hline
+\textbf{Data Size} & \textbf{Setting} & \textbf{Metric} & \textbf{Learns} & \textbf{Guesses} & \textbf{Slips} & \textbf{Prior} \\ \hline
 \multirow{2}{*}{50}  
                         & A & MSE & 0.002073 & 0.000393 & 0.000104 & 0.003834 \\ \cline{2-6}
                         & B & MSE & 0.010618 & 0.009161 & 0.001365 & 0.020640 \\ \hline
@@ -1030,7 +1027,6 @@ To account for this variability, we conducted 100 simulation runs and computed t
                         & B & Bias  & -0.000320 & -0.008643 & 0.001474 & 0.020545 \\ \hline
 \end{tabular}
 \end{table}
-    
 
 \section{Data Example}
 
