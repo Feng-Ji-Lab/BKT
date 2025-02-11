@@ -913,19 +913,22 @@ The following is a preview of the structure of the generated dataset:
 \centering
 \caption{Example of Simulated Data}
 \label{tab:example-data}
-\begin{tabular}{|c|c|c|}
-\hline
-\textbf{order\_id} & \textbf{correct} & \textbf{student\_id} \\ \hline
-1 & 0 & 1 \\ \hline
-2 & 0 & 1 \\ \hline
-3 & 1 & 1 \\ \hline
-... & ... & ... \\ \hline
-11 & 0 & 2 \\ \hline
-12 & 0 & 2 \\ \hline
-13 & 0 & 2 \\ \hline
-... & ... & ... \\ \hline
+\begin{tabular}{@{}ccc@{}}
+\toprule
+\textbf{\texttt{order\_id}} & \textbf{\texttt{correct}} & \textbf{\texttt{student\_id}} \\ 
+\midrule
+1  & 0 & 1 \\  
+2  & 0 & 1 \\  
+3  & 1 & 1 \\  
+... & ... & ... \\  
+11 & 0 & 2 \\  
+12 & 0 & 2 \\  
+13 & 0 & 2 \\  
+... & ... & ... \\  
+\bottomrule
 \end{tabular}
 \end{table}
+
 
 \subsection{Simulation Parameters}
 Three datasets were generated using the parameters in Table~\ref{tab:sim_params} to evaluate scalability.
