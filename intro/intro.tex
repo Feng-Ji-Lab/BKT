@@ -900,7 +900,7 @@ The data generation follows these key steps, corresponding to the abstraction of
     \begin{itemize}
         \item Collect records with columns: 
         \begin{itemize}
-            \item \texttt{order\_id}, \texttt{correct}, \texttt{student\_id}, \texttt{skill\_name}
+            \item \texttt{order\_id}, \texttt{correct}, \texttt{student\_id}
         \end{itemize}
     \end{itemize}
 \end{enumerate}
@@ -913,17 +913,17 @@ The following is a preview of the structure of the generated dataset:
 \centering
 \caption{Example of Simulated Data}
 \label{tab:example-data}
-\begin{tabular}{|l|l|l|l|}
+\begin{tabular}{|c|c|c|}
 \hline
-\textbf{order\_id} & \textbf{correct} & \textbf{student\_id} & \textbf{skill\_name} \\ \hline
-1 & 0 & 1 & mathematics \\ \hline
-2 & 0 & 1 & mathematics \\ \hline
-3 & 1 & 1 & mathematics \\ \hline
-... & ... & ... & ... \\ \hline
-11 & 0 & 2 & mathematics \\ \hline
-12 & 0 & 2 & mathematics \\ \hline
-13 & 0 & 2 & mathematics \\ \hline
-... & ... & ... & ... \\ \hline
+\textbf{order\_id} & \textbf{correct} & \textbf{student\_id} \\ \hline
+1 & 0 & 1 \\ \hline
+2 & 0 & 1 \\ \hline
+3 & 1 & 1 \\ \hline
+... & ... & ... \\ \hline
+11 & 0 & 2 \\ \hline
+12 & 0 & 2 \\ \hline
+13 & 0 & 2 \\ \hline
+... & ... & ... \\ \hline
 \end{tabular}
 \end{table}
 
@@ -944,37 +944,40 @@ Three datasets were generated using the parameters in Table~\ref{tab:sim_params}
 \texttt{learn} & 0.3 & Learning probability \\
 \texttt{num\_students} & 50, 500, 2000 & Dataset sizes \\
 \texttt{max\_questions} & 10 & Maximum questions per student \\
-\texttt{skill\_name} & ``mathematic'' & Fixed skill label \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \subsection{Comparison Result}
 The generated simulation data was used to fit the basic BKT model in both the \texttt{BKT} and \texttt{pyBKT} packages. The results of the fitting process are shown in Table \ref{tab:bkt-comparison}.
-
 \begin{table}[H]
 \centering
 \caption{Comparison of BKT and pyBKT Results}
 \label{tab:bkt-comparison}
-\begin{tabular}{|c|c|c|c|c|}
-\hline
-\textbf{Data Size} & \textbf{Parameter} & \textbf{Origin Value} & \textbf{BKT Value} & \textbf{pyBKT Value} \\ \hline
-\multirow{4}{*}{50} & Prior   & 0.2      & 0.261569 & 0.25647 \\ \cline{2-5}
-                    & Learns  & 0.3      & 0.374822 & 0.32318 \\ \cline{2-5}
-                    & Guesses & 0.1      & 0.093822 & 0.08976 \\ \cline{2-5}
-                    & Slips   & 0.1      & 0.111001 & 0.12422 \\ \hline
-\multirow{4}{*}{500} & Prior   & 0.2      & 0.232586 & 0.22841 \\ \cline{2-5}
-                     & Learns  & 0.3      & 0.296199 & 0.28833 \\ \cline{2-5}
-                     & Guesses & 0.1      & 0.092990 & 0.09644 \\ \cline{2-5}
-                     & Slips   & 0.1      & 0.088352 & 0.08931 \\ \hline
-\multirow{4}{*}{2000} & Prior   & 0.2      & 0.196425 & 0.19982 \\ \cline{2-5}
-                      & Learns  & 0.3      & 0.304423 & 0.29789 \\ \cline{2-5}
-                      & Guesses & 0.1      & 0.103813 & 0.10712 \\ \cline{2-5}
-                      & Slips   & 0.1      & 0.102593 & 0.09861 \\ \hline
+\begin{tabular}{@{}clccc@{}}
+\toprule
+\textbf{Data Size} & \textbf{Parameter} & \textbf{Origin Value} & \textbf{BKT Value} & \textbf{pyBKT Value} \\
+\midrule
+\multirow{4}{*}{50} 
+    & Prior   & 0.2 & 0.261569 & 0.25647 \\
+    & Learn   & 0.3 & 0.374822 & 0.32318 \\
+    & Guess   & 0.1 & 0.093822 & 0.08976 \\
+    & Slip    & 0.1 & 0.111001 & 0.12422 \\
+\midrule
+\multirow{4}{*}{500} 
+    & Prior   & 0.2 & 0.232586 & 0.22841 \\
+    & Learn   & 0.3 & 0.296199 & 0.28833 \\
+    & Guess   & 0.1 & 0.092990 & 0.09644 \\
+    & Slip    & 0.1 & 0.088352 & 0.08931 \\
+\midrule
+\multirow{4}{*}{2000} 
+    & Prior   & 0.2 & 0.196425 & 0.19982 \\
+    & Learn   & 0.3 & 0.304423 & 0.29789 \\
+    & Guess   & 0.1 & 0.103813 & 0.10712 \\
+    & Slip    & 0.1 & 0.102593 & 0.09861 \\
+\bottomrule
 \end{tabular}
 \end{table}
-
-
 \subsection{MSE and Bias}
 
 Table~\ref{tab:sim_params_3} presents the Mean Squared Error (MSE) and Bias for different dataset sizes (50, 500, and 2000 students) in the estimation of the four parameters: \textit{Learns}, \textit{Guesses}, \textit{Slips}, and \textit{Prior}.
@@ -1002,29 +1005,30 @@ The MSE values quantify the average squared differences between the estimated an
 To account for this variability, we conducted 100 simulation runs and computed the average MSE and Bias values. The results are presented in Table~\ref{tab:mse-bias-comparison}.
 \begin{table}[H]
 \centering
-\caption{MSE and Bias}
+\caption{MSE and Bias for Different Data Sizes and Settings}
 \label{tab:mse-bias-comparison}
-\begin{tabular}{|c|c|c|c|c|c|c|c|}
-\hline
-\textbf{Data Size} & \textbf{Setting} & \textbf{Metric} & \textbf{Learns} & \textbf{Guesses} & \textbf{Slips} & \textbf{Prior} \\ \hline
-\multirow{2}{*}{50}  
-                        & A & MSE & 0.002073 & 0.000393 & 0.000104 & 0.003834 \\ \cline{2-6}
-                        & B & MSE & 0.010618 & 0.009161 & 0.001365 & 0.020640 \\ \hline
-\multirow{2}{*}{50}  
-                        & A & Bias & 0.006589 & -0.000646 & -0.000269 & 0.000453 \\ \cline{2-6}
-                        & B & Bias  & 0.035441 & -0.054509 & 0.012494 & 0.091014 \\ \hline
-\multirow{2}{*}{500}  
-                        & A & MSE & 0.000168 & 0.000043 & 0.000013 & 0.000311 \\ \cline{2-6}
-                        & B & MSE & 0.000711 & 0.000743 & 0.000119 & 0.001798 \\ \hline
-\multirow{2}{*}{500}  
-                        & A & Bias  & -0.000109 & 0.000527 & 0.000636 & -0.000490 \\ \cline{2-6}
-                        & B & Bias  & 0.005335 & -0.012432 & 0.002067 & 0.029230 \\ \hline
-\multirow{2}{*}{2000}  
-                        & A & MSE & 0.000037 & 0.000008 & 0.000003 & 0.000080 \\ \cline{2-6}
-                        & B & MSE & 0.000174 & 0.000195 & 0.000036 & 0.000676 \\ \hline
-\multirow{2}{*}{2000}  
-                        & A & Bias  & 0.001181 & -0.000250 & -0.000160 & -0.000114 \\ \cline{2-6}
-                        & B & Bias  & -0.000320 & -0.008643 & 0.001474 & 0.020545 \\ \hline
+\begin{tabular}{@{}cclcccc@{}}
+\toprule
+\textbf{Data Size} & \textbf{Setting} & \textbf{Metric} & \texttt{learns} & \texttt{guesses} & \texttt{slips} & \texttt{prior} \\ 
+\midrule
+\multirow{4}{*}{50}  
+    & A & MSE  & 0.002073 & 0.000393 & 0.000104 & 0.003834 \\  
+    & B & MSE  & 0.010618 & 0.009161 & 0.001365 & 0.020640 \\  
+    & A & Bias & 0.006589 & -0.000646 & -0.000269 & 0.000453 \\  
+    & B & Bias & 0.035441 & -0.054509 & 0.012494 & 0.091014 \\  
+\midrule
+\multirow{4}{*}{500}  
+    & A & MSE  & 0.000168 & 0.000043 & 0.000013 & 0.000311 \\  
+    & B & MSE  & 0.000711 & 0.000743 & 0.000119 & 0.001798 \\  
+    & A & Bias & -0.000109 & 0.000527 & 0.000636 & -0.000490 \\  
+    & B & Bias & 0.005335 & -0.012432 & 0.002067 & 0.029230 \\  
+\midrule
+\multirow{4}{*}{2000}  
+    & A & MSE  & 0.000037 & 0.000008 & 0.000003 & 0.000080 \\  
+    & B & MSE  & 0.000174 & 0.000195 & 0.000036 & 0.000676 \\  
+    & A & Bias & 0.001181 & -0.000250 & -0.000160 & -0.000114 \\  
+    & B & Bias & -0.000320 & -0.008643 & 0.001474 & 0.020545 \\  
+\bottomrule
 \end{tabular}
 \end{table}
 
