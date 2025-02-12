@@ -38,6 +38,7 @@ devtools::load_all("./")
 devtools::check()
 
 # check cran
+# 0. 改版本号
 # 1. build
 devtools::build()
 # 2. bash run
