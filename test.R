@@ -10,9 +10,9 @@ model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
 # print(params(result))
 
 # # MARK: Save & Load
-# save(result, "model.pkl")
+# save_model(result, "model.pkl")
 # model2 <- bkt()
-# model2 <- load(model2, "model.pkl")
+# model2 <- load_model(model2, "model.pkl")
 # # print(params(model2))
 
 # # MARK: Evaluate
@@ -37,9 +37,9 @@ model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
 # fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/as.csv", ".")
 # result <- fit(model, data_path = "as.csv", forgets = TRUE, skills = "Box and Whisker")
 # print(params(result))
-# save(result, "model.pkl")
+# save_model(result, "model.pkl")
 # model2 <- bkt()
-# model2 <- load(model2, "model.pkl")
+# model2 <- load_model(model2, "model.pkl")
 # preds_df <- predict_bkt(model2, data_path = "as.csv")
 # box_and_whisker_preds <- subset(preds_df, skill_name == "Box and Whisker",
 #     select = c("user_id", "correct", "correct_predictions", "state_predictions")
@@ -164,14 +164,26 @@ model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
 
 library(BKT)
 
-# defaults
+# MARK: defaults
 # model <- bkt(seed = 42, num_fits = 1, parallel = FALSE, forgets = TRUE, defaults = list( order_id = "Row"))
 # fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
 
 # result <- fit(model, data_path = "ct.csv", skills = c("Plot terminating proper fraction"))
 # print(params(result))
 
-model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
-fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
-result = fit(model, data_path = "ct.csv", skills = "Plot non-terminating improper fraction")
+# model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+# fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+# result = fit(model, data_path = "ct.csv", skills = "Plot non-terminating improper fraction")
+# print(params(result))
+
+# MARK: Simulation & Prediction
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE, forgets = TRUE, defaults = list("order_id" = "r1", "user_id" = "r3", "correct" = "r2", "skill_name" = "r4"))
+
+result <- fit(model, data_path = "simulation_data_500_need_defaults.csv")
 print(params(result))
+
+model2 <- result
+
+# model2 <- load_model(result, "model.pkl")
+preds_df <- predict_bkt(model2, data_path = "simulation_data_500_need_defaults_test.csv")
+print((preds_df))

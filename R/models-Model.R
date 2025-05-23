@@ -756,8 +756,10 @@ predict_bkt <- function(model, data_path = NULL, data = NULL) {
       state_predictions <- state_predictions[-all_data[[skill]]$multiprior_index]
     }
 
-    df[df$skill_name == skill, "correct_predictions"] <- correct_predictions
-    df[df$skill_name == skill, "state_predictions"] <- state_predictions
+    defaults = model@defaults
+    skill_column = defaults[["skill_name"]]
+    df[df[[skill_column]] == skill, "correct_predictions"] <- correct_predictions
+    df[df[[skill_column]] == skill, "state_predictions"] <- state_predictions
   }
 
   return(df)

@@ -58,9 +58,19 @@ convert_data <- function(data, skill_name, defaults, model_type,
 
     required_columns <- c("user_id", "correct", "skill_name")
     for (col in required_columns) {
-        if (!(defaults[[col]] %in% names(df))) {
-            stop(paste("The required column (", col, ") is missing in the dataframe."))
-        }
+        tryCatch(
+            {
+                if (!(defaults[[col]] %in% names(df))) {
+                    stop(paste("The required column (", col, ") is missing in the dataframe."))
+                }
+            },
+            warning = function(w) {
+                stop("Required column name *", col, " not found in data column names. Please use parameter 'defaults' correctly.")
+            },
+            error = function(e) {
+                stop("Required column name *", col, " not found in data column names. Please use parameter 'defaults' correctly.")
+            }
+        )
     }
     # order by user_id
     df[[defaults[["user_id"]]]] <- as.character(df[[defaults[["user_id"]]]])

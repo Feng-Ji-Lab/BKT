@@ -127,7 +127,7 @@ file <- 'mystery.csv'
 # In this case, the order ID that BKT expects is specified by the column 'row' in the
 # dataset, the 'skill_name' is specified by a column 'skill_t', and the correctness is specified
 # by the 'answer' column in the dataset.
-defaults <- list(order_id = 'row', skill_name = 'skill_t', correct = 'answer')
+defaults <- list(user_id = 'user_id', order_id = 'row', skill_name = 'skill_t', correct = 'answer')
 
 # Fit using the defaults (column mappings) specified in the list
 fit(model, data_path = file, defaults = defaults)
