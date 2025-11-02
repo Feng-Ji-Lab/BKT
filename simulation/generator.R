@@ -63,10 +63,10 @@ simulate_bkt_data <- function(prior, guess, slip, learn, num_students, max_quest
 }
 
 # Example usage:
-# prior <- 0.2
-# guess <- 0.1
-# slip <- 0.1
-# learn <- 0.3
-# num_students <- 500
-# max_questions <- 10
-# simulate_bkt_data(prior, guess, slip, learn, num_students, max_questions, output_file = "simulation_data.csv")
+prior <- 0.2
+guess <- 0.1
+slip <- 0.1
+learn <- 0.3
+num_students <- 2000
+max_questions <- 10
+simulate_bkt_data(prior, guess, slip, learn, num_students, max_questions, output_file = "simulation_data_2000.csv")

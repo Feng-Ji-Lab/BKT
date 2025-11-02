@@ -3,6 +3,10 @@ rm(list = ls())
 devtools::load_all("./")
 
 model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+
+data(simulation_data_50)
+print(head(simulation_data_50))
+
 # fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
 
 # MARK: Fit
