@@ -1,6 +1,6 @@
 unloadNamespace("BKT")
 rm(list = ls())
-source("simulation/generator.R")
+# source("simulation/generator.R")
 
 devtools::load_all("./")
 
