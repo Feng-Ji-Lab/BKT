@@ -64,16 +64,15 @@ simulate_bkt_data <- function(prior, guess, slip, learn, num_students, max_quest
             student_id = integer(max_questions),
             skill_name = character(max_questions)
         )
-        know_rate <- rbinom(1, 1, prior) # k_1^j ~ Bernoulli(Pp)
+        know_rate <- rbinom(1, 1, prior) # k1^j ~ Bernoulli(Pp)
 
         for (i in 1:max_questions) {
-            # Probability of correct
-            p_correct <- know_rate * (1 - slip) + (1 - know_rate) * guess
+            p_correct <- know_rate * (1 - slip) + (1 - know_rate) * guess # Probability of correct
 
-            correct <- rbinom(1, 1, p_correct)
+            correct <- rbinom(1, 1, p_correct) # ai^j ∼ Bernoulli(Pcorrect)
             if (know_rate == 0) {
-                know_rate <- rbinom(1, 1, learn)
-            }
+                know_rate <- rbinom(1, 1, learn) # Learning: ki+1^j ~ Bernoulli(Pl) if ki^j = 0
+            } # else know_state remains unchaged.
 
             student_data[i, ] <- c(i, correct, student_id, skill_name)
         }
