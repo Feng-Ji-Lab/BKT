@@ -110,53 +110,66 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
   get_x <- function(parallel, inner) {
     x <- list() # Define x locally
     success_flag = FALSE
-
-    # 1) threads <= min(cores, num_sequences)
-    max_threads <- parallel::detectCores(logical = TRUE)
-    max_threads = 4
-    num_threads <- max(1L, min(max_threads, num_sequences))
-
-    # 2) split indices evenly; no empty chunks
+    # ----- build lightweight tasks: only ranges -----
+    max_threads <- 16L
+    num_threads <- max(1L, min(parallel::detectCores(logical = TRUE), max_threads, num_sequences))
     idx_groups <- parallel::splitIndices(num_sequences, num_threads)
-    idx_groups <- Filter(length, idx_groups) # safety
+    idx_groups <- Filter(length, idx_groups)
 
-    thread_counts <- lapply(seq_along(idx_groups), function(k) {
-      idx <- idx_groups[[k]]
-      sequence_idx_start <- idx[1L] # already 1-based
-      sequence_idx_end <- idx[length(idx)]
-      c(
-        list(
-          sequence_idx_start = sequence_idx_start,
-          sequence_idx_end = sequence_idx_end
-        ),
-        input
+    thread_counts <- lapply(idx_groups, function(idx) {
+      list(
+        sequence_idx_start = idx[1L],
+        sequence_idx_end   = idx[length(idx)]
       )
     })
-          print("before")
+
+    # ----- pack heavy stuff ONCE -----
+    INPUT <- list(
+      As = As,
+      Bn = Bn,
+      initial_distn = initial_distn,
+      allresources = allresources,
+      starts = starts,
+      lengths = lengths,
+      num_resources = num_resources,
+      num_subparts = num_subparts,
+      alldata = alldata,
+      normalizeLengths = normalizeLengths
+    )
+
     success_flag <- FALSE
-    if (isTRUE(parallel)) {
+
+    MIN_SEQ_PER_WORKER <- 100L
+
+    should_parallel <- isTRUE(parallel) && (num_sequences >= num_threads * MIN_SEQ_PER_WORKER)
+
+    if (isTRUE(parallel) && should_parallel) {
       tryCatch(
         {
-          cl <- makeCluster(length(thread_counts))
+          cl <- parallel::makeCluster(length(thread_counts)) # set outfile="" only when debugging
           on.exit(parallel::stopCluster(cl), add = TRUE)
-          
-          x <- parLapply(cl, thread_counts, inner)
+
+          # export once; DO NOT put `INPUT` inside each task
+          parallel::clusterExport(cl, varlist = c("inner", "INPUT"), envir = environment())
+          # if inner needs packages:
+          # parallel::clusterEvalQ(cl, { library(BKT) })
+
+          # run with load balancing; pass only the small task list
+          x <- parallel::parLapplyLB(cl, thread_counts, inner)
           success_flag <- TRUE
         },
         error = function(e) {
           message(
-            "Parallel computing error occurred: ",
-            conditionMessage(e),
+            "Parallel computing error occurred: ", conditionMessage(e),
             ". Automatically switching to serial computing."
           )
         }
       )
     }
 
-    if (!parallel || !success_flag) {
-      x <- lapply(thread_counts, inner) # If no parallel, just serial
+    if (!isTRUE(parallel) || !isTRUE(success_flag)) {
+      x <- lapply(thread_counts, function(task) inner(task, input = INPUT))
     }
-          print("after")
 
     return(x) # Return x after computation
   }
@@ -194,23 +207,27 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
 
   return(result)
 }
-
-
 # MARK: inner (R)
-inner <- function(x) {
-  As <- x$As
-  Bn <- x$Bn
-  initial_distn <- x$initial_distn
-  allresources <- x$allresources
-  starts <- x$starts
-  lengths <- x$lengths
-  num_resources <- x$num_resources
-  num_subparts <- x$num_subparts
-  alldata <- x$alldata
-  normalizeLengths <- x$normalizeLengths
+inner <- function(x, input = NULL) {
+  if (is.null(input)) {
+    input <- get("INPUT", inherits = TRUE)
+  }
+  pull <- function(name) if (!is.null(x[[name]])) x[[name]] else input[[name]]
+
+  As             <- pull("As")
+  Bn             <- pull("Bn")
+  initial_distn  <- pull("initial_distn")
+  allresources   <- pull("allresources")
+  starts         <- pull("starts")
+  lengths        <- pull("lengths")
+  num_resources  <- pull("num_resources")
+  num_subparts   <- pull("num_subparts")
+  alldata        <- pull("alldata")
+  normalizeLengths <- pull("normalizeLengths")
+
   sequence_idx_start <- x$sequence_idx_start
-  sequence_idx_end <- x$sequence_idx_end
-  
+  sequence_idx_end   <- x$sequence_idx_end
+
   N_R <- 2 * num_resources
   N_S <- 2 * num_subparts
   trans_softcounts_temp <- matrix(0, nrow = 2, ncol = N_R)
