@@ -8,8 +8,8 @@ prior <- 0.2
 guess <- 0.1
 slip <- 0.1
 learn <- 0.3
-num_students <- 2000
-max_questions <- 10
+num_students <- 4000
+max_questions <- 100
 num_fits <- 1
 data <- simulate_bkt_data(prior, guess, slip, learn, num_students, max_questions)
 # parallel
