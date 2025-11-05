@@ -1,143 +1,188 @@
-unloadNamespace("BKT")
+# ============================================
+# Benchmark BKT: time + memory + MSE/Bias
+# Units: Memory in MiB (1 MiB = 1024^2 bytes)
+# Outputs:
+#   - performance_summary.csv
+#   - parameter_recovery_results.csv
+# ============================================
+
+# ---- Packages ----
+ensure_pkg <- function(pkg) {
+    if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg)
+    suppressPackageStartupMessages(library(pkg, character.only = TRUE))
+}
+ensure_pkg("peakRAM")
+ensure_pkg("progress")
+ensure_pkg("devtools")
+
+# ---- Clean & load local code ----
+suppressWarnings(try(unloadNamespace("BKT"), silent = TRUE))
 rm(list = ls())
-source("simulation/generator.R")
 
-devtools::load_all("./")
+# Your generator + package
+# source("simulation/generator.R") # defines simulate_bkt_data()
+devtools::load_all("./") # loads your BKT package in dev mode
 
-# Define parameters
+# ---- Settings ----
 prior <- 0
 guess <- 0.5
 slip <- 0.05
 learn <- 0.3
 max_questions <- 10
 
-# True parameters for comparison
 true_params <- c(learns = learn, guesses = guess, slips = slip, prior = prior)
 
-# Function to compute MSE and Bias
+num_simulations <- 10 # change if needed
+num_students_values <- c(50, 500, 2000) # dataset sizes
+
+# ---- Helpers ----
 compute_metrics <- function(estimated, true_values) {
     estimated <- as.numeric(estimated)
-    errors <- estimated - true_values
-    mse <- errors^2
-    bias <- errors
-    return(list(MSE = mse, Bias = bias))
+    errs <- estimated - true_values
+    list(MSE = errs^2, Bias = errs)
 }
 
-# Number of simulations
-num_simulations <- 100
+# ---- Storage ----
+perf_summary <- data.frame(
+    data_size = integer(),
+    total_time_sec = numeric(),
+    avg_time_per_iter_sec = numeric(),
+    mean_total_RAM_MiB = numeric(),
+    mean_peak_RAM_MiB = numeric(),
+    p95_peak_RAM_MiB = numeric(),
+    max_peak_RAM_MiB = numeric(),
+    stringsAsFactors = FALSE
+)
 
-# Call simulate_bkt_data with different values of num_students
-num_students_values <- c(50, 500, 2000)
+msebias_rows <- list() # will bind into a CSV at the end
 
-# Store results
-results_list <- list()
-
-library(progress) # 加载进度条库
-
+# ======================================================
+# Main loop over dataset sizes
+# ======================================================
 for (num_students in num_students_values) {
-    print(num_students)
-    output_file <- paste("simulation_data_", num_students, ".csv", sep = "")
+    cat("\n=== Running:", num_students, "students ===\n")
 
-    mse_values <- matrix(0, nrow = num_simulations, ncol = 4, dimnames = list(NULL, names(true_params)))
-    bias_values <- matrix(0, nrow = num_simulations, ncol = 4, dimnames = list(NULL, names(true_params)))
+    mse_values <- matrix(0,
+        nrow = num_simulations, ncol = 4,
+        dimnames = list(NULL, names(true_params))
+    )
+    bias_values <- matrix(0,
+        nrow = num_simulations, ncol = 4,
+        dimnames = list(NULL, names(true_params))
+    )
+
+    iter_time_sec <- numeric(num_simulations) # seconds
+    iter_total_ram <- numeric(num_simulations) # MiB
+    iter_peak_ram <- numeric(num_simulations) # MiB
 
     pb <- progress_bar$new(
-        format = "  Processing [:bar] :percent in :elapsed",
+        format = "  Processing [:bar] :percent in :elapsed (eta: :eta)",
         total = num_simulations, clear = FALSE, width = 60
     )
 
-    for (i in 1:num_simulations) {
-        pb$tick() # 更新进度条
-        data <- simulate_bkt_data(prior, guess, slip, learn, num_students, max_questions, output_file = output_file)
+    dataset_tic <- proc.time()[["elapsed"]]
 
-        model <- bkt(num_fits = 5, parallel = FALSE, defaults = list("order_id" = "order_id", "user_id" = "student_id", "correct" = "correct", "skill_name" = "skill_name"))
-        result <- fit(model, data = data)
+    for (i in seq_len(num_simulations)) {
+        pb$tick()
+        # --- Generate one dataset ---
+        dat <- simulate_bkt_data(
+            prior = prior,
+            guess = guess,
+            slip = slip,
+            learn = learn,
+            num_students = num_students,
+            max_questions = max_questions,
+            output_file = NULL # don't write to disk for fairness
+        )
 
-        estimated_params <- setNames(params(result)$value, params(result)$param)
-        metrics <- compute_metrics(estimated_params[names(true_params)], true_params)
+        # Wrap a whole iteration (data gen + fit + params) in peakRAM
+        prof <- peakRAM({
+            # --- Fit model ---
+            model <- bkt(
+                num_fits = 5, parallel = TRUE,
+                defaults = list(
+                    "order_id"   = "order_id",
+                    "user_id"    = "student_id",
+                    "correct"    = "correct",
+                    "skill_name" = "skill_name"
+                )
+            )
+            result <- fit(model, data = dat)
 
-        mse_values[i, ] <- metrics$MSE
-        bias_values[i, ] <- metrics$Bias
+            # --- Collect params & compute MSE/Bias for this iter ---
+            est <- setNames(params(result)$value, params(result)$param)
+            met <- compute_metrics(est[names(true_params)], true_params)
+            mse_values[i, ] <- met$MSE
+            bias_values[i, ] <- met$Bias
+        })
+
+        # peakRAM returns a data.frame with columns including:
+        # Elapsed_Time_sec, Total_RAM_Used_MiB, Peak_RAM_Used_MiB
+        # We keep those per-iteration values.
+        iter_time_sec[i] <- as.numeric(prof$Elapsed_Time_sec[1])
+        iter_total_ram[i] <- as.numeric(prof$Total_RAM_Used_MiB[1])
+        iter_peak_ram[i] <- as.numeric(prof$Peak_RAM_Used_MiB[1])
     }
+    # print(iter_time_sec)
+    # print(iter_total_ram)
+    # print(iter_peak_ram)
 
+    total_time <- proc.time()[["elapsed"]] - dataset_tic
+
+    # ---- Aggregate MSE/Bias over iterations ----
     avg_mse <- colMeans(mse_values)
     avg_bias <- colMeans(bias_values)
 
-    results_list[[as.character(num_students)]] <- list(MSE = avg_mse, Bias = avg_bias)
-    print(paste("MSE:", avg_mse, "Bias:", avg_bias))
+    # Collect rows for the final MSE/Bias CSV (one row per size & parameter)
+    for (p in names(true_params)) {
+        msebias_rows[[length(msebias_rows) + 1]] <- data.frame(
+            data_size = num_students,
+            parameter = p,
+            MSE = round(avg_mse[p], 6),
+            Bias = round(avg_bias[p], 6),
+            stringsAsFactors = FALSE
+        )
+    }
+
+    # ---- Performance aggregation ----
+    size_perf <- data.frame(
+        data_size             = num_students,
+        total_time_sec        = round(total_time, 3),
+        avg_time_per_iter_sec = round(mean(iter_time_sec, na.rm = TRUE), 4),
+        mean_total_RAM_MiB    = round(mean(iter_total_ram, na.rm = TRUE), 3),
+        mean_peak_RAM_MiB     = round(mean(iter_peak_ram, na.rm = TRUE), 3),
+        p95_peak_RAM_MiB      = round(as.numeric(quantile(iter_peak_ram, 0.95, na.rm = TRUE)), 3),
+        max_peak_RAM_MiB      = round(max(iter_peak_ram, na.rm = TRUE), 3)
+    )
+
+    perf_summary <- rbind(perf_summary, size_perf)
+
+    # ---- Pretty print (per size) ----
+    cat("\n--- Parameter Recovery (averaged over", num_simulations, "runs) ---\n")
+    print(
+        data.frame(
+            Parameter = names(true_params),
+            MSE = round(avg_mse[names(true_params)], 6),
+            Bias = round(avg_bias[names(true_params)], 6),
+            row.names = NULL
+        ),
+        row.names = FALSE
+    )
+
+    cat("\n--- Performance (this size, memory in MiB) ---\n")
+    print(size_perf, row.names = FALSE)
 }
 
+# ======================================================
+# Write outputs
+# ======================================================
+write.csv(perf_summary, file = "performance_summary.csv", row.names = FALSE)
 
-# Print final results
-print(results_list)
+msebias_df <- do.call(rbind, msebias_rows)
+write.csv(msebias_df, file = "parameter_recovery_results.csv", row.names = FALSE)
 
-# # # Define parameters
-# # prior <- 0.2
-# # guess <- 0.03
-# # slip <- 0.01
-# # learn <- 0.2
-# # max_questions <- 10
-# # $`50`
-# # $`50`$MSE
-# #       learns      guesses        slips        prior
-# # 0.0020732857 0.0003929945 0.0001042762 0.0038343926
-
-# # $`50`$Bias
-# #      learns     guesses       slips       prior
-# #  0.00658904 -0.00064629 -0.00026916  0.00045293
-
-
-# # $`500`
-# # $`500`$MSE
-# #       learns      guesses        slips        prior
-# # 1.678112e-04 4.309942e-05 1.317629e-05 3.107675e-04
-
-# # $`500`$Bias
-# #      learns     guesses       slips       prior
-# # -0.00010905  0.00052652  0.00063621 -0.00049037
-
-
-# # $`2000`
-# # $`2000`$MSE
-# #       learns      guesses        slips        prior
-# # 3.680554e-05 8.014726e-06 3.179281e-06 7.960864e-05
-
-# # $`2000`$Bias
-# #      learns     guesses       slips       prior
-# #  0.00118115 -0.00024965 -0.00016040 -0.00011429
-
-# # Define parameters
-# prior <- 0
-# guess <- 0.5
-# slip <- 0.05
-# learn <- 0.3
-# max_questions <- 10
-
-# $`50`
-# $`50`$MSE
-#      learns     guesses       slips       prior
-# 0.010617775 0.009160709 0.001364555 0.020640199
-
-# $`50`$Bias
-#      learns     guesses       slips       prior
-#  0.03544142 -0.05450892  0.01249428  0.09101379
-
-
-# $`500`
-# $`500`$MSE
-#       learns      guesses        slips        prior
-# 0.0007106359 0.0007432631 0.0001194657 0.0017977936
-
-# $`500`$Bias
-#      learns     guesses       slips       prior
-#  0.00533499 -0.01243248  0.00206705  0.02922964
-
-
-# $`2000`
-# $`2000`$MSE
-#       learns      guesses        slips        prior
-# 1.744229e-04 1.950385e-04 3.645666e-05 6.758397e-04
-
-# $`2000`$Bias
-#      learns     guesses       slips       prior
-# -0.00031973 -0.00864346  0.00147408  0.02054502
+cat(
+    "\nResults written to:\n",
+    "- performance_summary.csv (time + memory; memory in MiB)\n",
+    "- parameter_recovery_results.csv (MSE/Bias by size & parameter)\n"
+)

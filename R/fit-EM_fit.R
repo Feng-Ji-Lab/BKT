@@ -107,58 +107,60 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
     alpha_out = alpha_out
   )
   # parallel = FALSE
-
   get_x <- function(parallel, inner) {
-    x <- list()  # Define x locally
+    x <- list() # Define x locally
     success_flag = FALSE
-    if (parallel) {
+
+    # 1) threads <= min(cores, num_sequences)
+    max_threads <- parallel::detectCores(logical = TRUE)
+    max_threads = 4
+    num_threads <- max(1L, min(max_threads, num_sequences))
+
+    # 2) split indices evenly; no empty chunks
+    idx_groups <- parallel::splitIndices(num_sequences, num_threads)
+    idx_groups <- Filter(length, idx_groups) # safety
+
+    thread_counts <- lapply(seq_along(idx_groups), function(k) {
+      idx <- idx_groups[[k]]
+      sequence_idx_start <- idx[1L] # already 1-based
+      sequence_idx_end <- idx[length(idx)]
+      c(
+        list(
+          sequence_idx_start = sequence_idx_start,
+          sequence_idx_end = sequence_idx_end
+        ),
+        input
+      )
+    })
+          print("before")
+    success_flag <- FALSE
+    if (isTRUE(parallel)) {
       tryCatch(
         {
-          num_threads <- if (parallel) parallel::detectCores() else 1
-          thread_counts <- vector("list", num_threads)
-
-          for (thread_num in seq_len(num_threads)) {
-            blocklen <- 1 + ((num_sequences - 1) %/% num_threads)
-            sequence_idx_start <- blocklen * (thread_num - 1)
-            sequence_idx_end <- min(sequence_idx_start + blocklen, num_sequences)
-            thread_counts[[thread_num]] <- c(
-              list(sequence_idx_start = sequence_idx_start, sequence_idx_end = sequence_idx_end),
-              input
-            )
-          }
-
-          # Parallel block
-          cl <- makeCluster(num_threads)
-          x <- parLapply(cl, thread_counts, inner)  # Assign to x locally
-          stopCluster(cl)
-
-          success_flag = TRUE
+          cl <- makeCluster(length(thread_counts))
+          on.exit(parallel::stopCluster(cl), add = TRUE)
+          
+          x <- parLapply(cl, thread_counts, inner)
+          success_flag <- TRUE
         },
         error = function(e) {
-          # Error handling block
-          message(paste("Parallel computing error occurred:", conditionMessage(e), ". Automatically switching to serial computing."))
+          message(
+            "Parallel computing error occurred: ",
+            conditionMessage(e),
+            ". Automatically switching to serial computing."
+          )
         }
       )
-    } 
-    
-    if(!parallel || !success_flag) {
-      num_threads <- if (parallel) parallel::detectCores() else 1
-      thread_counts <- vector("list", num_threads)
-
-      for (thread_num in seq_len(num_threads)) {
-        blocklen <- 1 + ((num_sequences - 1) %/% num_threads)
-        sequence_idx_start <- blocklen * (thread_num - 1)
-        sequence_idx_end <- min(sequence_idx_start + blocklen, num_sequences)
-        thread_counts[[thread_num]] <- c(
-          list(sequence_idx_start = sequence_idx_start, sequence_idx_end = sequence_idx_end),
-          input
-        )
-      }
-      x <- lapply(thread_counts, inner)  # If no parallel, just serial
     }
 
-    return(x)  # Return x after computation
+    if (!parallel || !success_flag) {
+      x <- lapply(thread_counts, inner) # If no parallel, just serial
+    }
+          print("after")
+
+    return(x) # Return x after computation
   }
+  
   x <- get_x(parallel, inner)
 
   for (i in x) {
@@ -207,16 +209,14 @@ inner <- function(x) {
   alldata <- x$alldata
   normalizeLengths <- x$normalizeLengths
   sequence_idx_start <- x$sequence_idx_start
-  sequence_idx_start <- sequence_idx_start + 1 # handle index difference between R and Python
   sequence_idx_end <- x$sequence_idx_end
-
+  
   N_R <- 2 * num_resources
   N_S <- 2 * num_subparts
   trans_softcounts_temp <- matrix(0, nrow = 2, ncol = N_R)
   emission_softcounts_temp <- matrix(0, nrow = 2, ncol = N_S)
   init_softcounts_temp <- matrix(0, nrow = 2, ncol = 1)
   loglike <- 0
-
   alphas <- list()
   for (sequence_index in sequence_idx_start:sequence_idx_end) {
     sequence_start <- starts[sequence_index]
