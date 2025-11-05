@@ -15,8 +15,25 @@ EM_fit <- function(model, data, tol = 0.005, maxiter = 100, parallel = TRUE, fix
     all_initial_softcounts = init_softcounts
   )
 
+  max_threads <- 16L
+  num_threads <- max(1L, min(parallel::detectCores(logical = TRUE), max_threads, length(data$starts)))
+  idx_groups <- parallel::splitIndices(length(data$starts), num_threads)
+  idx_groups <- Filter(length, idx_groups)
+
+  thread_counts <- lapply(idx_groups, function(idx) {
+    list(
+      sequence_idx_start = idx[1L],
+      sequence_idx_end   = idx[length(idx)]
+    )
+  })
+
+  if (isTRUE(parallel)) {
+    cl <- parallel::makeCluster(lengths(thread_counts))
+    on.exit(parallel::stopCluster(cl))
+  }
+
   for (i in seq_len(maxiter)) {
-    result <- run(data, model, result$all_trans_softcounts, result$all_emission_softcounts, result$all_initial_softcounts, 1, parallel, fixed = fixed)
+    result <- run(data, model, result$all_trans_softcounts, result$all_emission_softcounts, result$all_initial_softcounts, 1, parallel, fixed = fixed, num_threads = num_threads, thread_counts = thread_counts)
 
     for (j in seq_len(num_resources)) {
       result$all_trans_softcounts[j, , ] <- t(result$all_trans_softcounts[j, , ])
@@ -38,7 +55,7 @@ EM_fit <- function(model, data, tol = 0.005, maxiter = 100, parallel = TRUE, fix
 }
 
 # MARK: run
-run <- function(data, model, trans_softcounts, emission_softcounts, init_softcounts, num_outputs, parallel = TRUE, fixed = list()) {
+run <- function(data, model, trans_softcounts, emission_softcounts, init_softcounts, num_outputs, parallel = TRUE, fixed = list(), num_threads, thread_counts) {
   # Processed Parameters
   alldata <- data$data
   bigT <- ncol(alldata)
@@ -93,7 +110,7 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
 
   total_loglike <- 0
 
-  input <- list(
+  INPUT <- list(
     As = As,
     Bn = Bn,
     initial_distn = initial_distn,
@@ -103,40 +120,15 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
     num_resources = num_resources,
     num_subparts = num_subparts,
     alldata = alldata,
-    normalizeLengths = normalizeLengths,
-    alpha_out = alpha_out
+    normalizeLengths = normalizeLengths
   )
-  # parallel = FALSE
-  get_x <- function(parallel, inner) {
+  if(isTRUE(parallel)) {
+    cl <- get("cl", envir = parent.frame(), inherits = TRUE)
+    parallel::clusterExport(cl, varlist = c("inner", "INPUT"), envir = environment())
+  }
+
+  get_x <- function(parallel, thread_counts, inner) {
     x <- list() # Define x locally
-    success_flag = FALSE
-    # ----- build lightweight tasks: only ranges -----
-    max_threads <- 16L
-    num_threads <- max(1L, min(parallel::detectCores(logical = TRUE), max_threads, num_sequences))
-    idx_groups <- parallel::splitIndices(num_sequences, num_threads)
-    idx_groups <- Filter(length, idx_groups)
-
-    thread_counts <- lapply(idx_groups, function(idx) {
-      list(
-        sequence_idx_start = idx[1L],
-        sequence_idx_end   = idx[length(idx)]
-      )
-    })
-
-    # ----- pack heavy stuff ONCE -----
-    INPUT <- list(
-      As = As,
-      Bn = Bn,
-      initial_distn = initial_distn,
-      allresources = allresources,
-      starts = starts,
-      lengths = lengths,
-      num_resources = num_resources,
-      num_subparts = num_subparts,
-      alldata = alldata,
-      normalizeLengths = normalizeLengths
-    )
-
     success_flag <- FALSE
 
     MIN_SEQ_PER_WORKER <- 100L
@@ -146,15 +138,7 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
     if (isTRUE(parallel) && should_parallel) {
       tryCatch(
         {
-          cl <- parallel::makeCluster(length(thread_counts)) # set outfile="" only when debugging
-          on.exit(parallel::stopCluster(cl), add = TRUE)
-
-          # export once; DO NOT put `INPUT` inside each task
-          parallel::clusterExport(cl, varlist = c("inner", "INPUT"), envir = environment())
-          # if inner needs packages:
-          # parallel::clusterEvalQ(cl, { library(BKT) })
-
-          # run with load balancing; pass only the small task list
+          cl <- get("cl", envir = parent.frame(), inherits = TRUE)
           x <- parallel::parLapplyLB(cl, thread_counts, inner)
           success_flag <- TRUE
         },
@@ -174,7 +158,7 @@ run <- function(data, model, trans_softcounts, emission_softcounts, init_softcou
     return(x) # Return x after computation
   }
   
-  x <- get_x(parallel, inner)
+  x <- get_x(parallel, thread_counts, inner)
 
   for (i in x) {
     total_loglike <- total_loglike + i[[4]]
