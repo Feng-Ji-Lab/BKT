@@ -656,8 +656,9 @@ Note column `class` refers to different items orders.
 In the `simulation` directory, there are several files used for data simulation.
 
 Specifically:
-- The function `simulate_bkt_data` in `generator.R` is used to generate data for the basic BKT model.
-- `run.R` is used to perform a simple data simulation and testing.
+- The function `simulate_bkt_data` in `simulation.R` is used to generate data for the basic BKT model.
+- `single.R` is used to perform a simple data simulation and testing.
+- `multiple.R` is used to perform a simple data simulation and testing.
 
 ## Internal Data Format
 
