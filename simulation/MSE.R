@@ -1,5 +1,5 @@
 # ============================================
-# Benchmark BKT: time + memory + MSE/Bias
+# Benchmark BKT: time + memory + MSE/Bias/SD
 # Units: Memory in MiB (1 MiB = 1024^2 bytes)
 # Outputs:
 #   - performance_summary.csv
@@ -28,14 +28,14 @@ prior <- 0.2
 guess <- 0.1
 slip <- 0.1
 learn <- 0.3
-parallel <- FALSE
+parallel <- TRUE
 min_questions <- 8
 max_questions <- 12
 
 true_params <- c(learns = learn, guesses = guess, slips = slip, prior = prior)
 
 num_simulations <- 2 # change if needed
-num_students_values <- c(50, 500, 5000) # dataset sizes
+num_students_values <- c(50, 500, 2000, 10000) # dataset sizes
 
 # ---- Helpers ----
 compute_metrics <- function(estimated, true_values) {
@@ -64,11 +64,13 @@ msebias_rows <- list() # will bind into a CSV at the end
 for (num_students in num_students_values) {
     cat("\n=== Running:", num_students, "students ===\n")
 
-    mse_values <- matrix(0,
+    mse_values <- matrix(
+        0,
         nrow = num_simulations, ncol = 4,
         dimnames = list(NULL, names(true_params))
     )
-    bias_values <- matrix(0,
+    bias_values <- matrix(
+        0,
         nrow = num_simulations, ncol = 4,
         dimnames = list(NULL, names(true_params))
     )
@@ -125,17 +127,20 @@ for (num_students in num_students_values) {
 
     total_time <- proc.time()[["elapsed"]] - dataset_tic
 
-    # ---- Aggregate MSE/Bias over iterations ----
+    # ---- Aggregate MSE/Bias/SD over iterations ----
     avg_mse <- colMeans(mse_values)
     avg_bias <- colMeans(bias_values)
+    # SD of estimates = SD of (estimate - true), since true is constant
+    sd_est <- apply(bias_values, 2, stats::sd, na.rm = TRUE)
 
-    # Collect rows for the final MSE/Bias CSV (one row per size & parameter)
+    # Collect rows for the final MSE/Bias/SD CSV (one row per size & parameter)
     for (p in names(true_params)) {
         msebias_rows[[length(msebias_rows) + 1]] <- data.frame(
             data_size = num_students,
             parameter = p,
             MSE = round(avg_mse[p], 6),
             Bias = round(avg_bias[p], 6),
+            SD = round(sd_est[p], 6),
             stringsAsFactors = FALSE
         )
     }
@@ -160,6 +165,7 @@ for (num_students in num_students_values) {
             Parameter = names(true_params),
             MSE = round(avg_mse[names(true_params)], 6),
             Bias = round(avg_bias[names(true_params)], 6),
+            SD = round(sd_est[names(true_params)], 6),
             row.names = NULL
         ),
         row.names = FALSE
@@ -180,5 +186,5 @@ write.csv(msebias_df, file = "parameter_recovery_results.csv", row.names = FALSE
 cat(
     "\nResults written to:\n",
     "- performance_summary.csv (time + memory; memory in MiB)\n",
-    "- parameter_recovery_results.csv (MSE/Bias by size & parameter)\n"
+    "- parameter_recovery_results.csv (MSE/Bias/SD by size & parameter)\n"
 )
