@@ -11,6 +11,9 @@ library(BKT)
 
 This package is based on the work of pyBKT in Python [pyBKT](https://github.com/CAHLR/pyBKT) developed by [CAHLR](https://github.com/CAHLR) lab at UC Berkeley.
 
+### Quick Start  
+Try the package online: [https://posit.cloud/content/11318364](https://posit.cloud/content/11318364)
+
 ## Preparing Data and Running the Model
 
 The following is a mini-tutorial on how to get started with `BKT`.
@@ -656,8 +659,9 @@ Note column `class` refers to different items orders.
 In the `simulation` directory, there are several files used for data simulation.
 
 Specifically:
-- The function `simulate_bkt_data` in `generator.R` is used to generate data for the basic BKT model.
-- `run.R` is used to perform a simple data simulation and testing.
+- The function `simulate_bkt_data` in `simulation.R` is used to generate data for the basic BKT model.
+- `single.R` is used to perform a simple data simulation and testing.
+- `multiple.R` is used to perform a simple data simulation and testing.
 
 ## Internal Data Format
 
