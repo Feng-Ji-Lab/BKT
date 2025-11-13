@@ -24,7 +24,7 @@ rm(list = ls())
 devtools::load_all("./") # loads your BKT package in dev mode
 
 # ---- Settings ----
-prior <- 0
+prior <- 0.1
 guess <- 0.5
 slip <- 0.05
 learn <- 0.3
@@ -32,7 +32,7 @@ max_questions <- 10
 
 true_params <- c(learns = learn, guesses = guess, slips = slip, prior = prior)
 
-num_simulations <- 10 # change if needed
+num_simulations <- 30 # change if needed
 num_students_values <- c(50, 500, 2000) # dataset sizes
 
 # ---- Helpers ----
