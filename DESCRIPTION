@@ -1,6 +1,6 @@
 Package: BKT
 Title: Bayesian Knowledge Tracing Model
-Version: 0.1.0
+Version: 0.1.2
 Authors@R: c(
     person("Yuhao", "Yuan", email = "yuanyuhaoapply@163.com", role = c("aut", "cre")),
     person("Biying", "Zhou", email = "zby.zhou@mail.utoronto.ca", role = "aut"),
