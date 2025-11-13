@@ -24,16 +24,18 @@ rm(list = ls())
 devtools::load_all("./") # loads your BKT package in dev mode
 
 # ---- Settings ----
-prior <- 0.1
-guess <- 0.5
-slip <- 0.05
+prior <- 0.2
+guess <- 0.1
+slip <- 0.1
 learn <- 0.3
-max_questions <- 10
+parallel <- FALSE
+min_questions <- 8
+max_questions <- 12
 
 true_params <- c(learns = learn, guesses = guess, slips = slip, prior = prior)
 
-num_simulations <- 30 # change if needed
-num_students_values <- c(50, 500, 2000) # dataset sizes
+num_simulations <- 2 # change if needed
+num_students_values <- c(50, 500, 5000) # dataset sizes
 
 # ---- Helpers ----
 compute_metrics <- function(estimated, true_values) {
@@ -91,6 +93,7 @@ for (num_students in num_students_values) {
             slip = slip,
             learn = learn,
             num_students = num_students,
+            min_questions = min_questions,
             max_questions = max_questions,
             output_file = NULL # don't write to disk for fairness
         )
@@ -99,7 +102,7 @@ for (num_students in num_students_values) {
         prof <- peakRAM({
             # --- Fit model ---
             model <- bkt(
-                num_fits = 5, parallel = TRUE,
+                num_fits = 5, parallel = parallel,
                 defaults = list(
                     "order_id"   = "order_id",
                     "user_id"    = "student_id",
@@ -109,23 +112,16 @@ for (num_students in num_students_values) {
             )
             result <- fit(model, data = dat)
 
-            # --- Collect params & compute MSE/Bias for this iter ---
             est <- setNames(params(result)$value, params(result)$param)
             met <- compute_metrics(est[names(true_params)], true_params)
             mse_values[i, ] <- met$MSE
             bias_values[i, ] <- met$Bias
         })
 
-        # peakRAM returns a data.frame with columns including:
-        # Elapsed_Time_sec, Total_RAM_Used_MiB, Peak_RAM_Used_MiB
-        # We keep those per-iteration values.
         iter_time_sec[i] <- as.numeric(prof$Elapsed_Time_sec[1])
         iter_total_ram[i] <- as.numeric(prof$Total_RAM_Used_MiB[1])
         iter_peak_ram[i] <- as.numeric(prof$Peak_RAM_Used_MiB[1])
     }
-    # print(iter_time_sec)
-    # print(iter_total_ram)
-    # print(iter_peak_ram)
 
     total_time <- proc.time()[["elapsed"]] - dataset_tic
 
