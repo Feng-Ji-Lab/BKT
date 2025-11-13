@@ -48,25 +48,26 @@
 #'     slip = slip,
 #'     learn = learn,
 #'     num_students = num_students,
+#'     min_questions = min_questions,
 #'     max_questions = max_questions,
 #'     output_file = "simulation_data_2000.csv"
 #' )
 #' }
 #'
 #' @export
-simulate_bkt_data <- function(prior, guess, slip, learn, num_students, max_questions, output_file = NULL) {
-    simulate_student <- function(student_id, prior, guess, slip, learn, max_questions) {
+simulate_bkt_data <- function(prior, guess, slip, learn, num_students, min_questions, max_questions, output_file = NULL) {
+    simulate_student <- function(student_id, prior, guess, slip, learn, num_questions) {
         skill_name <- "mathematic"
 
         student_data <- data.frame(
-            order_id = integer(max_questions),
-            correct = integer(max_questions),
-            student_id = integer(max_questions),
-            skill_name = character(max_questions)
+            order_id = integer(num_questions),
+            correct = integer(num_questions),
+            student_id = integer(num_questions),
+            skill_name = character(num_questions)
         )
         know_rate <- rbinom(1, 1, prior) # k1^j ~ Bernoulli(Pp)
 
-        for (i in 1:max_questions) {
+        for (i in 1:num_questions) {
             p_correct <- know_rate * (1 - slip) + (1 - know_rate) * guess # Probability of correct
 
             correct <- rbinom(1, 1, p_correct) # ai^j ∼ Bernoulli(Pcorrect)
@@ -83,7 +84,7 @@ simulate_bkt_data <- function(prior, guess, slip, learn, num_students, max_quest
     all_student_data <- list()
 
     for (student_id in 1:num_students) {
-        student_data <- simulate_student(student_id, prior, guess, slip, learn, sample(1:max_questions, 1))
+        student_data <- simulate_student(student_id, prior, guess, slip, learn, sample(min_questions:max_questions, 1))
         all_student_data[[student_id]] <- student_data
     }
 
