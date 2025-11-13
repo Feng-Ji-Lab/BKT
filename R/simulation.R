@@ -14,6 +14,7 @@
 #' @param learn Numeric. Probability that a student transitions from the unmastered to mastered state after each activity.
 #'   Corresponds to the BKT parameter \(P_l\).
 #' @param num_students Integer. Number of students to simulate.
+#' @param min_questions Integer. Minimum number of questions (activities) per student.
 #' @param max_questions Integer. Maximum number of questions (activities) per student.
 #'   Each student's actual sequence length is randomly drawn from 1 to \code{max_questions}.
 #' @param output_file Character. Optional file path. If provided, the generated dataset will be written to a CSV file.

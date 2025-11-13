@@ -5,7 +5,7 @@
 #' @format A data frame with 50 rows and 4 variables:
 #' \describe{
 #'   \item{student_id}{Student ID}
-#'   \item{skill}{Skill name}
+#'   \item{skill_name}{Skill name}
 #'   \item{order_id}{response ID}
 #'   \item{correct}{Binary outcome (0/1)}
 #' }
