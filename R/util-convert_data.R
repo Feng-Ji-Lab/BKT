@@ -15,6 +15,17 @@ convert_data <- function(data, skill_name, defaults, model_type,
         }
     }
     df <- data
+
+    if (anyNA(df)) {
+        na_cols <- names(df)[colSums(is.na(df)) > 0]
+        stop(
+            sprintf(
+                "Detected missing values (NA) in the following columns: %s",
+                paste(na_cols, collapse = ", ")
+            ),
+            call. = FALSE
+        )
+    }
     # default column names for cognitive tutors
     ct_default <- list(
         order_id = "Row",
