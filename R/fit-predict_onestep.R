@@ -12,7 +12,19 @@ predict_onestep_run <- function(model, data) {
         all_emission_softcounts = emission_softcounts,
         all_initial_softcounts = init_softcounts
     )
-    result <- run(data, model, result$all_trans_softcounts, result$all_emission_softcounts, result$all_initial_softcounts, 1, parallel = FALSE)
+
+    num_threads <- 1
+    idx_groups <- parallel::splitIndices(length(data$starts), num_threads)
+    idx_groups <- Filter(length, idx_groups)
+
+    thread_counts <- lapply(idx_groups, function(idx) {
+        list(
+            sequence_idx_start = idx[1L],
+            sequence_idx_end   = idx[length(idx)]
+        )
+    })
+    
+    result <- run(data, model, result$all_trans_softcounts, result$all_emission_softcounts, result$all_initial_softcounts, 1, parallel = FALSE, num_threads = num_threads, thread_counts = thread_counts)
 
     for (j in seq_len(num_resources)) {
         result$all_trans_softcounts[j, , ] <- t(result$all_trans_softcounts[j, , ])
