@@ -16,16 +16,6 @@ convert_data <- function(data, skill_name, defaults, model_type,
     }
     df <- data
 
-    if (anyNA(df)) {
-        na_cols <- names(df)[colSums(is.na(df)) > 0]
-        stop(
-            sprintf(
-                "Detected missing values (NA) in the following columns: %s",
-                paste(na_cols, collapse = ", ")
-            ),
-            call. = FALSE
-        )
-    }
     # default column names for cognitive tutors
     ct_default <- list(
         order_id = "Row",
@@ -38,14 +28,6 @@ convert_data <- function(data, skill_name, defaults, model_type,
         multigs = "Problem Name",
         folds = "Anon Student Id"
     )
-    # integrate custom defaults with default assistments/ct columns if they are still unspecified
-    if (is.null(defaults)) {
-        defaults <- list()
-    } else {
-        # stop("not implemented")
-        # TBD: check defaults's key
-    }
-
     df_columns <- colnames(df)
     for (key in names(ct_default)) {
         value <- ct_default[[key]]
@@ -55,45 +37,77 @@ convert_data <- function(data, skill_name, defaults, model_type,
             defaults[[key]] <- value
         }
     }
-    # change df columns names
-    # df_columns <- colnames(df)
-    # for (key in names(defaults)) {
-    #     value <- defaults[[key]]
-    #     df_columns[df_columns == value] <- key
-    # }
-    # colnames(df) <- df_columns
+    
+    # integrate custom defaults with default assistments/ct columns if they are still unspecified
+    if (is.null(defaults)) {
+        defaults <- list()
+    } else if (is.list(defaults)) {
+        as_default <- names(ct_default)
 
-    # sort df by order_id
-    df[[defaults[["order_id"]]]] <- as.numeric(df[[defaults[["order_id"]]]])
-    df <- df[order(df[[defaults[["order_id"]]]]), ]
-
-    required_columns <- c("user_id", "correct", "skill_name")
-    for (col in required_columns) {
-        tryCatch(
-            {
-                if (!(defaults[[col]] %in% names(df))) {
-                    stop(paste("The required column (", col, ") is missing in the dataframe."))
-                }
-            },
-            warning = function(w) {
-                stop("Required column name *", col, " not found in data column names. Please use parameter 'defaults' correctly.")
-            },
-            error = function(e) {
-                stop("Required column name *", col, " not found in data column names. Please use parameter 'defaults' correctly.")
+        ks <- names(defaults)
+        for (k in ks) {
+            v <- defaults[[k]]
+            if (k %in% as_default && !(v %in% colnames(df))) {
+                defaults[[k]] <- NULL
             }
-        )
+        }
+    } else {
+        stop("incorrectly specified defaults")
     }
-    # order by user_id
-    df[[defaults[["user_id"]]]] <- as.character(df[[defaults[["user_id"]]]])
-    df <- df[order(ascii_order(df[[defaults[["user_id"]]]]), df[[defaults[["order_id"]]]]), ]
-    if ("original" %in% colnames(df)) {
-        df <- df[df$original == 1, ]
-    }
-    df[[defaults[["skill_name"]]]] <- as.character(df[[defaults[["skill_name"]]]])
 
+    if ("order_id" %in% names(defaults)) {
+        ord_col <- defaults[["order_id"]]
+        df[[ord_col]] <- as.numeric(df[[ord_col]])
+        df <- df[order(df[[ord_col]]), ]
+    }
+
+    # user_id
+    if (!("user_id" %in% names(defaults))) {
+        stop("user id default column not specified")
+    } else if (!(defaults[["user_id"]] %in% names(df))) {
+        stop("specified user id default column not in data")
+    }
+
+    # correct
+    if (!("correct" %in% names(defaults))) {
+        stop("correct default column not specified")
+    } else if (!(defaults[["correct"]] %in% names(df))) {
+        stop("specified correct default column not in data")
+    }
+
+    # skill_name
+    if (!("skill_name" %in% names(defaults))) {
+        stop("skill name default column not specified")
+    } else if (!(defaults[["skill_name"]] %in% names(df))) {
+        stop("specified skill name default column not in data")
+    }
+
+    uid_col <- defaults[["user_id"]]
+    df[[uid_col]] <- as.character(df[[uid_col]])
+
+    if ("order_id" %in% names(defaults)) {
+        ord_col <- defaults[["order_id"]]
+        df <- df[
+            order(
+                ascii_order(df[[uid_col]]),
+                df[[ord_col]]
+            ),
+        ]
+    } else {
+        df <- df[order(ascii_order(df[[uid_col]])), ]
+    }
+
+    if ("original" %in% colnames(df)) {
+        df <- df[df[["original"]] == 1, ]
+    }
+
+    skill_col <- defaults[["skill_name"]]
+    df[[skill_col]] <- as.character(df[[skill_col]])
+
+    correct_col <- defaults[["correct"]]
     tryCatch(
         {
-            df[[defaults[["correct"]]]] <- as.integer(df[[defaults[["correct"]]]])
+            df[[correct_col]] <- as.integer(df[[correct_col]])
         },
         warning = function(w) {
             stop("Invalid Data In Specified Corrects Column")
@@ -102,6 +116,30 @@ convert_data <- function(data, skill_name, defaults, model_type,
             stop("Invalid Data In Specified Corrects Column")
         }
     )
+
+    cols_to_check <- c("user_id", "correct", "skill_name")
+    if ("order_id" %in% names(defaults)) {
+        cols_to_check <- c(cols_to_check, "order_id")
+    }
+    for (nm in cols_to_check) {
+        colname <- defaults[[nm]]
+        vals <- df[[colname]]
+        if (is.character(vals)) {
+            bad_idx <- is.na(vals) | vals == ""
+        } else {
+            bad_idx <- is.na(vals)
+        }
+
+        if (any(bad_idx)) {
+            stop(
+                sprintf(
+                    "Detected missing or empty values in required column '%s' (defaults key '%s').",
+                    colname, nm
+                ),
+                call. = FALSE
+            )
+        }
+    }
 
     # handle skills
     datas <- list()
