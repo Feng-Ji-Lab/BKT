@@ -181,13 +181,25 @@ library(BKT)
 # print(params(result))
 
 # MARK: Simulation & Prediction
-model <- bkt(seed = 42, num_fits = 1, parallel = FALSE, forgets = TRUE, defaults = list("order_id" = "r1", "user_id" = "r3", "correct" = "r2", "skill_name" = "r4"))
+# model <- bkt(seed = 42, num_fits = 1, parallel = FALSE, forgets = TRUE, defaults = list("order_id" = "r1", "user_id" = "r3", "correct" = "r2", "skill_name" = "r4"))
 
-result <- fit(model, data_path = "simulation_data_500_need_defaults.csv")
+# result <- fit(model, data_path = "simulation_data_500_need_defaults.csv")
+# print(params(result))
+
+# model2 <- result
+
+# # model2 <- load_model(result, "model.pkl")
+# preds_df <- predict_bkt(model2, data_path = "simulation_data_500_need_defaults_test.csv")
+# # print((preds_df))
+
+model <- bkt(seed = 42, num_fits = 1, parallel = FALSE)
+fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
+
+# Fixes the prior rate to 0.5 for the 'Plot non-terminating improper fraction' skill, and trains the model given those fixed parameters
+model <- set_coef(model, list("Plot non-terminating improper fraction" = list("prior" = 0.5)))
+result <- fit(model,
+    forgets = TRUE,
+    data_path = "ct.csv", skills = "Plot non-terminating improper fraction",
+    fixed = list("Plot non-terminating improper fraction" = list("prior" = TRUE))
+)
 print(params(result))
-
-model2 <- result
-
-# model2 <- load_model(result, "model.pkl")
-preds_df <- predict_bkt(model2, data_path = "simulation_data_500_need_defaults_test.csv")
-print((preds_df))

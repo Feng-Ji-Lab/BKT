@@ -123,7 +123,7 @@ fit <- function(object, data_path = NULL, data = NULL, parallel = FALSE, seed = 
     object@fit_model <- list()
   }
 
-  object <- partial_fit(object, data_path = data_path, data = data, forgets = forgets, ...)
+  object <- partial_fit(object, data_path = data_path, data = data, num_fits = num_fits, forgets = forgets, fixed = fixed, ...)
 
   return(object)
 }
