@@ -16,44 +16,7 @@ convert_data <- function(data, skill_name, defaults, model_type,
     }
     df <- data
 
-    # default column names for cognitive tutors
-    ct_default <- list(
-        order_id = "Row",
-        skill_name = "KC(Default)",
-        correct = "Correct First Attempt",
-        user_id = "Anon Student Id",
-        multilearn = "Problem Name",
-        multiprior = "Anon Student Id",
-        multipair = "Problem Name",
-        multigs = "Problem Name",
-        folds = "Anon Student Id"
-    )
-    df_columns <- colnames(df)
-    for (key in names(ct_default)) {
-        value <- ct_default[[key]]
-        if (key %in% df_columns) {
-            defaults[[key]] <- key
-        } else if (value %in% df_columns) {
-            defaults[[key]] <- value
-        }
-    }
-    
-    # integrate custom defaults with default assistments/ct columns if they are still unspecified
-    if (is.null(defaults)) {
-        defaults <- list()
-    } else if (is.list(defaults)) {
-        as_default <- names(ct_default)
-
-        ks <- names(defaults)
-        for (k in ks) {
-            v <- defaults[[k]]
-            if (k %in% as_default && !(v %in% colnames(df))) {
-                defaults[[k]] <- NULL
-            }
-        }
-    } else {
-        stop("incorrectly specified defaults")
-    }
+    defaults = get_defaults(df, defaults)
 
     if ("order_id" %in% names(defaults)) {
         ord_col <- defaults[["order_id"]]
@@ -124,11 +87,7 @@ convert_data <- function(data, skill_name, defaults, model_type,
     for (nm in cols_to_check) {
         colname <- defaults[[nm]]
         vals <- df[[colname]]
-        if (is.character(vals)) {
-            bad_idx <- is.na(vals) | vals == ""
-        } else {
-            bad_idx <- is.na(vals)
-        }
+        bad_idx <- is.na(vals)
 
         if (any(bad_idx)) {
             stop(
@@ -360,4 +319,46 @@ ascii_order <- function(x) {
     sapply(seq_along(x), function(i) {
         paste0(sprintf("%03d", utf8ToInt(substr(x[i], 1, nchar(x[i])))), collapse = "")
     })
+}
+
+get_defaults <- function(df, defaults) {
+    # default column names for cognitive tutors
+    ct_default <- list(
+        order_id = "Row",
+        skill_name = "KC(Default)",
+        correct = "Correct First Attempt",
+        user_id = "Anon Student Id",
+        multilearn = "Problem Name",
+        multiprior = "Anon Student Id",
+        multipair = "Problem Name",
+        multigs = "Problem Name",
+        folds = "Anon Student Id"
+    )
+    df_columns <- colnames(df)
+    for (key in names(ct_default)) {
+        value <- ct_default[[key]]
+        if (key %in% df_columns) {
+            defaults[[key]] <- key
+        } else if (value %in% df_columns) {
+            defaults[[key]] <- value
+        }
+    }
+
+    # integrate custom defaults with default assistments/ct columns if they are still unspecified
+    if (is.null(defaults)) {
+        defaults <- list()
+    } else if (is.list(defaults)) {
+        as_default <- names(ct_default)
+
+        ks <- names(defaults)
+        for (k in ks) {
+            v <- defaults[[k]]
+            if (k %in% as_default && !(v %in% colnames(df))) {
+                defaults[[k]] <- NULL
+            }
+        }
+    } else {
+        stop("incorrectly specified defaults")
+    }
+    return(defaults)
 }
