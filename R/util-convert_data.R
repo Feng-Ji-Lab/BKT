@@ -266,10 +266,22 @@ convert_data <- function(data, skill_name, defaults, model_type,
                 }
             }
             data_ref <- sapply(df3[[defaults[["multigs"]]]], function(x) gs_ref[[x]])
-            # make data n-dimensional, fill in corresponding row and make other non-row entries 0
-            data_temp <- matrix(0, nrow = length(unique(df3[[defaults[["multigs"]]]])), ncol = nrow(df3))
-            for (i in seq_len(ncol(data_temp))) {
-                data_temp[data_ref[i], i] <- data[i]
+            # Make data n-dimensional and leave multiprior phantom timeslices
+            # empty. multiprior adds one leading timeslice per student, so the
+            # observation matrix must use the expanded data length.
+            data_temp <- matrix(
+                0,
+                nrow = length(unique(df3[[defaults[["multigs"]]]])),
+                ncol = length(data)
+            )
+            observation_index <- if (multiprior) {
+                setdiff(seq_along(data), multiprior_index)
+            } else {
+                seq_along(data)
+            }
+            for (i in seq_along(observation_index)) {
+                column <- observation_index[i]
+                data_temp[data_ref[i], column] <- data[column]
             }
             Data$data <- data_temp
         } else {
