@@ -21,10 +21,9 @@ include model-specific values such as "learns", "guesses", "slips", and "forgets
 These parameters are returned in a format that is easy to print or manipulate for further analysis.
 }
 \examples{
-\donttest{
-model <- bkt(seed = 42, parallel = TRUE, num_fits = 5)
-result <- fit(model, data_path = "data.csv", skills = "skill name")
+data("simulation_data_50", package = "BKT")
+model <- bkt(seed = 42, parallel = FALSE, num_fits = 1)
+result <- fit(model, data = simulation_data_50)
 params_df <- params(result)
 print(params_df)
-}
 }

@@ -344,6 +344,16 @@ get_defaults <- function(df, defaults) {
         }
     }
 
+    # Simulation datasets use student_id for the learner identifier.
+    if ('student_id' %in% df_columns) {
+        if (is.null(defaults[['user_id']])) {
+            defaults[['user_id']] <- 'student_id'
+        }
+        if (is.null(defaults[['folds']])) {
+            defaults[['folds']] <- 'student_id'
+        }
+    }
+
     # integrate custom defaults with default assistments/ct columns if they are still unspecified
     if (is.null(defaults)) {
         defaults <- list()

@@ -66,9 +66,8 @@ the dataset into training and validation sets, trains the model on the training 
 and evaluates it on the validation data according to a specified metric.
 }
 \examples{
-\donttest{
-model <- bkt(seed = 42, parallel = TRUE, num_fits = 5)
-cv_results <- crossvalidate(model, data_path = "ct.csv", folds = 5)
+data("simulation_data_50", package = "BKT")
+model <- bkt(seed = 42, parallel = FALSE, num_fits = 1)
+cv_results <- crossvalidate(model, data = simulation_data_50, folds = 2)
 print(cv_results)
-}
 }

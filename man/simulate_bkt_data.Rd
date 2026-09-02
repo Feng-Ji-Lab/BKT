@@ -59,25 +59,23 @@ and the observed correctness is drawn as:
 \deqn{P(C_t = 1) = P(K_t = 1)(1 - P_s) + (1 - P(K_t = 1))P_g.}
 }
 \examples{
-\donttest{
 prior <- 0.2
 guess <- 0.1
 slip <- 0.1
 learn <- 0.3
-num_students <- 2000
+num_students <- 5
+min_questions <- 5
 max_questions <- 10
 
-# Simulate and save to CSV
-simulate_bkt_data(
+simulated_data <- simulate_bkt_data(
     prior = prior,
     guess = guess,
     slip = slip,
     learn = learn,
     num_students = num_students,
     min_questions = min_questions,
-    max_questions = max_questions,
-    output_file = "simulation_data_2000.csv"
+    max_questions = max_questions
 )
-}
+head(simulated_data)
 
 }

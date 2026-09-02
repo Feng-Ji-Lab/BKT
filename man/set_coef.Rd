@@ -27,21 +27,20 @@ The values should be provided as a named list, with each skill having its own su
 The function performs checks to ensure that the provided parameters are valid in terms of type, length, and existence.
 }
 \examples{
-\donttest{
+data("simulation_data_50", package = "BKT")
 # Initialize a BKT model
-model <- bkt(seed = 42)
+model <- bkt(seed = 42, parallel = FALSE, num_fits = 1)
 
 # Set custom parameters for a specific skill
 model <- set_coef(model, list(
-  "Plot non-terminating improper fraction" = list("prior" = 0.5, "learns" = 0.2)
+  "mathematic" = list("prior" = 0.5, "learns" = 0.2)
 ))
 
 # Fit the model with fixed parameters
 result <- fit(model,
   forgets = TRUE,
-  data_path = "ct.csv",
-  skills = "Plot non-terminating improper fraction",
-  fixed = list("Plot non-terminating improper fraction" = list("prior" = TRUE))
+  data = simulation_data_50,
+  skills = "mathematic",
+  fixed = list("mathematic" = list("prior" = TRUE))
 )
-}
 }

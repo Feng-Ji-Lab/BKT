@@ -59,11 +59,10 @@ skill filtering, forget model, and parallelization. The function uses the model 
 created by \code{bkt()} and fits the data according to the specified parameters.
 }
 \examples{
-\donttest{
+data("simulation_data_50", package = "BKT")
 model <- bkt(seed = 42, parallel = FALSE, num_fits = 1)
 result <- fit(
   model,
-  data_path = "data.csv"
+  data = simulation_data_50
 )
-}
 }

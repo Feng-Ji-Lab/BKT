@@ -20,9 +20,10 @@ This function saves a trained BKT model to a specified file location. The model 
 as an RDS file, which can be loaded back into R using the \code{load_model()} function.
 }
 \examples{
-\donttest{
-model <- bkt(seed = 42)
-fit_model <- fit(model, data_path = "ct.csv")
-save_model(fit_model, "bkt_model.rds")
-}
+data("simulation_data_50", package = "BKT")
+model <- bkt(seed = 42, parallel = FALSE, num_fits = 1)
+fit_model <- fit(model, data = simulation_data_50)
+model_file <- tempfile(fileext = ".rds")
+save_model(fit_model, model_file)
+unlink(model_file)
 }

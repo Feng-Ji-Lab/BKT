@@ -27,10 +27,9 @@ on new data. The predictions include both the likelihood of a correct response (
 and the estimated hidden state of the learner's knowledge (\code{state_predictions}).
 }
 \examples{
-\donttest{
-model <- bkt(seed = 42)
-fit_model <- fit(model, data_path = "ct.csv")
-predictions <- predict_bkt(fit_model, data_path = "ct_test.csv")
+data("simulation_data_50", package = "BKT")
+model <- bkt(seed = 42, parallel = FALSE, num_fits = 1)
+fit_model <- fit(model, data = simulation_data_50)
+predictions <- predict_bkt(fit_model, data = simulation_data_50)
 head(predictions)
-}
 }

@@ -5,7 +5,7 @@
 \alias{simulation_data_50}
 \title{Simulated dataset}
 \format{
-A data frame with 50 rows and 4 variables:
+A data frame with 494 rows and 4 variables, representing 50 students:
 \describe{
 \item{student_id}{Student ID}
 \item{skill_name}{Skill name}

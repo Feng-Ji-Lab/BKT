@@ -20,8 +20,11 @@ This function loads a previously saved BKT model from an RDS file. The model att
 are restored into the provided model object, allowing it to be used for further analysis or predictions.
 }
 \examples{
-\donttest{
-model <- bkt(seed = 42)
-loaded_model <- load_model(model, "bkt_model.rds")
-}
+data("simulation_data_50", package = "BKT")
+model <- bkt(seed = 42, parallel = FALSE, num_fits = 1)
+fitted_model <- fit(model, data = simulation_data_50)
+model_file <- tempfile(fileext = ".rds")
+save_model(fitted_model, model_file)
+loaded_model <- load_model(bkt(), model_file)
+unlink(model_file)
 }

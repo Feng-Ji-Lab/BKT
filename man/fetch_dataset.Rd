@@ -24,8 +24,8 @@ on the local system. The dataset must be publicly accessible, without requiring 
 password or authentication. It can then be used for further analysis or modeling.
 }
 \examples{
-\donttest{
+\dontrun{
 model <- bkt()
-fetch_dataset(model, "http://example.com/dataset.csv", "data.csv")
+fetch_dataset(model, "https://example.com/dataset.csv", tempdir())
 }
 }

@@ -8,11 +8,12 @@
 #' @param loc Character. The file path where the model will be saved, typically with an `.rds` extension.
 #' @return None. The function saves the model to the specified location.
 #' @examples
-#' \donttest{
-#' model <- bkt(seed = 42)
-#' fit_model <- fit(model, data_path = "ct.csv")
-#' save_model(fit_model, "bkt_model.rds")
-#' }
+#' data("simulation_data_50", package = "BKT")
+#' model <- bkt(seed = 42, parallel = FALSE, num_fits = 1)
+#' fit_model <- fit(model, data = simulation_data_50)
+#' model_file <- tempfile(fileext = ".rds")
+#' save_model(fit_model, model_file)
+#' unlink(model_file)
 #' @export
 save_model <- function(model, loc) {
     saveRDS(object = model, file = loc)
@@ -28,10 +29,13 @@ save_model <- function(model, loc) {
 #' @param loc Character. The file path from which the model will be loaded, typically an `.rds` file.
 #' @return The updated BKT model object with the restored attributes from the saved model.
 #' @examples
-#' \donttest{
-#' model <- bkt(seed = 42)
-#' loaded_model <- load_model(model, "bkt_model.rds")
-#' }
+#' data("simulation_data_50", package = "BKT")
+#' model <- bkt(seed = 42, parallel = FALSE, num_fits = 1)
+#' fitted_model <- fit(model, data = simulation_data_50)
+#' model_file <- tempfile(fileext = ".rds")
+#' save_model(fitted_model, model_file)
+#' loaded_model <- load_model(bkt(), model_file)
+#' unlink(model_file)
 #' @export
 load_model <- function(model, loc) {
     orig_model <- readRDS(loc)

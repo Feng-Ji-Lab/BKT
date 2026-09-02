@@ -28,10 +28,9 @@ It takes either a data frame or a file path to the data and returns the evaluati
 based on the specified metric (e.g., RMSE or accuracy).
 }
 \examples{
-\donttest{
-model <- bkt(seed = 42, parallel = TRUE, num_fits = 5)
-result <- fit(model, data_path = "ct.csv", skills = "Plot non-terminating improper fraction")
-eval_result <- evaluate(result, data_path = "ct_test.csv", metric = rmse)
+data("simulation_data_50", package = "BKT")
+model <- bkt(seed = 42, parallel = FALSE, num_fits = 1)
+result <- fit(model, data = simulation_data_50)
+eval_result <- evaluate(result, data = simulation_data_50)
 print(eval_result)
-}
 }
