@@ -2,7 +2,7 @@
 #'
 #' A simulated BKT dataset containing 50 students with maximum sequence length of 10.
 #'
-#' @format A data frame with 50 rows and 4 variables:
+#' @format A data frame with 50 students:
 #' \describe{
 #'   \item{student_id}{Student ID}
 #'   \item{skill_name}{Skill name}
