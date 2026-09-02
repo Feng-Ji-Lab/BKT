@@ -1,7 +1,9 @@
 library(testthat)
 test_that("test-usage_2", {
-    # parallel on
+    # Verify the parallel configuration without opening PSOCK ports during
+    # CRAN checks. Model fitting is covered by the simulation-data tests.
     model <- bkt(seed = 42, num_fits = 1, parallel = TRUE)
-    fetch_dataset(model, "https://raw.githubusercontent.com/CAHLR/pyBKT-examples/master/data/ct.csv", ".")
-    # fit(model, data_path = "ct.csv", skills = ".*Plot.*")
+
+    expect_s4_class(model, "Model")
+    expect_true(model@parallel)
 })
