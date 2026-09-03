@@ -5,6 +5,8 @@
 #' activities according to specified learning, guessing, and slipping probabilities.
 #' The generated dataset can be used for testing, model evaluation, or demonstration purposes.
 #'
+#' @importFrom stats rbinom
+#' @importFrom utils write.csv
 #' @param prior Numeric. Initial probability that a student has mastered the skill before any questions.
 #'   Corresponds to the BKT parameter \(P_p\).
 #' @param guess Numeric. Probability that a student answers correctly despite not mastering the skill.
